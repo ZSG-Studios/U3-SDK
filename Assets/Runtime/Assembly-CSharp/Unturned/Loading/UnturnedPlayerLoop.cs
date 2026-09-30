@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_PLAYERLOOP
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using System.Collections.Generic;
 
 namespace SDG.Unturned
@@ -21,7 +21,6 @@ namespace SDG.Unturned
 				// Unturned does not use Video Player, but plugin developers want to use it in GUI (issue #3549)
 				// 2022-12-09: Director was removed from disabledSystems list because mods/plugins use it. (e.g. Animator component)
 				typeof(UnityEngine.PlayerLoop.EarlyUpdate.AnalyticsCoreStatsUpdate),
-				typeof(UnityEngine.PlayerLoop.EarlyUpdate.ARCoreUpdate),
 				typeof(UnityEngine.PlayerLoop.EarlyUpdate.DeliverIosPlatformEvents), // Mobile
 				typeof(UnityEngine.PlayerLoop.EarlyUpdate.UpdateKinect),
 				typeof(UnityEngine.PlayerLoop.EarlyUpdate.XRUpdate),
@@ -30,17 +29,14 @@ namespace SDG.Unturned
 				typeof(UnityEngine.PlayerLoop.FixedUpdate.XRFixedUpdate),
 				typeof(UnityEngine.PlayerLoop.Initialization.XREarlyUpdate),
 				typeof(UnityEngine.PlayerLoop.PostLateUpdate.EnlightenRuntimeUpdate),
-				typeof(UnityEngine.PlayerLoop.PostLateUpdate.ExecuteGameCenterCallbacks), // Mobile
 				typeof(UnityEngine.PlayerLoop.PostLateUpdate.UpdateLightProbeProxyVolumes),
-				typeof(UnityEngine.PlayerLoop.PostLateUpdate.UpdateSubstance),
 				typeof(UnityEngine.PlayerLoop.PostLateUpdate.XRPostLateUpdate),
 				typeof(UnityEngine.PlayerLoop.PostLateUpdate.XRPostPresent),
 				typeof(UnityEngine.PlayerLoop.PostLateUpdate.XRPreEndFrame),
-				typeof(UnityEngine.PlayerLoop.PreLateUpdate.AIUpdatePostScript),
+				// Keep native AI updates: Unity AI Navigation needs obstacle carving and path updates.
 				typeof(UnityEngine.PlayerLoop.PreLateUpdate.Physics2DLateUpdate),
 				typeof(UnityEngine.PlayerLoop.PreLateUpdate.UpdateMasterServerInterface),
 				typeof(UnityEngine.PlayerLoop.PreLateUpdate.UpdateNetworkManager),
-				typeof(UnityEngine.PlayerLoop.PreUpdate.AIUpdate),
 				typeof(UnityEngine.PlayerLoop.PreUpdate.NewInputUpdate),
 				typeof(UnityEngine.PlayerLoop.PreUpdate.Physics2DUpdate),
 				typeof(UnityEngine.PlayerLoop.PreUpdate.SendMouseEvents),

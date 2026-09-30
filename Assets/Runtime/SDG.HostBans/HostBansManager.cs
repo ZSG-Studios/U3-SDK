@@ -108,12 +108,12 @@ namespace SDG.HostBans
 						reader.SetBuffer(rawData);
 						filters = new HostBanFilters();
 						filters.ReadConfiguration(reader);
-#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && WITH_NOREDIST
+#if (UNITY_EDITOR || UNITY_ENABLE_CHECKS) && WITH_NOREDIST
 						StringBuilder stringBuilder = new StringBuilder();
 						stringBuilder.AppendLine($"Host bans received (addresses: {filters.addresses.Count} names: {filters.nameRegexes.Count} descriptions: {filters.descriptionRegexes.Count} thumbnails: {filters.thumbnailRegexes.Count} steamids: {filters.steamIds.Count})");
 						filters.Dump(stringBuilder);
 						Debug.Log(stringBuilder.ToString());
-#endif // (UNITY_EDITOR || DEVELOPMENT_BUILD) && WITH_NOREDIST
+#endif // (UNITY_EDITOR || UNITY_ENABLE_CHECKS) && WITH_NOREDIST
 					}
 					catch (System.Exception ex)
 					{

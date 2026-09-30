@@ -10,7 +10,7 @@ using UnityEngine;
 namespace SDG.Unturned
 {
 	/// <summary>
-	/// Exposes the same API as the older Block class used by existing netcode, but implemented using new bit reader/writer. 
+	/// Exposes the same API as the older Block class used by existing netcode, but implemented using new bit reader/writer.
 	/// </summary>
 	internal class NetPakBlockImplementation
 	{
@@ -576,7 +576,7 @@ namespace SDG.Unturned
 		{
 			// RPCs e.g. askEquip may have sent less data than the server expects, so we cannot restrict to send length.
 			// https://github.com/SmartlyDressedGames/Unturned-3.x-Community/issues/2424#issuecomment-784233599
-#if WITH_NETPAK_EXCEPTIONS || UNITY_EDITOR || DEVELOPMENT_BUILD
+#if WITH_NETPAK_EXCEPTIONS || UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			reader.SetBufferSegment(buffer, size);
 #else
 			reader.SetBuffer(buffer);

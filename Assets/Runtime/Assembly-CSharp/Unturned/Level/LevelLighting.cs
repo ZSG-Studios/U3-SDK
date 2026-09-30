@@ -12,19 +12,19 @@ namespace SDG.Unturned
 	public enum ELightingRain
 	{
 		/// <summary>
-		/// Corresponds to not active and not blending with new weather system. 
+		/// Corresponds to not active and not blending with new weather system.
 		/// </summary>
 		NONE,
 		/// <summary>
-		/// Corresponds to transitioning in with new weather system. 
+		/// Corresponds to transitioning in with new weather system.
 		/// </summary>
 		PRE_DRIZZLE,
 		/// <summary>
-		/// Corresponds to active with new weather system. 
+		/// Corresponds to active with new weather system.
 		/// </summary>
 		DRIZZLE,
 		/// <summary>
-		/// Corresponds to transitioning out with new weather system. 
+		/// Corresponds to transitioning out with new weather system.
 		/// </summary>
 		POST_DRIZZLE
 	}
@@ -32,19 +32,19 @@ namespace SDG.Unturned
 	public enum ELightingSnow
 	{
 		/// <summary>
-		/// Corresponds to not active and not blending with new weather system. 
+		/// Corresponds to not active and not blending with new weather system.
 		/// </summary>
 		NONE,
 		/// <summary>
-		/// Corresponds to transitioning in with new weather system. 
+		/// Corresponds to transitioning in with new weather system.
 		/// </summary>
 		PRE_BLIZZARD,
 		/// <summary>
-		/// Corresponds to active with new weather system. 
+		/// Corresponds to active with new weather system.
 		/// </summary>
 		BLIZZARD,
 		/// <summary>
-		/// Corresponds to transitioning out with new weather system. 
+		/// Corresponds to transitioning out with new weather system.
 		/// </summary>
 		POST_BLIZZARD
 	}
@@ -1374,13 +1374,13 @@ namespace SDG.Unturned
 
 				if (reflectionMap == null)
 				{
-					reflectionMap = new RenderTexture(32, 32, 0);
+					reflectionMap = new RenderTexture(32, 32, 24);
 					reflectionMap.dimension = UnityEngine.Rendering.TextureDimension.Cube;
 				}
 
 				if (reflectionMapVision == null)
 				{
-					reflectionMapVision = new RenderTexture(32, 32, 0);
+					reflectionMapVision = new RenderTexture(32, 32, 24);
 					reflectionMapVision.dimension = UnityEngine.Rendering.TextureDimension.Cube;
 				}
 
@@ -2299,7 +2299,7 @@ namespace SDG.Unturned
 				target.Create();
 			}
 
-			int mask = 1 << index;
+			int face = index;
 
 			index++;
 			if (index > 5)
@@ -2308,7 +2308,7 @@ namespace SDG.Unturned
 				isBuilding = false;
 			}
 
-			reflectionCamera.RenderToCubemap(target, mask);
+			global::Unturned.UnityEx.CameraRenderEx.RenderCubemapFace(reflectionCamera, target, face);
 		}
 
 		public static void updateSkyboxReflections()
@@ -2536,7 +2536,7 @@ namespace SDG.Unturned
 			}
 #endif // !DEDICATED_SERVER
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			instance.audioSource.name = $"AmbientAudioInstance {asset.name}";
 #endif
 
@@ -2741,7 +2741,7 @@ namespace SDG.Unturned
 			// 2: Priority 3, Volume: 0.9 → highestVolume: 0.9
 			// 3: Priority 2, Volume: 1.0 → decreaseVolume: highestVolume (0.9), highestVolume: 1.0, new volume: 0.1
 			// 4: Priority 2, Volume: 0.5 → new volume: 0.0
-			// 5: Priority 1, Volume: 1.0 → decreaseVolume: highestVolume (1.0), new volume: 0.0 
+			// 5: Priority 1, Volume: 1.0 → decreaseVolume: highestVolume (1.0), new volume: 0.0
 			int previousTierHighestPriority = activeAmbianceAudioInstances[activeAmbianceAudioInstances.Count - 1].maxPriority;
 			float highestVolume = 0.0f;
 			float decreaseVolume = 0.0f;
@@ -2749,7 +2749,7 @@ namespace SDG.Unturned
 			for (int index = activeAmbianceAudioInstances.Count - 1; index >= 0; --index)
 			{
 				AmbianceAudioInstance instance = activeAmbianceAudioInstances[index];
-				
+
 				float alpha;
 				if (instance.isAnyVolumeOverlapping)
 				{

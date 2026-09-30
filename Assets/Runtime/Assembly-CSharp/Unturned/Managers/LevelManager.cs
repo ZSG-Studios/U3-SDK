@@ -496,7 +496,7 @@ namespace SDG.Unturned
 			{
 				VehicleSpawnpoint vehicleSpawn = vehicleSpawns[vehicleIndex];
 				Asset vehicleAsset = LevelVehicles.GetRandomAssetForSpawnpoint(vehicleSpawn);
-				
+
 				if (vehicleAsset != null)
 				{
 					Vector3 point = vehicleSpawn.point;
@@ -1103,14 +1103,14 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			Vector3 replicatedDropPosition = airdropInfo.state + airdropInfo.Velocity * timeUntilDrop;
 			float horizontalError = (replicatedDropPosition - dropPosition).GetHorizontalMagnitude();
 			if (horizontalError >= 0.1f)
 			{
 				UnturnedLog.warn($"Significant discrepency between client and server airdrop trajectory: {horizontalError}");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 #pragma warning disable
 			// Backwards compatibility in case mods are using it.

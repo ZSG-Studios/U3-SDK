@@ -506,7 +506,7 @@ namespace SDG.Unturned
 					placementPreviewTransform.rotation = Quaternion.Euler(-90, pendingPlacementYaw + animatedRotationOffset, 0);
 				}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (HasSelection && selectedOption.craftable.status != null)
 				{
 					if (!selectedOption.craftable.status.blueprint.DoesOutputCreateItem(selectedOption.asset))
@@ -514,7 +514,7 @@ namespace SDG.Unturned
 						UnturnedLog.error($"Housing planner selected blueprint does not create selected item! (Bug!)\nItem: {selectedOption.asset.FriendlyName}\nBlueprint: {selectedOption.craftable.status.blueprint}");
 					}
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 		}
 

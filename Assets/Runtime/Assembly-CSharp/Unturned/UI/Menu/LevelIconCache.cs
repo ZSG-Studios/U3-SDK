@@ -61,12 +61,12 @@ namespace SDG.Unturned
 			}
 
 			string iconsDir = Path.Join(ReadWrite.PATH, "CuratedMapIcons");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (!Directory.Exists(iconsDir) && Provider.steamAppInstallDirectory != null)
 			{
 				iconsDir = PathEx.Join(Provider.steamAppInstallDirectory, "CuratedMapIcons");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 			foreach (CuratedMapLink link in Provider.statusData.Maps.Curated_Map_Links)
 			{

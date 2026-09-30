@@ -1,9 +1,8 @@
-﻿Shader "GL/LineCheckeredDepthCutoffColor"
+Shader "GL/LineCheckeredDepthCutoffColor"
 {
 	SubShader
 	{
-		Tags
-		{
+		Tags { "RenderPipeline"="UniversalPipeline"
 			"RenderType" = "Opaque"
 		}
 
@@ -13,13 +12,13 @@
 			Cull Off
 			Blend SrcAlpha OneMinusSrcAlpha
 
-			CGPROGRAM
+			HLSLPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#include "UnityCG.cginc"
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
-			sampler2D _CameraDepthTexture;
+
 
 			struct appdata
 			{
@@ -37,10 +36,10 @@
 			v2f vert(appdata v)
 			{
 				v2f OUT;
-				OUT.vertex = UnityObjectToClipPos(v.vertex);
+				OUT.vertex = UnturnedGeometryToClip(v.vertex);
 				OUT.color = v.color;
 				OUT.ref = ComputeScreenPos(OUT.vertex);
-				COMPUTE_EYEDEPTH(OUT.ref.z);
+				OUT.ref.z = -TransformWorldToView(TransformObjectToWorld(v.vertex.xyz)).z;
 
 				return OUT;
 			}
@@ -49,7 +48,7 @@
 			{
 				clip(frac((IN.ref.x + IN.ref.y) / IN.ref.w * 64) - 0.5);
 
-				float sceneDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(IN.ref)).r);
+				float sceneDepth = UnturnedLinearEyeDepth(SampleSceneDepth(IN.ref.xy / IN.ref.w));
 				float objectDepth = IN.ref.z;
 
 				// 0 = close, 1 = far
@@ -58,7 +57,7 @@
 				return IN.color;
 			}
 
-			ENDCG
+			ENDHLSL
 		}
 	}
 }

@@ -19,7 +19,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_LINE_FLAT_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_LINE_FLAT_COLOR = new Material(Shader.Find("GL/LineFlatColor"));
+					_LINE_FLAT_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/LineFlatColor"));
 				}
 
 				return _LINE_FLAT_COLOR;
@@ -33,7 +33,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_LINE_CHECKERED_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_LINE_CHECKERED_COLOR = new Material(Shader.Find("GL/LineCheckeredColor"));
+					_LINE_CHECKERED_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/LineCheckeredColor"));
 				}
 
 				return _LINE_CHECKERED_COLOR;
@@ -47,7 +47,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_LINE_DEPTH_CHECKERED_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_LINE_DEPTH_CHECKERED_COLOR = new Material(Shader.Find("GL/LineDepthCheckeredColor"));
+					_LINE_DEPTH_CHECKERED_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/LineDepthCheckeredColor"));
 				}
 
 				return _LINE_DEPTH_CHECKERED_COLOR;
@@ -61,7 +61,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_LINE_CHECKERED_DEPTH_CUTOFF_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_LINE_CHECKERED_DEPTH_CUTOFF_COLOR = new Material(Shader.Find("GL/LineCheckeredDepthCutoffColor"));
+					_LINE_CHECKERED_DEPTH_CUTOFF_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/LineCheckeredDepthCutoffColor"));
 				}
 
 				return _LINE_CHECKERED_DEPTH_CUTOFF_COLOR;
@@ -75,7 +75,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_LINE_DEPTH_CUTOFF_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_LINE_DEPTH_CUTOFF_COLOR = new Material(Shader.Find("GL/LineDepthCutoffColor"));
+					_LINE_DEPTH_CUTOFF_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/LineDepthCutoffColor"));
 				}
 
 				return _LINE_DEPTH_CUTOFF_COLOR;
@@ -89,7 +89,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_TRI_FLAT_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_TRI_FLAT_COLOR = new Material(Shader.Find("GL/TriFlatColor"));
+					_TRI_FLAT_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/TriFlatColor"));
 				}
 
 				return _TRI_FLAT_COLOR;
@@ -103,7 +103,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_TRI_CHECKERED_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_TRI_CHECKERED_COLOR = new Material(Shader.Find("GL/TriCheckeredColor"));
+					_TRI_CHECKERED_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/TriCheckeredColor"));
 				}
 
 				return _TRI_CHECKERED_COLOR;
@@ -117,7 +117,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_TRI_DEPTH_CHECKERED_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_TRI_DEPTH_CHECKERED_COLOR = new Material(Shader.Find("GL/TriDepthCheckeredColor"));
+					_TRI_DEPTH_CHECKERED_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/TriDepthCheckeredColor"));
 				}
 
 				return _TRI_DEPTH_CHECKERED_COLOR;
@@ -131,7 +131,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_TRI_CHECKERED_DEPTH_CUTOFF_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_TRI_CHECKERED_DEPTH_CUTOFF_COLOR = new Material(Shader.Find("GL/TriCheckeredDepthCutoffColor"));
+					_TRI_CHECKERED_DEPTH_CUTOFF_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/TriCheckeredDepthCutoffColor"));
 				}
 
 				return _TRI_CHECKERED_DEPTH_CUTOFF_COLOR;
@@ -145,7 +145,7 @@ namespace SDG.Framework.Rendering
 			{
 				if (_TRI_DEPTH_CUTOFF_COLOR == null && !Dedicator.IsDedicatedServer)
 				{
-					_TRI_DEPTH_CUTOFF_COLOR = new Material(Shader.Find("GL/TriDepthCutoffColor"));
+					_TRI_DEPTH_CUTOFF_COLOR = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("GL/TriDepthCutoffColor"));
 				}
 
 				return _TRI_DEPTH_CUTOFF_COLOR;
@@ -156,8 +156,8 @@ namespace SDG.Framework.Rendering
 
 		public static void line(Vector3 begin, Vector3 end)
 		{
-			GL.Vertex(matrix.MultiplyPoint3x4(begin));
-			GL.Vertex(matrix.MultiplyPoint3x4(end));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(begin));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(end));
 		}
 
 		public static void boxSolid(Vector3 center, Vector3 size)
@@ -165,52 +165,52 @@ namespace SDG.Framework.Rendering
 			Vector3 extents = size / 2;
 
 			// -x
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
 
 			// +x
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
 
 			// -y
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
 
 			// +y
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
 
 			// -z
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, -extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, -extents.z)));
 
 			// +z
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
-			GL.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(-extents.x, extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, -extents.y, extents.z)));
+			SDG.Framework.Rendering.GraphGeometry.Vertex(matrix.MultiplyPoint3x4(center + new Vector3(extents.x, extents.y, extents.z)));
 		}
 
 		public static void circle(Vector3 center, float radius, Vector3 horizontalAxis, Vector3 verticalAxis, float steps = 0)
@@ -232,8 +232,8 @@ namespace SDG.Framework.Rendering
 				float v = Mathf.Sin(value) * radius;
 
 				Vector3 end = matrix.MultiplyPoint3x4(center + (horizontalAxis * h) + (verticalAxis * v));
-				GL.Vertex(begin);
-				GL.Vertex(end);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(begin);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(end);
 				begin = end;
 			}
 		}
@@ -260,8 +260,8 @@ namespace SDG.Framework.Rendering
 
 				Vector3 end = matrix.MultiplyPoint3x4(center + (horizontalAxis * h) + (verticalAxis * v));
 				handleGLCircleOffset(ref end);
-				GL.Vertex(begin);
-				GL.Vertex(end);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(begin);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(end);
 				begin = end;
 			}
 		}

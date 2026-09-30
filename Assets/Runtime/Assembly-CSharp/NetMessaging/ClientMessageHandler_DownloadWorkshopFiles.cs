@@ -100,7 +100,7 @@ namespace SDG.Unturned
 				Provider.cachedWorkshopResponses.Add(response);
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 			sb.AppendLine($"{requiredFiles.Count} workshop file(s):");
 			for (int index = 0; index < requiredFiles.Count; ++index)
@@ -108,7 +108,7 @@ namespace SDG.Unturned
 				sb.AppendLine($"{index}: {requiredFiles[index].fileId} Timestamp: {requiredFiles[index].timestamp.ToLocalTime()}");
 			}
 			UnturnedLog.info(sb.ToString());
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			response.holiday = holiday;
 			response.serverName = serverName;

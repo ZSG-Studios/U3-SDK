@@ -731,7 +731,7 @@ namespace SDG.Unturned
 				if (element == null || element.gameObject == null)
 				{
 					// Someone else destroyed this element without our permission. Hard to track down.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.warn("uGUI element ({0}) was destroyed while in pool", typeof(T).Name);
 #endif
 					continue;

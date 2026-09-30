@@ -1,6 +1,6 @@
-Shader "Skins/Shine" 
+Shader "Skins/Shine"
 {
-	Properties 
+	Properties
 	{
 		_AlbedoBase("Albedo Base", 2D) = "" {}
 		_MetallicBase("Metallic Base", 2D) = "black" {}
@@ -12,71 +12,84 @@ Shader "Skins/Shine"
 		_ShineOffset("Shine Vertex Offset", Vector) = (0, 0, 0, 0)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque"
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-			// Nelson 2026-04-09: noticed discontinuity with some effects, traced back to dynamic batching changing object-space coords. ;)
-			"DisableBatching" = "True"
-		}
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		LOD 200
-		
-		CGPROGRAM
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Shine.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard vertex:vert
-		#pragma target 3.0
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Shine.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		sampler2D _AlbedoBase;
-		sampler2D _MetallicBase;
-		sampler2D _EmissionBase;
-		sampler2D _AlbedoSkin;
-		sampler2D _MetallicSkin;
-		sampler2D _Shine;
-		fixed3 _ShineScale;
-		fixed3 _ShineOffset;
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Shine.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		struct Input
-		{
-			float2 uv_AlbedoBase;
-			fixed shine;
-		};
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void vert(inout appdata_full v, out Input OUT)
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Shine.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed3 vertex = v.vertex * _ShineOffset;
-			fixed offset = vertex.x + vertex.y + vertex.z;
-			OUT.shine = saturate(sin(offset + _Time.y * _ShineScale.x) * _ShineScale.y - _ShineScale.z);
-		}
-
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed4 albedoBase = tex2D(_AlbedoBase, IN.uv_AlbedoBase);
-			fixed4 metallicBase = tex2D(_MetallicBase, IN.uv_AlbedoBase);
-			fixed4 emissionBase = tex2D(_EmissionBase, IN.uv_AlbedoBase);
-
-			fixed4 albedoSkin = tex2D(_AlbedoSkin, IN.uv_AlbedoBase);
-			fixed4 metallicSkin = tex2D(_MetallicSkin, IN.uv_AlbedoBase);
-			fixed4 shine = tex2D(_Shine, IN.uv_AlbedoBase);
-
-			fixed4 albedo = albedoBase * albedoBase.a + lerp(albedoSkin, shine, IN.shine * shine.a) * (1.0 - albedoBase.a);
-			fixed4 metallic = metallicBase * albedoBase.a + metallicSkin * (1.0 - albedoBase.a);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = albedo.a;
-
-			OUT.Metallic = metallic.r;
-			OUT.Smoothness = metallic.a;
-
-			OUT.Emission = emissionBase.rgb;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Shine.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

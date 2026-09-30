@@ -252,9 +252,9 @@ namespace SDG.Framework.Devkit
 				{
 					// Exclude from save because this is probably a component added inside Unity.
 					// For example a lot of modders add volume components in their objects.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.info($"Excluding {item.GetType()} ({(item as Component)?.GetSceneHierarchyPath()}) from save because its instance ID was not initialized (probably component in a Unity prefab?)");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					continue;
 				}
 

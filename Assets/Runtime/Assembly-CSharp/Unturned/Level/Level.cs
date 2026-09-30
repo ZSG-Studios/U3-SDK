@@ -524,12 +524,12 @@ namespace SDG.Unturned
 				ReadWrite.writeBlock("/Maps/" + name + "/Level.dat", false, block);
 
 				string templateSrc = Path.Join(ReadWrite.PATH, "Extras", "LevelTemplate");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				if (!Directory.Exists(templateSrc) && Provider.steamAppInstallDirectory != null)
 				{
 					templateSrc = PathEx.Join(Provider.steamAppInstallDirectory, "Extras", "LevelTemplate");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 				string templateDst = Path.Join(ReadWrite.PATH, "Maps", name);
 				File.Copy(Path.Join(templateSrc, "Charts.unity3d"), Path.Join(templateDst, "Charts.unity3d"));
@@ -1135,12 +1135,12 @@ namespace SDG.Unturned
 			try
 			{
 				string rootMapsFolder = PathEx.Join(UnturnedPaths.RootDirectory, "Maps");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				if (!Directory.Exists(rootMapsFolder) && Provider.steamAppInstallDirectory != null)
 				{
 					rootMapsFolder = PathEx.Join(Provider.steamAppInstallDirectory, "Maps");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 				foreach (string rootMapFolderPath in Directory.GetDirectories(rootMapsFolder))
 				{
@@ -1438,7 +1438,7 @@ namespace SDG.Unturned
 
 			onSatellitePreCapture?.Invoke();
 
-			satelliteCaptureCamera.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(satelliteCaptureCamera);
 
 			onSatellitePostCapture?.Invoke();
 
@@ -1458,7 +1458,9 @@ namespace SDG.Unturned
 			QualitySettings.lodBias = lod;
 
 			RenderTexture downsampledRenderTexture = RenderTexture.GetTemporary(imageWidth, imageHeight);
+			RenderTexture previouslyActiveRenderTexture = RenderTexture.active;
 			Graphics.Blit(captureRenderTexture, downsampledRenderTexture);
+			satelliteCaptureCamera.targetTexture = null;
 			RenderTexture.ReleaseTemporary(captureRenderTexture);
 
 			RenderTexture.active = downsampledRenderTexture;
@@ -1466,6 +1468,7 @@ namespace SDG.Unturned
 			texture.name = "Satellite";
 			texture.hideFlags = HideFlags.HideAndDontSave;
 			texture.ReadPixels(new Rect(0, 0, imageWidth, imageHeight), 0, 0);
+			RenderTexture.active = previouslyActiveRenderTexture;
 			RenderTexture.ReleaseTemporary(downsampledRenderTexture);
 
 			for (int x = 0; x < texture.width; x++)

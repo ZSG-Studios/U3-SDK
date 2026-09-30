@@ -9,6 +9,7 @@ namespace SDG.Unturned
 {
 	public class WeatherComponentBase : MonoBehaviour
 	{
+		[System.NonSerialized]
 		public WeatherAssetBase asset;
 
 		/// <summary>
@@ -22,7 +23,7 @@ namespace SDG.Unturned
 		public float localVolumeBlendAlpha;
 
 		/// <summary>
-		/// Lesser of global or volume blend alphas. 
+		/// Lesser of global or volume blend alphas.
 		/// </summary>
 		public float EffectBlendAlpha => Mathf.Min(globalBlendAlpha, localVolumeBlendAlpha);
 

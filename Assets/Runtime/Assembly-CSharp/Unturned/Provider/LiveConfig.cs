@@ -14,7 +14,7 @@ namespace SDG.Unturned
 		/// </summary>
 		public static void Refresh()
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (useEditorLiveConfig)
 			{
 				if (LiveConfigManager.Get().HasEditorLiveConfigFile())
@@ -28,7 +28,7 @@ namespace SDG.Unturned
 					UnturnedLog.info($"Ignoring {useEditorLiveConfig.flag} because file does not exist");
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (SteamUser.BLoggedOn() && Provider.allowWebRequests)
 			{
@@ -52,22 +52,22 @@ namespace SDG.Unturned
 			remove => LiveConfigManager.Get().OnConfigRefreshed -= value;
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		internal static CommandLineFlag useEditorLiveConfig = new CommandLineFlag(false, "-EditorLiveConfig");
 		internal static CommandLineFlag shouldDelayEditorLiveConfig = new CommandLineFlag(false, "-DelayEditorLiveConfig");
-#endif // !UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // !UNITY_EDITOR || UNITY_ENABLE_CHECKS
 	}
 
 	public static class LiveConfigEx
 	{
 		public static bool IsNowFeaturedTimeOrBypassed(this MainMenuWorkshopFeaturedLiveConfig config)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (LiveConfig.useEditorLiveConfig)
 			{
 				return true;
 			}
-#endif // !UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // !UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			return config.IsNowFeaturedTime;
 		}

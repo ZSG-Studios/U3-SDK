@@ -13,9 +13,9 @@ namespace SDG.Unturned
 		{
 			if (transform == null || gameObject == null)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnturnedLog.error("Transform or gameObject null when releasing GlazierEmpty into uGUI pool!");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				return false;
 			}
 

@@ -2,13 +2,16 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define LOG_RECEIVE_FROM_CLIENT_ERRORS
 #define LOG_SEND_TO_CLIENT_ERRORS
 #define LOG_SEND_TO_SERVER_ERRORS
 #define LOG_RECEIVE_FROM_SERVER_ERRORS
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
+
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 #define PROFILE_NET_MESSAGE_READ_HANDLERS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif
 
 using SDG.NetPak;
 using SDG.NetTransport;
@@ -24,13 +27,13 @@ namespace SDG.Unturned
 
 		public static void SendMessageToClient(EClientMessage index, ENetReliability reliability, ITransportConnection transportConnection, ClientWriteHandler callback)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (!Provider.isServer)
 			{
 				// Loopback is handled by net invokables. Other messages do not use loopback.
 				throw new System.Exception($"Only server can send message {index}");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			writer.Reset();
 			writer.WriteEnum(index);
@@ -49,13 +52,13 @@ namespace SDG.Unturned
 
 		public static void SendMessageToClients(EClientMessage index, ENetReliability reliability, List<ITransportConnection> transportConnections, ClientWriteHandler callback)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (!Provider.isServer)
 			{
 				// Loopback is handled by net invokables. Other messages do not use loopback.
 				throw new System.Exception($"Only server can send message {index}");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			writer.Reset();
 			writer.WriteEnum(index);
@@ -91,13 +94,13 @@ namespace SDG.Unturned
 
 		public static void SendMessageToServer(EServerMessage index, ENetReliability reliability, ClientWriteHandler callback)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (Provider.isServer)
 			{
 				// Loopback is handled by net invokables. Other messages do not use loopback.
 				throw new System.Exception($"Only client can send message {index}");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (!Provider.isConnected)
 			{
@@ -259,7 +262,7 @@ namespace SDG.Unturned
 			serverReadCallbacks[(int) EServerMessage.ValidateAssets] = ServerMessageHandler_ValidateAssets.ReadMessage;
 			serverReadCallbacks[(int) EServerMessage.GracefullyDisconnect] = ServerMessageHandler_GracefullyDisconnect.ReadMessage;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			// Ensure there are no null entries.
 			// The reader arrays _should_ be sized accordingly to the number of compiled handlers.
 			for (int index = 2; index < clientReadCallbacks.Length; ++index)
@@ -272,7 +275,7 @@ namespace SDG.Unturned
 				if (serverReadCallbacks[index] == null)
 					UnturnedLog.info("Missing server message handler {0}", index);
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 #if PROFILE_NET_MESSAGE_READ_HANDLERS
 			clientSamplers = new UnityEngine.Profiling.CustomSampler[clientReadCallbacks.Length];

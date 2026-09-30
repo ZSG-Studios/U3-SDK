@@ -776,11 +776,11 @@ namespace SDG.Unturned
 		public Quaternion rotation;
 		public Quaternion aimRotation;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		public Vector3 debugPosition;
 		public Vector3 debugVelocity;
 		public bool debugIsGrounded;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 	}
 
 	[NetEnum]
@@ -979,15 +979,15 @@ namespace SDG.Unturned
 
 				if (inputInfo.usage != usage)
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					CommandWindow.LogWarningFormat("Input discarded because client usage {0} did not match server usage {1}", inputInfo.usage, usage);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					continue;
 				}
 
 				if (doOcclusionCheck)
 				{
-					// Called when obstruction.transform is not null, so compare against inputInfo.transform 
+					// Called when obstruction.transform is not null, so compare against inputInfo.transform
 					bool IsObstructionHitValid()
 					{
 						if (inputInfo.transform == null)
@@ -1016,9 +1016,9 @@ namespace SDG.Unturned
 
 							if (obstruction.transform != null && !IsObstructionHitValid())
 							{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 								CommandWindow.LogWarningFormat("Input discarded because forward ray hit {0}", obstruction.ToDebugString());
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 								return null;
 							}
 							else
@@ -1027,9 +1027,9 @@ namespace SDG.Unturned
 
 								if (obstruction.transform != null && !IsObstructionHitValid())
 								{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 									CommandWindow.LogWarningFormat("Input discarded because backward ray hit {0}", obstruction.ToDebugString());
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 									return null;
 								}
 							}
@@ -1186,7 +1186,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Number of times askInput has been called by client.
-		/// Even with huge packet loss, we know that 
+		/// Even with huge packet loss, we know that
 		/// </summary>
 		private int serversideAskInputCount = 0;
 
@@ -1267,7 +1267,7 @@ namespace SDG.Unturned
 
 		private void ClientResimulate()
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			for (int index = 0; index < clientInputHistory.Count; ++index)
 			{
 				if (clientInputHistory[index].frameNumber == clientResimulationFrameNumber)
@@ -1279,7 +1279,7 @@ namespace SDG.Unturned
 					break;
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			ClientRemoveInputHistory(clientResimulationFrameNumber);
 
@@ -1618,11 +1618,11 @@ Position delta: {(transform.position - oldPosition).magnitude}");
 							historyInput.sprint = inputSprint;
 							historyInput.rotation = transform.rotation;
 							historyInput.aimRotation = player.look.aim.rotation;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							historyInput.debugPosition = transform.position;
 							historyInput.debugVelocity = player.movement.velocity;
 							historyInput.debugIsGrounded = player.movement.isGrounded;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							clientInputHistory.Add(historyInput);
 						}
 
@@ -1822,9 +1822,9 @@ Position delta: {(transform.position - oldPosition).magnitude}");
 									Vector3 serverPosition = transform.position;
 									if ((walkingPacket.clientPosition - serverPosition).sqrMagnitude > sqrErrorToleranceDistance)
 									{
-#if LOG_INPUT_RESIMULATION || UNITY_EDITOR || DEVELOPMENT_BUILD
+#if LOG_INPUT_RESIMULATION || UNITY_EDITOR || UNITY_ENABLE_CHECKS
 										CommandWindow.LogWarning($"Movement misprediction! frame: {walkingPacket.clientSimulationFrameNumber} client: {walkingPacket.clientPosition} server: {serverPosition} distance: {(walkingPacket.clientPosition - serverPosition).magnitude} x: {moveInputX} y: {moveInputY} velocity: {player.movement.velocity} grounded: {player.movement.isGrounded} jump: {moveInputJump}");
-#endif // LOG_INPUT_RESIMULATION || UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // LOG_INPUT_RESIMULATION || UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 										// Server simulation frame may differ from client, so tell client to offset these
 										// values from client's simulation frame number.

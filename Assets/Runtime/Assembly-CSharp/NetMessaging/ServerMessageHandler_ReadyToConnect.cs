@@ -2,11 +2,11 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_CONNECT_ARGS
 #define LOG_CONNECT_MOD_INFO
 #define LOG_SKIN_TERRAIN_COLOR_COMPARISON
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using SDG.NetPak;
 using SDG.NetTransport;
@@ -229,7 +229,7 @@ namespace SDG.Unturned
 			reader.ReadUInt8(out hwidCount);
 			if (hwidCount > LocalHwid.MAX_HWIDS)
 			{
-				// We do not have a specific rejection for this, but it should never occur legitimately anyway. 
+				// We do not have a specific rejection for this, but it should never occur legitimately anyway.
 				Provider.reject(transportConnection, ESteamRejection.WRONG_HASH_ASSEMBLY);
 				return;
 			}
@@ -580,7 +580,7 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEDICATED_SERVER
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEDICATED_SERVER
 			if (!PlayerHashValidation.IsAssemblyHashValid(app, clientPlatform) && !playerID.BypassIntegrityChecks)
 			{
 				Provider.reject(transportConnection, ESteamRejection.WRONG_HASH_ASSEMBLY);
@@ -592,7 +592,7 @@ namespace SDG.Unturned
 				Provider.reject(transportConnection, ESteamRejection.WRONG_HASH_RESOURCES);
 				return;
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || DEDICATED_SERVER
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEDICATED_SERVER
 
 			if (reportedPing > Provider.configData.Server.Max_Ping_Milliseconds)
 			{

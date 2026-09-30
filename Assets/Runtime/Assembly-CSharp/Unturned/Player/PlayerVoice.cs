@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define VOICE_CHAT_HEAR_SELF // Send voice data back to speaker for debugging.
 // #define LOG_VOICE_CHAT // Verbosely log voice details.
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using SDG.NetPak;
 using SDG.NetTransport;

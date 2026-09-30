@@ -7,16 +7,17 @@ Shader "Unturned/AtlasBlit"
     }
     SubShader
     {
+        Tags { "RenderPipeline"="UniversalPipeline" }
         // No culling or depth
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
+            #include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
             struct appdata
             {
@@ -33,21 +34,21 @@ Shader "Unturned/AtlasBlit"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = UnturnedObjectToClip(v.vertex);
                 o.uv = v.uv;
                 return o;
             }
 
-            sampler2D _MainTex;
+            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 			float4 _Color;
 
             float4 frag (v2f i) : SV_Target
             {
-                float4 col = tex2D(_MainTex, i.uv);
+                float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
 				col *= _Color;
                 return col;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

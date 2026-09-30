@@ -4,9 +4,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 using System.IO;
 using UnityEngine;
-#if DEVELOPMENT_BUILD && !UNITY_EDITOR
+#if !UNITY_EDITOR
 using Unturned.SystemEx;
-#endif // DEVELOPMENT_BUILD && !UNITY_EDITOR
+#endif // !UNITY_EDITOR
 
 namespace Unturned.UnityEx
 {
@@ -55,24 +55,27 @@ namespace Unturned.UnityEx
 #endif // UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 #endif // !UNITY_EDITOR
 
-#if DEVELOPMENT_BUILD && !UNITY_EDITOR
-			// Search up the file hierarchy for a Unity project.
-			DirectoryInfo ProjectSearchDirectory = GameDirectory;
-			do
+#if !UNITY_EDITOR
+			if (Debug.isDebugBuild)
 			{
-				string projectVersionFilePath = PathEx.Join(ProjectSearchDirectory, "ProjectSettings", "ProjectVersion.txt");
-				if (File.Exists(projectVersionFilePath))
+				// Search up the file hierarchy for a Unity project.
+				DirectoryInfo ProjectSearchDirectory = GameDirectory;
+				do
 				{
-					ProjectDirectory = ProjectSearchDirectory;
-					AssetsDirectory = ProjectDirectory.CreateSubdirectory("Assets");
-					TempDirectory = ProjectDirectory.CreateSubdirectory("Temp");
-					LibraryDirectory = ProjectDirectory.CreateSubdirectory("Library");
-					break;
-				}
-				ProjectSearchDirectory = ProjectSearchDirectory.Parent;
+					string projectVersionFilePath = PathEx.Join(ProjectSearchDirectory, "ProjectSettings", "ProjectVersion.txt");
+					if (File.Exists(projectVersionFilePath))
+					{
+						ProjectDirectory = ProjectSearchDirectory;
+						AssetsDirectory = ProjectDirectory.CreateSubdirectory("Assets");
+						TempDirectory = ProjectDirectory.CreateSubdirectory("Temp");
+						LibraryDirectory = ProjectDirectory.CreateSubdirectory("Library");
+						break;
+					}
+					ProjectSearchDirectory = ProjectSearchDirectory.Parent;
 			}
 			while (ProjectSearchDirectory != null);
-#endif // DEVELOPMENT_BUILD && !UNITY_EDITOR
+			}
+#endif // !UNITY_EDITOR
 		}
 	}
 }

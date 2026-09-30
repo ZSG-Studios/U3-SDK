@@ -201,6 +201,7 @@ namespace SDG.Unturned
 					humanAnim.pitch = npcAsset.posePitch;
 					humanAnim.offset = npcAsset.poseHeadOffset;
 					humanAnim.force();
+					if (npcAsset.IsLeftHanded) MirroredColliderAdapter.ConvertBoxes(root);
 					root.localScale = new Vector3(npcAsset.IsLeftHanded ? -1 : 1, 1, 1);
 
 					ItemAsset equippedAsset = null;

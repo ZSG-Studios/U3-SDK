@@ -427,9 +427,9 @@ namespace SDG.Unturned
 
 		protected virtual void Awake()
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			name = typeof(TVolume).Name;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			gameObject.layer = LayerMasks.TRAP;
 
 			// This check is intended for when new volumes are instantiated with invalid shape

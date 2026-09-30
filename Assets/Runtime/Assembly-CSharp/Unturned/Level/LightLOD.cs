@@ -22,7 +22,7 @@ namespace SDG.Unturned
 
 		private void apply()
 		{
-			if (targetLight == null || targetLight.type == LightType.Area || targetLight.type == LightType.Directional)
+			if (targetLight == null || targetLight.type == LightType.Rectangle || targetLight.type == LightType.Directional)
 			{
 				return;
 			}
@@ -72,7 +72,7 @@ namespace SDG.Unturned
 
 		private void Start()
 		{
-			if (targetLight == null || targetLight.type == LightType.Area || targetLight.type == LightType.Directional)
+			if (targetLight == null || targetLight.type == LightType.Rectangle || targetLight.type == LightType.Directional)
 			{
 				enabled = false;
 				return;

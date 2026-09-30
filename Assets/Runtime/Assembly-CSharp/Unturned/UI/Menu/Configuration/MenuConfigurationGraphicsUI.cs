@@ -392,9 +392,17 @@ namespace SDG.Unturned
 
 			scopePerf.IsVisible = GraphicsSettings.scopeQuality != EGraphicQuality.OFF;
 
-			// Not supported by forward renderer.
-			reflectionButton.isInteractable = GraphicsSettings.renderMode == ERenderMode.DEFERRED;
+			// Native URP SSR supports both Forward+ and Deferred+.
+			reflectionButton.isInteractable = true;
 			blastToggle.IsInteractable = GraphicsSettings.renderMode == ERenderMode.DEFERRED;
+
+#if !WITH_NOREDIST
+			// These proprietary effects are omitted from the public SDK. Do not expose inert controls.
+			sunShaftsButton.isInteractable = false;
+			outlineButton.isInteractable = false;
+			sunShaftsButton.tooltip = "Sun shafts are not available in this build.";
+			outlineButton.tooltip = "Outline quality is not available in this build. Interaction highlights use tinting.";
+#endif
 
 			scopeDarkPeripheralToggle.IsInteractable = GraphicsSettings.scopeQuality == EGraphicQuality.OFF;
 		}
@@ -684,7 +692,7 @@ namespace SDG.Unturned
 
 			antiAliasingButton = new SleekButtonState(new GUIContent(localization.format("Off")),
 				new GUIContent(localization.format("FXAA")),
-				new GUIContent(localization.format("TAA")),
+				new GUIContent(localization.format("TAA") + " / " + localization.format("SMAA")),
 				new GUIContent(localization.format("SMAA"))
 				);
 			antiAliasingButton.PositionOffset_X = 205;
@@ -692,7 +700,7 @@ namespace SDG.Unturned
 			antiAliasingButton.SizeOffset_X = 200;
 			antiAliasingButton.SizeOffset_Y = 30;
 			antiAliasingButton.AddLabel(localization.format("Anti_Aliasing_Button_Label"), ESleekSide.RIGHT);
-			antiAliasingButton.tooltip = localization.format("Anti_Aliasing_Button_Tooltip");
+			antiAliasingButton.tooltip = localization.format("Anti_Aliasing_Button_Tooltip") + " TAA uses SMAA when the viewmodel camera is stacked.";
 			antiAliasingButton.onSwappedState = onSwappedAntiAliasingState;
 			graphicsBox.AddChild(antiAliasingButton);
 			verticalOffset += 40;

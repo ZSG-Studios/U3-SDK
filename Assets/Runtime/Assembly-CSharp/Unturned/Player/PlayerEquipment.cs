@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_EQUIPMENT_ATTACK_INPUTS
 // #define LOG_EQUIPMENT_START_STOP
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetTransport;
 using SDG.Provider;
 using Steamworks;
@@ -43,7 +43,7 @@ namespace SDG.Unturned
 
 	/// <summary>
 	/// Start/Stop input is encoded as 2 bits, 1 bit for Start flag and 1 bit for Stop flag.
-	/// 
+	///
 	/// Prior to 2023-03-16 it was a single bit. The server would Start if true and the previous frame was false,
 	/// and vice versa call Stop if false and the previous frame was true. The problem with that approach was when
 	/// the client FPS is higher than the simulation FPS a series of repeated attack presses would be treated as a

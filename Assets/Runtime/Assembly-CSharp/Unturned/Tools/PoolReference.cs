@@ -10,6 +10,7 @@ namespace SDG.Unturned
 {
 	public class PoolReference : MonoBehaviour
 	{
+		[System.NonSerialized]
 		public GameObjectPool pool;
 		public bool inPool;
 

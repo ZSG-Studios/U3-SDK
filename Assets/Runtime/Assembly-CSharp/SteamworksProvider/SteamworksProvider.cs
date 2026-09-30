@@ -108,7 +108,7 @@ namespace SDG.SteamworksProvider
 					throw new Exception("Steam API initialization failed.");
 				}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				string appInstallDir;
 				uint appInstallDirLength = SteamApps.GetAppInstallDir((AppId_t) appInfo.id, out appInstallDir, /*bufferSize*/ 1024);
 				if (appInstallDirLength > 0)
@@ -124,7 +124,7 @@ namespace SDG.SteamworksProvider
 				{
 					SDG.Unturned.UnturnedLog.info("Unable to get Steam app install directory");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			}
 
 			initializeServices();

@@ -22,10 +22,10 @@ namespace SDG.Unturned
 
 		public static float GetCurrentAspectRatio()
 		{
-			Resolution currentResolution = Screen.currentResolution;
-			if (currentResolution.height > 0)
+			// currentResolution describes the monitor, which can differ from a window's viewport.
+			if (Screen.height > 0)
 			{
-				return currentResolution.width / (float) currentResolution.height;
+				return Screen.width / (float)Screen.height;
 			}
 			else
 			{

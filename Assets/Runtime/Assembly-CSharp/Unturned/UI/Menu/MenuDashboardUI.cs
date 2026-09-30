@@ -541,12 +541,12 @@ namespace SDG.Unturned
 
 			string titleText = localization.format(titleTextKey, details.m_rgchTitle);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (LiveConfig.useEditorLiveConfig && isExplicitlyFeatured && liveConfig.useTimeWindow)
 			{
 				titleText += $" ({liveConfig.startTime.ToLocalTime()} - {liveConfig.endTime.ToLocalTime()})";
 			}
-#endif // !UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // !UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			ISleekElement titleLayout = Glazier.Get().CreateFrame();
 			titleLayout.UseManualLayout = false;
@@ -1239,12 +1239,12 @@ namespace SDG.Unturned
 #endif // !WITH_NOREDIST
 
 			bool bypassTimeWindow = false;
-#if (UNITY_EDITOR || DEVELOPMENT_BUILD) && WITH_NOREDIST
+#if (UNITY_EDITOR || UNITY_ENABLE_CHECKS) && WITH_NOREDIST
 			if (LiveConfig.useEditorLiveConfig)
 			{
 				bypassTimeWindow = true;
 			}
-#endif // (UNITY_EDITOR || DEVELOPMENT_BUILD) && WITH_NOREDIST
+#endif // (UNITY_EDITOR || UNITY_ENABLE_CHECKS) && WITH_NOREDIST
 
 			if (liveConfig.mainMenuAlert.useTimeWindow && !bypassTimeWindow)
 			{
@@ -1338,12 +1338,12 @@ namespace SDG.Unturned
 			alertBodyLabel.Text = liveConfig.mainMenuAlert.body;
 			dismissAlertLabel.TextColor = color * 0.5f;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (LiveConfig.useEditorLiveConfig && liveConfig.mainMenuAlert.useTimeWindow)
 			{
 				alertHeaderLabel.Text += $" ({liveConfig.mainMenuAlert.startTime.ToLocalTime()} - {liveConfig.mainMenuAlert.endTime.ToLocalTime()})";
 			}
-#endif // !UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // !UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (!string.IsNullOrEmpty(liveConfig.mainMenuAlert.iconName))
 			{
@@ -1638,30 +1638,31 @@ namespace SDG.Unturned
 #endif
 
 			// Warning on 32-bit Windows that it cannot join multiplayer.
-#if !UNITY_64
-			ISleekBox architectureBox = Glazier.Get().CreateBox();
-			architectureBox.PositionOffset_X = 210;
-			architectureBox.PositionOffset_Y = mainHeaderOffset;
-			architectureBox.SizeOffset_Y = 200;
-			architectureBox.SizeOffset_X = -210;
-			architectureBox.SizeScale_X = 1.0f;
-			container.AddChild(architectureBox);
-			mainHeaderOffset += architectureBox.SizeOffset_Y + 10;
-			mainScrollView.PositionOffset_Y += architectureBox.SizeOffset_Y + 10;
-			mainScrollView.SizeOffset_Y -= (architectureBox.SizeOffset_Y + 10);
+if (System.IntPtr.Size == 4)
+{
+				ISleekBox architectureBox = Glazier.Get().CreateBox();
+				architectureBox.PositionOffset_X = 210;
+				architectureBox.PositionOffset_Y = mainHeaderOffset;
+				architectureBox.SizeOffset_Y = 200;
+				architectureBox.SizeOffset_X = -210;
+				architectureBox.SizeScale_X = 1.0f;
+				container.AddChild(architectureBox);
+				mainHeaderOffset += architectureBox.SizeOffset_Y + 10;
+				mainScrollView.PositionOffset_Y += architectureBox.SizeOffset_Y + 10;
+				mainScrollView.SizeOffset_Y -= (architectureBox.SizeOffset_Y + 10);
 
-			ISleekLabel architectureLabel = Glazier.Get().CreateLabel();
-			architectureLabel.PositionOffset_X = 20;
-			architectureLabel.PositionOffset_Y = 20;
-			architectureLabel.SizeOffset_X = -20;
-			architectureLabel.SizeOffset_Y = -20;
-			architectureLabel.SizeScale_X = 1.0f;
-			architectureLabel.SizeScale_Y = 1.0f;
-			architectureLabel.Text = "Sorry, 32-bit Windows is no longer supported in multiplayer. :(\nYou can however host and play multiplayer from the archived 32-bit Windows compatibility version:\n1. Right-click Unturned in your Steam Library\n2. Select Properties... > Betas\n3. From the dropdown select \"32bit-windows\"";
-			architectureLabel.FontSize = ESleekFontSize.Large;
-			architectureLabel.TextAlignment = TextAnchor.MiddleLeft;
-			architectureBox.AddChild(architectureLabel);
-#endif // !UNITY_64
+				ISleekLabel architectureLabel = Glazier.Get().CreateLabel();
+				architectureLabel.PositionOffset_X = 20;
+				architectureLabel.PositionOffset_Y = 20;
+				architectureLabel.SizeOffset_X = -20;
+				architectureLabel.SizeOffset_Y = -20;
+				architectureLabel.SizeScale_X = 1.0f;
+				architectureLabel.SizeScale_Y = 1.0f;
+				architectureLabel.Text = "Sorry, 32-bit Windows is no longer supported in multiplayer. :(\nYou can however host and play multiplayer from the archived 32-bit Windows compatibility version:\n1. Right-click Unturned in your Steam Library\n2. Select Properties... > Betas\n3. From the dropdown select \"32bit-windows\"";
+				architectureLabel.FontSize = ESleekFontSize.Large;
+				architectureLabel.TextAlignment = TextAnchor.MiddleLeft;
+				architectureBox.AddChild(architectureLabel);
+}
 
 			string betaName;
 			if (SteamApps.GetCurrentBetaName(out betaName, 64) && string.Equals(betaName, "preview", System.StringComparison.InvariantCultureIgnoreCase))

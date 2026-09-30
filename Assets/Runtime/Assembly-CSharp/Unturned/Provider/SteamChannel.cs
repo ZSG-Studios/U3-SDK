@@ -90,6 +90,7 @@ namespace SDG.Unturned
 		}
 
 		public int id;
+		[System.NonSerialized]
 		public SteamPlayer owner;
 
 		/// <summary>
@@ -259,7 +260,7 @@ namespace SDG.Unturned
 
 			int index = packet[offset + 1];
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			int channelHeader;
 			if (Provider.getChannelHeader(packet, size, offset, out channelHeader))
 			{
@@ -272,7 +273,7 @@ namespace SDG.Unturned
 			{
 				CommandWindow.LogErrorFormat("\tChannel {0} ({1}) unable to determine channel from header", id, name);
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			buildCallArrayIfDirty();
 			if (index < 0 || index >= calls.Length)
@@ -335,9 +336,9 @@ namespace SDG.Unturned
 				float nextAllowedTime = player.rpcAllowedTimes[calls[index].attribute.rateLimitIndex];
 				if (currentTime < nextAllowedTime)
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					CommandWindow.LogWarningFormat("Hit {0} rate limit on channel {1}", rpcId, id);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					return true; // Return valid because we do not necessarily want to kick them.
 				}
 				else

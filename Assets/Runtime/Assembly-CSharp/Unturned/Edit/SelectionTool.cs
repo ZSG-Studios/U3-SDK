@@ -647,9 +647,9 @@ namespace SDG.Unturned
 				return;
 			}
 
-			GLUtility.LINE_FLAT_COLOR.SetPass(0);
-			GL.Begin(GL.LINES);
-			GL.Color(Color.yellow);
+			SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+			SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
+			SDG.Framework.Rendering.GraphGeometry.Color(Color.yellow);
 
 			GLUtility.matrix = MathUtility.IDENTITY_MATRIX;
 
@@ -670,19 +670,19 @@ namespace SDG.Unturned
 			Vector3 bottomLeftWorld = MainCamera.instance.ViewportToWorldPoint(bottomLeftViewport);
 			Vector3 bottomRightWorld = MainCamera.instance.ViewportToWorldPoint(bottomRightViewport);
 
-			GL.Vertex(topLeftWorld);
-			GL.Vertex(topRightWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(topLeftWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(topRightWorld);
 
-			GL.Vertex(topRightWorld);
-			GL.Vertex(bottomRightWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(topRightWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(bottomRightWorld);
 
-			GL.Vertex(bottomRightWorld);
-			GL.Vertex(bottomLeftWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(bottomRightWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(bottomLeftWorld);
 
-			GL.Vertex(bottomLeftWorld);
-			GL.Vertex(topLeftWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(bottomLeftWorld);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(topLeftWorld);
 
-			GL.End();
+			SDG.Framework.Rendering.GraphGeometry.End();
 		}
 	}
 }

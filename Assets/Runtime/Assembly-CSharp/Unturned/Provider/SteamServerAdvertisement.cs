@@ -700,12 +700,12 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		internal string GetUtilityScoreDebugText()
 		{
 			return $"Total Score: {utilityScore}\nPing Score: {PingUtilityScore}\nFullness Score: {FullnessUtilityScore}\nPlayer Count Score: {PlayerCountUtilityScore}";
 		}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		/// <summary>
 		/// Called before inserting to server list.

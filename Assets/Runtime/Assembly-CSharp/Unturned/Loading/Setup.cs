@@ -60,7 +60,7 @@ namespace SDG.Unturned
 			if (!Dedicator.IsDedicatedServer)
 			{
 				MenuSettings.load();
-				GraphicsSettings.applyResolution();
+				GraphicsSettings.applyResolution(true);
 
 				// Applying at startup prevents high CPU usage from unlimited FPS
 				// during async asset bundle load. (public issue #3825)

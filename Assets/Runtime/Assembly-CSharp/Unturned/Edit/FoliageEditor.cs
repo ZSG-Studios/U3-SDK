@@ -616,26 +616,26 @@ namespace SDG.Unturned
 
 				if (previewSamples.Count <= maxPreviewSamples)
 				{
-					GLUtility.LINE_FLAT_COLOR.SetPass(0);
-					GL.Begin(GL.TRIANGLES);
+					SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+					SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.TRIANGLES);
 
 					float vertexWidth = Mathf.Lerp(0.25f, 1, brushRadius / 256);
 					Vector3 vertexSize = new Vector3(vertexWidth, vertexWidth, vertexWidth);
 					foreach (FoliagePreviewSample sample in previewSamples)
 					{
-						GL.Color(sample.color);
+						SDG.Framework.Rendering.GraphGeometry.Color(sample.color);
 						GLUtility.boxSolid(sample.position, vertexSize);
 					}
 
-					GL.End();
+					SDG.Framework.Rendering.GraphGeometry.End();
 				}
 
 				if (mode == EFoliageMode.PAINT)
 				{
-					GL.LoadOrtho();
+					SDG.Framework.Rendering.GraphGeometry.LoadOrtho();
 
-					GLUtility.LINE_FLAT_COLOR.SetPass(0);
-					GL.Begin(GL.LINES);
+					SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+					SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 
 					Color color;
 					if (isChangingBrushStrength)
@@ -660,28 +660,28 @@ namespace SDG.Unturned
 					Vector3 brushFalloffVerticalViewportPosition = MainCamera.instance.WorldToViewportPoint(brushWorldPosition + (MainCamera.instance.transform.up * brushRadius * brushFalloff));
 					brushFalloffVerticalViewportPosition.z = 0;
 
-					GL.Color(color / 2);
+					SDG.Framework.Rendering.GraphGeometry.Color(color / 2);
 					GLUtility.circle(brushCenterViewportPosition, 1, brushRadiusHorizontalViewportPosition - brushCenterViewportPosition, brushRadiusVerticalViewportPosition - brushCenterViewportPosition, steps: 64);
 
-					GL.Color(color);
+					SDG.Framework.Rendering.GraphGeometry.Color(color);
 					GLUtility.circle(brushCenterViewportPosition, 1, brushFalloffHorizontalViewportPosition - brushCenterViewportPosition, brushFalloffVerticalViewportPosition - brushCenterViewportPosition, steps: 64);
 
-					GL.End();
+					SDG.Framework.Rendering.GraphGeometry.End();
 
 				}
 				else if (mode == EFoliageMode.EXACT)
 				{
 					GLUtility.matrix = Matrix4x4.TRS(brushWorldPosition, MathUtility.IDENTITY_QUATERNION, new Vector3(1, 1, 1));
 
-					GLUtility.LINE_FLAT_COLOR.SetPass(0);
-					GL.Begin(GL.LINES);
+					SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+					SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 
-					GL.Color(Color.yellow);
+					SDG.Framework.Rendering.GraphGeometry.Color(Color.yellow);
 					GLUtility.line(new Vector3(-1, 0, 0), new Vector3(1, 0, 0));
 					GLUtility.line(new Vector3(0, -1, 0), new Vector3(0, 1, 0));
 					GLUtility.line(new Vector3(0, 0, -1), new Vector3(0, 0, 1));
 
-					GL.End();
+					SDG.Framework.Rendering.GraphGeometry.End();
 				}
 			}
 		}

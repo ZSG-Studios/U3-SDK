@@ -11,12 +11,6 @@
 
 #if !DISABLESTEAMWORKS
 
-#if UNITY_EDITOR_64 || (UNITY_STANDALONE && !UNITY_EDITOR && UNITY_64)
-	#define STEAMWORKS_X64
-#elif UNITY_EDITOR_32 || (UNITY_STANDALONE && !UNITY_EDITOR && !UNITY_64)
-	#define STEAMWORKS_X86
-#endif
-
 #if UNITY_EDITOR_WIN
 	#define STEAMWORKS_WIN
 #elif UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
@@ -39,7 +33,9 @@ using IntPtr = System.IntPtr;
 namespace Steamworks {
 	[System.Security.SuppressUnmanagedCodeSecurity()]
 	internal static class NativeMethods {
-#if STEAMWORKS_WIN && STEAMWORKS_X64
+#if STEAMWORKS_WIN && !STEAMWORKS_X86
+		// Unity 6 desktop targets are 64-bit; Windows exports use the steam_api64 library.
+		// STEAMWORKS_X86 remains available for consumers building this wrapper outside Unity.
 		internal const string NativeLibraryName = "steam_api64";
 		internal const string NativeLibrary_SDKEncryptedAppTicket = "sdkencryptedappticket64";
 #else

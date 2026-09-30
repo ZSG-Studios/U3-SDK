@@ -21,19 +21,19 @@ namespace SDG.Unturned
 		public readonly EOrigin origin;
 		public readonly NetPakReader reader;
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
 		public void ReadParameterFailed(string parameterName)
 		{
 			UnturnedLog.warn("{0}: unable to read {1}", clientMethodInfo, parameterName);
 		}
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
 		public void IndexOutOfRange(string parameterName, int index, int max)
 		{
 			UnturnedLog.error("{0}: {1} out of range ({2}/{3})", clientMethodInfo, parameterName, index, max);
 		}
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
 		public void LogWarning(string message)
 		{
 			UnturnedLog.warn("{0}: {1}", clientMethodInfo, message);

@@ -3,13 +3,14 @@
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 namespace SDG.Unturned.Tools
 {
 	/// <summary>
-	/// Selects a folder of assets and builds them into a legacy assetbundle.
+	/// Selects a folder of assets and builds a bundle with the current build pipeline.
 	/// </summary>
 	public class BundleTool : EditorWindow
 	{
@@ -25,7 +26,7 @@ namespace SDG.Unturned.Tools
 		private static Object focus;
 
 		/// <summary>
-		/// Assets in the selected folder and their dependencies.
+		/// Assets in the selected folder. The build pipeline includes their dependencies.
 		/// </summary>
 		private static Object[] selection;
 
@@ -53,7 +54,7 @@ namespace SDG.Unturned.Tools
 			}
 
 			focus = Selection.activeObject;
-			selection = EditorUtility.CollectDependencies(Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets));
+			selection = Selection.GetFiltered(typeof(Object), SelectionMode.DeepAssets);
 		}
 
 		/// <summary>
@@ -67,20 +68,50 @@ namespace SDG.Unturned.Tools
 		}
 
 		/// <summary>
-		/// Creates a legacy assetbundle at the provided path.
+		/// Creates an assetbundle at the provided path.
 		/// </summary>
 		/// <param name="path">Path to assetbundle.</param>
 		private void bundleAssets()
 		{
 			if (path.Length > 0 && selection.Length > 0)
 			{
-#pragma warning disable 0618
-				if (!BuildPipeline.BuildAssetBundle(selection[0], selection, path, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows))
+				string[] assetPaths = selection
+					.Where(asset => asset != null && !(asset is MonoScript))
+					.Select(AssetDatabase.GetAssetPath)
+					.Where(assetPath => (assetPath.StartsWith("Assets/") || assetPath.StartsWith("Packages/"))
+						&& !AssetDatabase.IsValidFolder(assetPath))
+					.Distinct()
+					.ToArray();
+				if (assetPaths.Length == 0)
 				{
-					Debug.LogError("Failed to build bundle for \"" + focus.name + "\"!");
+					Debug.LogError("No buildable assets in the selection.");
 					return;
 				}
-#pragma warning restore 0618
+
+				// Build in a unique staging directory so Unity's manifests and lowercase
+				// bundle names do not change the user's chosen destination filename.
+				string outputDirectory = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Library", "BundleTool", System.Guid.NewGuid().ToString("N")));
+				Directory.CreateDirectory(outputDirectory);
+				try
+				{
+					AssetBundleBuild build = new AssetBundleBuild
+					{
+						assetBundleName = "selection.unity3d",
+						assetNames = assetPaths
+					};
+					AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(outputDirectory, new[] { build },
+						BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows64);
+					if (manifest == null)
+					{
+						Debug.LogError("Failed to build bundle for \"" + focus.name + "\"!");
+						return;
+					}
+					File.Copy(Path.Join(outputDirectory, build.assetBundleName), path, overwrite: true);
+				}
+				finally
+				{
+					Directory.Delete(outputDirectory, recursive: true);
+				}
 
 				Debug.Log("Successfully built bundle for \"" + focus.name + "\"!");
 

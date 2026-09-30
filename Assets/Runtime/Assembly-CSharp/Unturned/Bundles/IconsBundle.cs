@@ -21,7 +21,7 @@ namespace SDG.Unturned
 			{
 				result = Assets.coreMasterBundle.LoadAsset<T>($"{path}/{name}.png");
 			}
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			else
 			{
 				UnturnedLog.warn("Cannot load built-in icons because Assets.coreMasterBundle is null");
@@ -31,7 +31,7 @@ namespace SDG.Unturned
 			{
 				UnturnedLog.warn($"Missing icon {path}/{name}.png");
 			}
-#endif //  UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif //  UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			return result;
 		}

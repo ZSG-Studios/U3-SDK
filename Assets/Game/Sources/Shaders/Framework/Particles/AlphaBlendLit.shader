@@ -6,45 +6,45 @@ Properties {
 }
 
 Category {
-	Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "PreviewType"="Plane" }
+	Tags { "RenderPipeline"="UniversalPipeline"  "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "PreviewType"="Plane" }
 	Blend SrcAlpha OneMinusSrcAlpha
 	ColorMask RGB
 	Cull Off Lighting Off ZWrite Off
 
 	SubShader {
 		Pass {
-		
-			CGPROGRAM
+
+			HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 2.0
-			#pragma multi_compile_particles
+			#pragma multi_compile _ SOFTPARTICLES_ON
 			#pragma multi_compile_fog
-			
-			#include "UnityCG.cginc"
 
-			sampler2D _MainTex;
-			fixed4 _TintColor;
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
+
+			TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+			half4 _TintColor;
 			float4 _AlphaParticleLightingColor; // Set globally by LevelLighting
-			
+
 			struct appdata_t {
 				float4 vertex : POSITION;
-				fixed4 color : COLOR;
+				half4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct v2f {
 				float4 vertex : SV_POSITION;
-				fixed4 color : COLOR;
+				half4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
+				half fogCoord : TEXCOORD1;
 				#ifdef SOFTPARTICLES_ON
 				float4 projPos : TEXCOORD2;
 				#endif
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
-			
+
 			float4 _MainTex_ST;
 
 			v2f vert (appdata_t v)
@@ -52,35 +52,35 @@ Category {
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = UnturnedObjectToClip(v.vertex);
 				#ifdef SOFTPARTICLES_ON
 				o.projPos = ComputeScreenPos (o.vertex);
-				COMPUTE_EYEDEPTH(o.projPos.z);
+				o.projPos.z = -TransformWorldToView(TransformObjectToWorld(v.vertex.xyz)).z;
 				#endif
 				o.color = v.color * _TintColor * _AlphaParticleLightingColor;
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.fogCoord = ComputeFogFactor(o.vertex.z);
 				return o;
 			}
 
-			sampler2D_float _CameraDepthTexture;
+
 			float _InvFade;
-			
-			fixed4 frag (v2f i) : SV_Target
+
+			half4 frag (v2f i) : SV_Target
 			{
 				#ifdef SOFTPARTICLES_ON
-				float sceneZ = LinearEyeDepth (SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
+				float sceneZ = UnturnedLinearEyeDepth(SampleSceneDepth(i.projPos.xy / i.projPos.w));
 				float partZ = i.projPos.z;
 				float fade = saturate (_InvFade * (sceneZ-partZ));
 				i.color.a *= fade;
 				#endif
-				
-				fixed4 col = 2.0f * i.color * tex2D(_MainTex, i.texcoord);
-				UNITY_APPLY_FOG(i.fogCoord, col);
+
+				half4 col = 2.0f * i.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+				col.rgb = MixFog(col.rgb, i.fogCoord);
 				return col;
 			}
-			ENDCG 
+			ENDHLSL
 		}
-	}	
+	}
 }
 }

@@ -133,12 +133,12 @@ namespace SDG.Unturned
 			AddChild(backdrop);
 
 			string iconsDir = Path.Join(ReadWrite.PATH, "CuratedMapIcons");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (!Directory.Exists(iconsDir) && Provider.steamAppInstallDirectory != null)
 			{
 				iconsDir = PathEx.Join(Provider.steamAppInstallDirectory, "CuratedMapIcons");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 			string iconPath = Path.Join(iconsDir, curatedMap.Workshop_File_Id + ".png");
 			if (ReadWrite.fileExists(iconPath, false, false))

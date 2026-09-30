@@ -7,10 +7,47 @@ using UnityEngine;
 namespace SDG.Unturned
 {
 	/// <summary>
-	/// Standard shader mode changes are based on built-in StandardShaderGUI.cs 
+	/// Standard shader mode changes are based on built-in StandardShaderGUI.cs
 	/// </summary>
 	public static class StandardShaderUtils
 	{
+		public static Shader StandardShader => global::SDG.Unturned.UniversalShaderCatalog.Find("Universal Render Pipeline/Lit");
+		public static Material CreateStandardMaterial(bool specular = false)
+		{
+			var material = new Material(StandardShader);
+			material.SetFloat("_WorkflowMode", specular ? 0f : 1f);
+			if (specular) material.EnableKeyword("_SPECULAR_SETUP");
+			return material;
+		}
+		public static int ColorProperty(Material material) => Shader.PropertyToID(material.HasProperty("_BaseColor") ? "_BaseColor" : "_Color");
+		public static int SmoothnessProperty(Material material) => Shader.PropertyToID(material.HasProperty("_Smoothness") ? "_Smoothness" : "_Glossiness");
+		public static bool IsUniversalLit(Material material) => material != null && material.shader != null && material.shader.name == "Universal Render Pipeline/Lit";
+		private static bool SetUniversalMode(Material material, int mode)
+		{
+			if (!material.HasProperty("_Surface")) return false;
+			bool transparent = mode >= 2;
+			material.SetFloat("_Surface", transparent ? 1f : 0f);
+			material.SetFloat("_Blend", mode == 3 ? 1f : 0f);
+			material.SetFloat("_AlphaClip", mode == 1 ? 1f : 0f);
+			material.SetFloat("_ZWrite", transparent ? 0f : 1f);
+			material.SetFloat("_SrcBlend", mode == 2 ? (int)UnityEngine.Rendering.BlendMode.SrcAlpha : (int)UnityEngine.Rendering.BlendMode.One);
+			material.SetFloat("_DstBlend", transparent ? (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha : (int)UnityEngine.Rendering.BlendMode.Zero);
+			material.SetFloat("_SrcBlendAlpha", 1f);
+			material.SetFloat("_DstBlendAlpha", transparent ? (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha : 0f);
+			SetKeyword(material, "_SURFACE_TYPE_TRANSPARENT", transparent);
+			SetKeyword(material, "_ALPHATEST_ON", mode == 1);
+			SetKeyword(material, "_ALPHAPREMULTIPLY_ON", mode == 3);
+			material.DisableKeyword("_ALPHABLEND_ON");
+			material.SetOverrideTag("RenderType", transparent ? "Transparent" : mode == 1 ? "TransparentCutout" : "Opaque");
+			material.renderQueue = (int)(transparent ? UnityEngine.Rendering.RenderQueue.Transparent : mode == 1 ? UnityEngine.Rendering.RenderQueue.AlphaTest : UnityEngine.Rendering.RenderQueue.Geometry);
+			material.SetShaderPassEnabled("ShadowCaster", !transparent);
+			material.SetShaderPassEnabled("DepthOnly", !transparent);
+			return true;
+		}
+		private static void SetKeyword(Material material, string keyword, bool enabled)
+		{
+			if (enabled) material.EnableKeyword(keyword); else material.DisableKeyword(keyword);
+		}
 		/// <summary>
 		/// Does shader name match any of the standard shaders?
 		/// Standard, StandardSpecular and the Unturned "Decalable" variants all share nearly identical parameters.
@@ -23,7 +60,7 @@ namespace SDG.Unturned
 			}
 			else
 			{
-				return name.StartsWith("Standard", System.StringComparison.Ordinal) && (name.Length == 8 || name.EndsWith(" (Decalable)", System.StringComparison.Ordinal) || name.EndsWith(" (Specular setup)", System.StringComparison.Ordinal));
+				return name == "Universal Render Pipeline/Lit" || name.StartsWith("Standard", System.StringComparison.Ordinal) && (name.Length == 8 || name.EndsWith(" (Decalable)", System.StringComparison.Ordinal) || name.EndsWith(" (Specular setup)", System.StringComparison.Ordinal));
 			}
 		}
 
@@ -36,7 +73,7 @@ namespace SDG.Unturned
 
 		public static bool isModeFade(Material material)
 		{
-			return material.IsKeywordEnabled("_ALPHABLEND_ON");
+			return material.HasProperty("_Surface") ? material.GetFloat("_Surface") == 1f && material.GetFloat("_Blend") == 0f : material.IsKeywordEnabled("_ALPHABLEND_ON");
 		}
 
 		public static bool isModeTransparent(Material material)
@@ -46,6 +83,7 @@ namespace SDG.Unturned
 
 		public static void setModeToOpaque(Material material)
 		{
+			if (SetUniversalMode(material, 0)) return;
 			material.SetFloat("_Mode", 0f);
 
 			material.SetOverrideTag("RenderType", "");
@@ -60,6 +98,7 @@ namespace SDG.Unturned
 
 		public static void setModeToCutout(Material material)
 		{
+			if (SetUniversalMode(material, 1)) return;
 			material.SetFloat("_Mode", 1f);
 
 			material.SetOverrideTag("RenderType", "TransparentCutout");
@@ -74,6 +113,7 @@ namespace SDG.Unturned
 
 		public static void setModeToFade(Material material)
 		{
+			if (SetUniversalMode(material, 2)) return;
 			material.SetFloat("_Mode", 2f);
 
 			material.SetOverrideTag("RenderType", "Transparent");
@@ -88,6 +128,7 @@ namespace SDG.Unturned
 
 		public static void setModeToTransparent(Material material)
 		{
+			if (SetUniversalMode(material, 3)) return;
 			material.SetFloat("_Mode", 3f);
 
 			material.SetOverrideTag("RenderType", "Transparent");
@@ -112,7 +153,7 @@ namespace SDG.Unturned
 			}
 			else
 			{
-				material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+				material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeIndirectEmission;
 			}
 
 			bool shouldEmissionBeEnabled = (material.globalIlluminationFlags & MaterialGlobalIlluminationFlags.EmissiveIsBlack) == 0;

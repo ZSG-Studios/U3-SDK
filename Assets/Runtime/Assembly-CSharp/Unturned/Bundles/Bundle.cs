@@ -66,11 +66,13 @@ namespace SDG.Unturned
 
 		protected void fixupMaterialForRenderer(Transform rootTransform, Renderer renderer, Material sharedMaterial)
 		{
+			StandardShaderUtils.maybeFixupMaterial(sharedMaterial);
+			if (UniversalMaterialAdapter.Upgrade(sharedMaterial)) return;
 			Shader sharedShader = sharedMaterial.shader;
 
 			if (convertShadersToStandard || sharedShader == null)
 			{
-				sharedMaterial.shader = Shader.Find("Standard");
+				sharedMaterial.shader = global::SDG.Unturned.UniversalShaderCatalog.Find("Standard");
 			}
 			else if (consolidateShaders)
 			{
@@ -92,12 +94,9 @@ namespace SDG.Unturned
 					UnturnedLog.warn("Unable to find consolidated version of shader {0} for material {1} in {2} {3}", sharedShader.name, sharedMaterial.name, name, pathToChild);
 				}
 			}
-			else
-			{
-				UnturnedLog.error("fixupMaterialForRenderer should not have been called for {0}", name);
-			}
 
 			StandardShaderUtils.maybeFixupMaterial(sharedMaterial);
+			UniversalMaterialAdapter.Upgrade(sharedMaterial);
 		}
 
 #if !DEDICATED_SERVER
@@ -136,7 +135,7 @@ namespace SDG.Unturned
 			}
 #endif // !DEDICATED_SERVER
 
-			if (!convertShadersToStandard && !consolidateShaders)
+			if (!convertShadersToStandard && !consolidateShaders && UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null)
 				return;
 
 			if (Dedicator.IsDedicatedServer)
@@ -159,13 +158,15 @@ namespace SDG.Unturned
 
 		protected virtual void processLoadedMaterial(Material material)
 		{
+			StandardShaderUtils.maybeFixupMaterial(material);
+			if (UniversalMaterialAdapter.Upgrade(material)) return;
 			if (!convertShadersToStandard && !consolidateShaders)
 				return;
 
 			Shader originalShader = material.shader;
 			if (convertShadersToStandard || originalShader == null)
 			{
-				material.shader = Shader.Find("Standard");
+				material.shader = global::SDG.Unturned.UniversalShaderCatalog.Find("Standard");
 			}
 			else if (consolidateShaders)
 			{
@@ -181,6 +182,7 @@ namespace SDG.Unturned
 			}
 
 			StandardShaderUtils.maybeFixupMaterial(material);
+			UniversalMaterialAdapter.Upgrade(material);
 		}
 
 		protected virtual void processLoadedObject<T>(T loadedObject) where T : Object
@@ -230,7 +232,9 @@ namespace SDG.Unturned
 		{
 			if (asset == null)
 			{
-				return Resources.Load<T>(resource + "/" + name);
+				var loaded = Resources.Load<T>(resource + "/" + name);
+				processLoadedObject(loaded);
+				return loaded;
 			}
 
 			if (asset.Contains(name))
@@ -286,7 +290,7 @@ namespace SDG.Unturned
 				string macPath = path.Replace(".unity3d", "_Mac.unity3d");
 				if(ReadWrite.fileExists(macPath, false, usePath))
 				{
-					asset = AssetBundle.LoadFromFile(usePath ? ReadWrite.PATH + macPath : macPath);
+					asset = AssetBundle.LoadFromFile(ModernBundleCache.Resolve(usePath ? ReadWrite.PATH + macPath : macPath));
 				}
 #endif
 
@@ -294,13 +298,13 @@ namespace SDG.Unturned
 				string linuxPath = path.Replace(".unity3d", "_Linux.unity3d");
 				if(ReadWrite.fileExists(linuxPath, false, usePath))
 				{
-					asset = AssetBundle.LoadFromFile(usePath ? ReadWrite.PATH + linuxPath : linuxPath);
+					asset = AssetBundle.LoadFromFile(ModernBundleCache.Resolve(usePath ? ReadWrite.PATH + linuxPath : linuxPath));
 				}
 #endif
 
 				if (asset == null)
 				{
-					asset = AssetBundle.LoadFromFile(usePath ? ReadWrite.PATH + path : path);
+					asset = AssetBundle.LoadFromFile(ModernBundleCache.Resolve(usePath ? ReadWrite.PATH + path : path));
 				}
 			}
 			else // resource object

@@ -43,14 +43,14 @@ namespace SDG.Unturned
 				typedChild._parent = null;
 				typedChild.InternalDestroy();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				bool wasRemoved =
 #endif
 
 				// Order of children is important for depth and UIs which rely on index.
 				_children.Remove(typedChild);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (!wasRemoved)
 				{
 					UnturnedLog.warn("Child was not in children list");

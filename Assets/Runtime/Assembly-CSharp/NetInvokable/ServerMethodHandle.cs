@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES
 #define LOG_INVOKE_ERRORS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES
 
 using SDG.NetPak;
 using SDG.NetTransport;
@@ -82,9 +82,9 @@ namespace SDG.Unturned
 		protected ServerMethodHandle(ServerMethodInfo serverMethodInfo)
 		{
 			this.serverMethodInfo = serverMethodInfo;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			++serverMethodInfo.handleCount;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		protected ServerMethodInfo serverMethodInfo;
@@ -122,9 +122,9 @@ namespace SDG.Unturned
 
 			ServerInvocationContext context = new ServerInvocationContext(ServerInvocationContext.EOrigin.Loopback, callingPlayer, reader, serverMethodInfo);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			serverMethodInfo.readSampler.Begin();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			try
 			{
@@ -147,9 +147,9 @@ namespace SDG.Unturned
 				UnturnedLog.error($"Additional context loopback calling stack trace:\n{System.Environment.StackTrace}");
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			serverMethodInfo.readSampler.End();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		}
 	}
 }

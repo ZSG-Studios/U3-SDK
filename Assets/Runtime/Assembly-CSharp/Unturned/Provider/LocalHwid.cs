@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_HWID
 #define LOG_HWID_INTEGRITY_CHECK
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
@@ -114,7 +114,7 @@ namespace SDG.Unturned
 			foreach (char c in ppValue)
 			{
 				expectedValueCheck = (byte) (expectedValueCheck * 3 + c);
-			}	
+			}
 			const string ppCheckKey = "unity.player_session_restoreflags";
 			if (PlayerPrefs.HasKey(ppCheckKey))
 			{

@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEDICATED_SERVER
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEDICATED_SERVER
 namespace SDG.Unturned
 {
 	/// <summary>
@@ -37,11 +37,11 @@ namespace SDG.Unturned
 
 #if UNITY_EDITOR
 			return true; // fixes joining editor from test build
-#elif DEVELOPMENT_BUILD
+#elif UNITY_ENABLE_CHECKS
 			return bypassAssemblyHash;
-#else // !DEVELOPMENT_BUILD
+#else // !UNITY_ENABLE_CHECKS
 			return false;
-#endif // !DEVELOPMENT_BUILD
+#endif // !UNITY_ENABLE_CHECKS
 		}
 
 		internal static bool IsResourcesHashValid(byte[] hash, EClientPlatform clientPlatform)
@@ -71,11 +71,11 @@ namespace SDG.Unturned
 
 #if UNITY_EDITOR
 			return true; // fixes joining editor from test build
-#elif DEVELOPMENT_BUILD
+#elif UNITY_ENABLE_CHECKS
 			return bypassResourcesHash;
-#else // !DEVELOPMENT_BUILD
+#else // !UNITY_ENABLE_CHECKS
 			return false;
-#endif // !DEVELOPMENT_BUILD
+#endif // !UNITY_ENABLE_CHECKS
 		}
 
 		private static void LoadHashes()
@@ -98,7 +98,7 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		/// <summary>
 		/// Should players be allowed to join this server regardless of whether their DLL hash matches ours?
 		/// Useful to allow players to join debug mode servers.
@@ -110,7 +110,7 @@ namespace SDG.Unturned
 		/// Useful to allow players to join debug mode servers.
 		/// </summary>
 		private static CommandLineFlag bypassResourcesHash = new CommandLineFlag(false, "-BypassResourcesHash");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		private static bool hasLoadedHashes = false;
 		private static bool areHashesAvailable = false;
@@ -122,4 +122,4 @@ namespace SDG.Unturned
 		private static byte[] linuxResourcesHash;
 	}
 }
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || DEDICATED_SERVER
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEDICATED_SERVER

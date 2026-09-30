@@ -1,18 +1,17 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnturnedObjectToClip(*)'
 
-Shader "Unlit/Aurora Borealis" 
+Shader "Unlit/Aurora Borealis"
 {
-	Properties 
+	Properties
 	{
 		_MainTex ("Color Strip", 2D) = "white" {}
 		_Pattern("Pattern", 2D) = "white" {}
 		_Intensity ("Intensity", Float) = 1
 	}
 
-	SubShader 
+	SubShader
 	{
-		Tags 
-		{
+		Tags { "RenderPipeline"="UniversalPipeline"
 			"Queue" = "Transparent"
 			"IgnoreProjector" = "True"
 			"RenderType" = "Transparent"
@@ -21,25 +20,25 @@ Shader "Unlit/Aurora Borealis"
 		LOD 100
 		Cull Off
 		ZWrite Off
-		Blend SrcAlpha OneMinusSrcAlpha 
-	
-		Pass 
-		{  
-			CGPROGRAM
+		Blend SrcAlpha OneMinusSrcAlpha
+
+		Pass
+		{
+			HLSLPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#include "UnityCG.cginc"
 
-			struct appdata_t 
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
+
+			struct appdata_t
 			{
 				float4 vertex : POSITION;
 				float2 texcoord : TEXCOORD0;
 				float4 color : COLOR;
 			};
 
-			struct v2f 
+			struct v2f
 			{
 				float4 vertex : SV_POSITION;
 				half2 texcoord0 : TEXCOORD0; // color
@@ -47,17 +46,17 @@ Shader "Unlit/Aurora Borealis"
 				float4 color : COLOR;
 			};
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 			float4 _MainTex_ST;
-			sampler2D _Pattern;
+			TEXTURE2D(_Pattern); SAMPLER(sampler_Pattern);
 			float4 _Pattern_ST;
 			float _Intensity;
-			fixed _AtmosphericFog;
-			
+			half _AtmosphericFog;
+
 			v2f vert(appdata_t v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = UnturnedObjectToClip(v.vertex);
 				o.texcoord1 = TRANSFORM_TEX(v.texcoord, _Pattern);
 				o.color = v.color;
 
@@ -69,7 +68,7 @@ Shader "Unlit/Aurora Borealis"
 				float colorTimeOffset = v.vertex.y / 8;
 
 				o.texcoord0.x = _Time.w / 256 + colorTimeOffset;
-				
+
 				float alphaTimeOffsetWave = v.vertex.x / 4 + v.vertex.y / 4 + sin(_Time.w / 32 + v.vertex.y / 4) / 16;
 				float alphaTimeOffset = v.vertex.x / 4 + abs(sin(_Time.w / 64 + alphaTimeOffsetWave)) * 2;
 
@@ -81,11 +80,11 @@ Shader "Unlit/Aurora Borealis"
 
 				return o;
 			}
-			
-			fixed4 frag(v2f i) : COLOR
+
+			half4 frag(v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.texcoord0);
-				fixed4 pat = tex2D(_Pattern, i.texcoord1);
+				half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord0);
+				half4 pat = SAMPLE_TEXTURE2D(_Pattern, sampler_Pattern, i.texcoord1);
 				col.a *= pat.a;
 				col.a *= i.texcoord0.y;
 				col.a *= _Intensity;
@@ -95,7 +94,7 @@ Shader "Unlit/Aurora Borealis"
 				return col;
 			}
 
-			ENDCG
+			ENDHLSL
 		}
 	}
 }

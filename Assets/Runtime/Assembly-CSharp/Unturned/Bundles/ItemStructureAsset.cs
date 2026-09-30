@@ -121,9 +121,9 @@ namespace SDG.Unturned
 		public MasterBundleReference<GameObject> placementPreviewRef;
 #endif // !DEDICATED_SERVER
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		public CustomSampler instantiationSampler;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 		public override void BuildDescription(ItemDescriptionBuilder builder, Item itemInstance)
 		{
@@ -265,9 +265,9 @@ namespace SDG.Unturned
 			foliageCutRadius = p.data.ParseFloat("Foliage_Cut_Radius", defaultValue: 6.0f);
 			terrainTestHeight = p.data.ParseFloat("Terrain_Test_Height", defaultValue: 10.0f);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			instantiationSampler = CustomSampler.Create(name);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		}
 
 		internal override void BuildCargoData(CargoBuilder builder)

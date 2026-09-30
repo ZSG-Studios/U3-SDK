@@ -169,6 +169,7 @@ namespace SDG.Unturned
 
 		public ushort index;
 		public ushort id;
+		[System.NonSerialized]
 		public PackInfo pack;
 		private ushort health;
 		private Vector3 ragdoll;
@@ -476,7 +477,7 @@ namespace SDG.Unturned
 				return point;
 			}
 
-			// Try toward danger, but slightly closer. 
+			// Try toward danger, but slightly closer.
 			point = transform.position + (normal * -16f) + new Vector3(Random.Range(-8f, 8f), 0, Random.Range(-8f, 8f));
 			if (checkTargetValid(point))
 			{
@@ -1132,7 +1133,7 @@ namespace SDG.Unturned
 		}
 
 		/// <summary>
-		/// Reduces frequency of UndergroundAllowlist checks because it can be expensive with lots of entities and volumes. 
+		/// Reduces frequency of UndergroundAllowlist checks because it can be expensive with lots of entities and volumes.
 		/// </summary>
 		private float undergroundTestTimer = 10.0f;
 

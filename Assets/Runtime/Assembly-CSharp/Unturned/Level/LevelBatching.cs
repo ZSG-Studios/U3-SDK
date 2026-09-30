@@ -264,7 +264,7 @@ namespace SDG.Unturned
 
 					Material debugMaterial = Object.Instantiate(standardDecalableOpaque.materialTemplate);
 					objectsToDestroy.Add(debugMaterial);
-					debugMaterial.SetColor(propertyID_Color, color);
+					debugMaterial.SetColor(StandardShaderUtils.ColorProperty(debugMaterial), color);
 					foreach (MeshRenderer meshRenderer in meshRenderers[listIndex])
 					{
 						meshRenderer.sharedMaterial = debugMaterial;
@@ -387,7 +387,7 @@ namespace SDG.Unturned
 					Material debugMaterial = Object.Instantiate(standardDecalableOpaque.materialTemplate);
 					debugMaterial.name = "Excluded mesh preview";
 					objectsToDestroy.Add(debugMaterial);
-					debugMaterial.SetColor(propertyID_Color, Random.ColorHSV());
+					debugMaterial.SetColor(StandardShaderUtils.ColorProperty(debugMaterial), Random.ColorHSV());
 					renderer.sharedMaterial = debugMaterial;
 				}
 			}
@@ -457,7 +457,7 @@ namespace SDG.Unturned
 			bool isGeneratedTexture = false;
 			if (texture == null)
 			{
-				if (shader.name == "Standard (Decalable)")
+				if ((shader.name == "Standard (Decalable)" || StandardShaderUtils.IsUniversalLit(material) && material.GetFloat("_WorkflowMode") == 1f))
 				{
 					if (CanAtlasStandardMaterialSimpleOpaque(material, renderer, /*isSpecular*/ false))
 					{
@@ -466,7 +466,7 @@ namespace SDG.Unturned
 						group = standardDecalableOpaque;
 					}
 				}
-				else if (shader.name == "Standard (Specular setup) (Decalable)")
+				else if ((shader.name == "Standard (Specular setup) (Decalable)" || StandardShaderUtils.IsUniversalLit(material) && material.GetFloat("_WorkflowMode") == 0f))
 				{
 					if (CanAtlasStandardMaterialSimpleOpaque(material, renderer, /*isSpecular*/ true))
 					{
@@ -496,20 +496,20 @@ namespace SDG.Unturned
 					return null;
 				}
 
-				if (shader.name == "Standard (Decalable)")
+				if ((shader.name == "Standard (Decalable)" || StandardShaderUtils.IsUniversalLit(material) && material.GetFloat("_WorkflowMode") == 1f))
 				{
 					if (CanAtlasStandardMaterialSimpleOpaque(material, renderer, /*isSpecular*/ false) && CanAtlasTextureFilterMode(texture, material, renderer, FilterMode.Point))
 					{
 						group = standardDecalableOpaque;
-						textureConfiguration.color = material.GetColor(propertyID_Color);
+						textureConfiguration.color = material.GetColor(StandardShaderUtils.ColorProperty(material));
 					}
 				}
-				else if (shader.name == "Standard (Specular setup) (Decalable)")
+				else if ((shader.name == "Standard (Specular setup) (Decalable)" || StandardShaderUtils.IsUniversalLit(material) && material.GetFloat("_WorkflowMode") == 0f))
 				{
 					if (CanAtlasStandardMaterialSimpleOpaque(material, renderer, /*isSpecular*/ true) && CanAtlasTextureFilterMode(texture, material, renderer, FilterMode.Point))
 					{
 						group = standardSpecularSetupDecalableOpaque;
-						textureConfiguration.color = material.GetColor(propertyID_Color);
+						textureConfiguration.color = material.GetColor(StandardShaderUtils.ColorProperty(material));
 					}
 				}
 				else if (shader.name == "Custom/Card")
@@ -591,7 +591,7 @@ namespace SDG.Unturned
 		/// </summary>
 		private bool CanAtlasStandardMaterialSimpleOpaque(Material material, Renderer renderer, bool isSpecular)
 		{
-			if (!Mathf.Approximately(material.GetFloat(propertyID_Mode), 0.0f))
+			if (!Mathf.Approximately((material.HasProperty("_Surface") ? material.GetFloat("_Surface") + material.GetFloat("_AlphaClip") : material.GetFloat(propertyID_Mode)), 0.0f))
 			{
 				if (shouldLogTextureAtlasExclusions && loggedMaterials.Add(material))
 				{
@@ -611,7 +611,7 @@ namespace SDG.Unturned
 					return false;
 				}
 
-				if (material.IsKeywordEnabled("_SPECGLOSSMAP"))
+				if ((material.IsKeywordEnabled("_SPECGLOSSMAP") || material.IsKeywordEnabled("_METALLICSPECGLOSSMAP")))
 				{
 					if (shouldLogTextureAtlasExclusions && loggedMaterials.Add(material))
 					{
@@ -631,7 +631,7 @@ namespace SDG.Unturned
 					return false;
 				}
 
-				if (material.IsKeywordEnabled("_METALLICGLOSSMAP"))
+				if ((material.IsKeywordEnabled("_METALLICGLOSSMAP") || material.IsKeywordEnabled("_METALLICSPECGLOSSMAP")))
 				{
 					if (shouldLogTextureAtlasExclusions && loggedMaterials.Add(material))
 					{
@@ -641,7 +641,7 @@ namespace SDG.Unturned
 				}
 			}
 
-			if (!Mathf.Approximately(material.GetFloat(propertyID_Glossiness), 0.0f)) // Smoothness
+			if (!Mathf.Approximately(material.GetFloat(StandardShaderUtils.SmoothnessProperty(material)), 0.0f)) // Smoothness
 			{
 				if (shouldLogTextureAtlasExclusions && loggedMaterials.Add(material))
 				{
@@ -686,12 +686,12 @@ namespace SDG.Unturned
 			if (!colorTextures.TryGetValue(material, out texture))
 			{
 				texture = new Texture2D(1, 1, TextureFormat.ARGB32, /*mipChain*/ false, /*linear*/ false);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				texture.name = material.name + " (albedo texture for atlas)";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				texture.wrapMode = TextureWrapMode.Clamp;
 				texture.filterMode = FilterMode.Point;
-				texture.SetPixel(0, 0, material.GetColor(propertyID_Color));
+				texture.SetPixel(0, 0, material.GetColor(StandardShaderUtils.ColorProperty(material)));
 				texture.Apply(/*updateMipmaps*/ false, /*makeNoLongerReadable*/ false);
 				colorTextures.Add(material, texture);
 			}
@@ -717,9 +717,9 @@ namespace SDG.Unturned
 			if (batchableTextures.Count > 0)
 			{
 				Texture2D atlas = new Texture2D(16, 16); // Initial dimensions don't matter.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				atlas.name = materialTemplate.shader.name + " texture atlas";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				atlas.wrapMode = TextureWrapMode.Clamp;
 				atlas.filterMode = group.filterMode;
 
@@ -741,13 +741,14 @@ namespace SDG.Unturned
 					RenderTexture.active = temp;
 
 					Texture2D texture = new Texture2D(original.width, original.height, TextureFormat.ARGB32, /*mipChain*/ false, /*linear*/ true);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					texture.name = original.name + " (copy for atlas)";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					texture.ReadPixels(new Rect(0, 0, original.width, original.height), 0, 0);
 					duplicatedTextures[copyFromDictionaryIndex] = texture;
 					textureUsers[copyFromDictionaryIndex] = pair.Value;
 
+					RenderTexture.active = previouslyActiveRenderTexture;
 					RenderTexture.ReleaseTemporary(temp);
 					++copyFromDictionaryIndex;
 				}
@@ -760,9 +761,9 @@ namespace SDG.Unturned
 
 					Material material = Object.Instantiate(materialTemplate);
 					objectsToDestroy.Add(material);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					material.name = materialTemplate.shader.name + " material atlas";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					if (!shouldPreview)
 					{
 						material.mainTexture = atlas;
@@ -781,9 +782,9 @@ namespace SDG.Unturned
 							Mesh originalMesh = pair.Key;
 							Mesh copyMesh = Object.Instantiate(originalMesh);
 							objectsToDestroy.Add(copyMesh);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							copyMesh.name = originalMesh.name + " (copy for atlas)";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							uvs.Clear();
 							copyMesh.GetUVs(0, uvs);
 							if (batchable.isGeneratedTexture)
@@ -959,7 +960,7 @@ namespace SDG.Unturned
 		private class TextureUsers
 		{
 			/// <summary>
-			/// If true, UVs should be centered and overridden because original mesh was not textured. 
+			/// If true, UVs should be centered and overridden because original mesh was not textured.
 			/// </summary>
 			public bool isGeneratedTexture;
 

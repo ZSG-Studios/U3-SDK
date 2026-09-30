@@ -159,14 +159,14 @@ namespace SDG.Unturned
 				typedChild._parent = null;
 				typedChild.InternalDestroy();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				bool wasRemoved =
 #endif
 
 				// Order of children is important for depth and UIs which rely on index.
 				_children.Remove(typedChild);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (!wasRemoved)
 				{
 					UnturnedLog.warn("Child was not in children list");
@@ -269,7 +269,7 @@ namespace SDG.Unturned
 
 			if (visualElement.panel == null)
 				return Vector2.zero;
-			
+
 			Rect rootRect = visualElement.panel.visualTree.worldBound;
 			if (Mathf.Approximately(rootRect.width, 0.0f) || Mathf.Approximately(rootRect.height, 0.0f))
 				return Vector2.zero;
@@ -327,7 +327,7 @@ namespace SDG.Unturned
 			tooltipColor = default;
 			return false;
 		}
-		
+
 		protected override void UpdateDirtyTransform()
 		{
 			isTransformDirty = false;

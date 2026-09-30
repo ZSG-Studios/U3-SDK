@@ -1,7 +1,8 @@
 {
     "name": "UnityEx",
     "references": [
-        "GUID:2a2ed13e77897fe4abe2cbe2a7c8f694"
+        "GUID:2a2ed13e77897fe4abe2cbe2a7c8f694",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_BARRICADE_LOADING
 #endif
 using SDG.NetPak;
@@ -1735,9 +1735,9 @@ namespace SDG.Unturned
 				return null;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			asset.instantiationSampler.Begin();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			Transform barricade = null;
 
@@ -1745,7 +1745,7 @@ namespace SDG.Unturned
 			{
 				if (asset.eligibleForPooling)
 				{
-					int prefabKey = asset.barricade.GetInstanceID();
+					EntityId prefabKey = asset.barricade.GetEntityId();
 					Stack<GameObject> instances = pool.GetOrAddNew(prefabKey);
 					while (instances.Count > 0)
 					{
@@ -2096,9 +2096,9 @@ namespace SDG.Unturned
 				}
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			asset.instantiationSampler.End();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			return barricade;
 		}
@@ -2437,7 +2437,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// Register a new vehicle as a valid parent for barricades.
 		/// Each train car is registered after the root of the train.
-		/// Note: why they are called "plants", refer to "only god and i" meme. 
+		/// Note: why they are called "plants", refer to "only god and i" meme.
 		/// </summary>
 		[System.Obsolete("Plugins should not be calling this")]
 		public static void waterPlant(Transform parent)
@@ -2840,7 +2840,7 @@ namespace SDG.Unturned
 				barricadeColliders = new List<Collider>();
 				version = SAVEDATA_VERSION;
 				instanceCount = 0;
-				pool = new Dictionary<int, Stack<GameObject>>();
+				pool = new Dictionary<EntityId, Stack<GameObject>>();
 
 				if (Provider.isServer)
 				{
@@ -3161,7 +3161,7 @@ namespace SDG.Unturned
 
 			river.closeRiver();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			HashSet<uint> ids = new HashSet<uint>();
 			for (byte x = 0; x < Regions.WORLD_SIZE; x++)
 			{
@@ -3181,7 +3181,7 @@ namespace SDG.Unturned
 					}
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		[System.Diagnostics.Conditional("LOG_BARRICADE_LOADING")]
@@ -3474,7 +3474,7 @@ namespace SDG.Unturned
 
 				instance.SetActive(false);
 				instanceTransform.parent = null;
-				int prefabKey = asset.barricade.GetInstanceID();
+				EntityId prefabKey = asset.barricade.GetEntityId();
 				Stack<GameObject> instances = pool.GetOrAddNew(prefabKey);
 				instances.Push(instance);
 			}
@@ -3487,7 +3487,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// Maps prefab unique id to inactive list.
 		/// </summary>
-		private Dictionary<int, Stack<GameObject>> pool;
+		private Dictionary<EntityId, Stack<GameObject>> pool;
 
 #if !DEDICATED_SERVER
 		internal static void HandleInstantiation(ref PlaceableInstantiationParameters instantiation)

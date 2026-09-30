@@ -122,6 +122,7 @@ CSteamworks.bundle/
 *.pidb
 *.unityproj
 *.sln
+*.slnx
 *.userprefs
 *.suo
 *.user
@@ -193,3 +194,21 @@ ItemLinks.txt
 # Unity creates these files during export
 /Assets/Resources/PerformanceTestRunInfo*
 /Assets/Resources/PerformanceTestRunSettings*
+
+# Local Pipeline discovery descriptors contain per-process credentials.
+**/.unity-pipeline-port
+**/.unity-pipeline-runtime-port
+
+# Local development player, generated runtime libraries, and Python caches.
+/Builds/Windows64/
+__pycache__/
+
+# Generated conversions of locally installed Steam content.
+/Assets/Generated/ModernMapBundles/
+/Assets/Generated/ModernMapBundles.meta
+/Builds/ConvertedBundles/
+
+# Machine-local Codex configuration and Steam conversion staging root.
+/.codex/
+/Assets/Generated/
+/Assets/Generated.meta

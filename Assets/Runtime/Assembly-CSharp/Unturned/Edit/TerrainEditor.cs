@@ -1586,7 +1586,7 @@ namespace SDG.Unturned
 					sampleSum += splatmapSmoothSampleAverage[tile2.materials[layer]] / splatmapSmoothSampleCount;
 				}
 			}
-			sampleSum = 1 / sampleSum; // e.g. if samples add up to 0.5 then 1/0.5 -> 2 multiply by 2 to all add up to 1 
+			sampleSum = 1 / sampleSum; // e.g. if samples add up to 0.5 then 1/0.5 -> 2 multiply by 2 to all add up to 1
 
 			for (int layer = 0; layer < Landscape.SPLATMAP_LAYERS; layer++)
 			{
@@ -1630,12 +1630,12 @@ namespace SDG.Unturned
 
 			if (toolMode == EDevkitLandscapeToolMode.TILE)
 			{
-				GLUtility.LINE_FLAT_COLOR.SetPass(0);
-				GL.Begin(GL.LINES);
+				SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+				SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 
 				if (selectedTile != null && selectedTile.coord != pointerTileCoord)
 				{
-					GL.Color(Color.yellow);
+					SDG.Framework.Rendering.GraphGeometry.Color(Color.yellow);
 					GLUtility.line(new Vector3(selectedTile.coord.x * Landscape.TILE_SIZE, 0, selectedTile.coord.y * Landscape.TILE_SIZE), new Vector3((selectedTile.coord.x + 1) * Landscape.TILE_SIZE, 0, selectedTile.coord.y * Landscape.TILE_SIZE));
 					GLUtility.line(new Vector3(selectedTile.coord.x * Landscape.TILE_SIZE, 0, selectedTile.coord.y * Landscape.TILE_SIZE), new Vector3(selectedTile.coord.x * Landscape.TILE_SIZE, 0, (selectedTile.coord.y + 1) * Landscape.TILE_SIZE));
 					GLUtility.line(new Vector3((selectedTile.coord.x + 1) * Landscape.TILE_SIZE, 0, (selectedTile.coord.y + 1) * Landscape.TILE_SIZE), new Vector3((selectedTile.coord.x + 1) * Landscape.TILE_SIZE, 0, selectedTile.coord.y * Landscape.TILE_SIZE));
@@ -1645,14 +1645,14 @@ namespace SDG.Unturned
 				if (isTileVisible && Glazier.Get().ShouldGameProcessInput)
 				{
 					LandscapeTile pointerTile = Landscape.getTile(pointerTileCoord);
-					GL.Color(pointerTile == null ? Color.green : (selectedTile != null && selectedTile.coord == pointerTileCoord) ? Color.red : Color.white);
+					SDG.Framework.Rendering.GraphGeometry.Color(pointerTile == null ? Color.green : (selectedTile != null && selectedTile.coord == pointerTileCoord) ? Color.red : Color.white);
 					GLUtility.line(new Vector3(pointerTileCoord.x * Landscape.TILE_SIZE, 0, pointerTileCoord.y * Landscape.TILE_SIZE), new Vector3((pointerTileCoord.x + 1) * Landscape.TILE_SIZE, 0, pointerTileCoord.y * Landscape.TILE_SIZE));
 					GLUtility.line(new Vector3(pointerTileCoord.x * Landscape.TILE_SIZE, 0, pointerTileCoord.y * Landscape.TILE_SIZE), new Vector3(pointerTileCoord.x * Landscape.TILE_SIZE, 0, (pointerTileCoord.y + 1) * Landscape.TILE_SIZE));
 					GLUtility.line(new Vector3((pointerTileCoord.x + 1) * Landscape.TILE_SIZE, 0, (pointerTileCoord.y + 1) * Landscape.TILE_SIZE), new Vector3((pointerTileCoord.x + 1) * Landscape.TILE_SIZE, 0, pointerTileCoord.y * Landscape.TILE_SIZE));
 					GLUtility.line(new Vector3((pointerTileCoord.x + 1) * Landscape.TILE_SIZE, 0, (pointerTileCoord.y + 1) * Landscape.TILE_SIZE), new Vector3(pointerTileCoord.x * Landscape.TILE_SIZE, 0, (pointerTileCoord.y + 1) * Landscape.TILE_SIZE));
 				}
 
-				GL.End();
+				SDG.Framework.Rendering.GraphGeometry.End();
 			}
 			else
 			{
@@ -1660,22 +1660,22 @@ namespace SDG.Unturned
 				{
 					if (previewSamples.Count <= maxPreviewSamples)
 					{
-						GLUtility.LINE_FLAT_COLOR.SetPass(0);
-						GL.Begin(GL.TRIANGLES);
+						SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+						SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.TRIANGLES);
 
 						float vertexWidth = Mathf.Lerp(0.1f, 1, brushRadius / 256);
 						Vector3 vertexSize = new Vector3(vertexWidth, vertexWidth, vertexWidth);
 						foreach (LandscapePreviewSample sample in previewSamples)
 						{
-							GL.Color(Color.Lerp(Color.red, Color.green, sample.weight));
+							SDG.Framework.Rendering.GraphGeometry.Color(Color.Lerp(Color.red, Color.green, sample.weight));
 							GLUtility.boxSolid(sample.position, vertexSize);
 						}
 
-						GL.End();
+						SDG.Framework.Rendering.GraphGeometry.End();
 					}
 
-					GLUtility.LINE_FLAT_COLOR.SetPass(0);
-					GL.Begin(GL.LINES);
+					SDG.Framework.Rendering.GraphGeometry.SetMaterial(GLUtility.LINE_FLAT_COLOR, 0);
+					SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 
 					if (toolMode == EDevkitLandscapeToolMode.HEIGHTMAP && heightmapMode == EDevkitLandscapeToolHeightmapMode.RAMP)
 					{
@@ -1685,10 +1685,10 @@ namespace SDG.Unturned
 							Vector3 rampDirection = rampOffset.normalized;
 							Vector3 rampCross = Vector3.Cross(Vector3.up, rampDirection);
 
-							GL.Color(new Color(0.5f, 0.5f, 0, 0.5f));
+							SDG.Framework.Rendering.GraphGeometry.Color(new Color(0.5f, 0.5f, 0, 0.5f));
 							GLUtility.line(heightmapRampBeginPosition - (rampCross * brushRadius), heightmapRampEndPosition - (rampCross * brushRadius));
 							GLUtility.line(heightmapRampBeginPosition + (rampCross * brushRadius), heightmapRampEndPosition + (rampCross * brushRadius));
-							GL.Color(Color.yellow);
+							SDG.Framework.Rendering.GraphGeometry.Color(Color.yellow);
 							GLUtility.line(heightmapRampBeginPosition - (rampCross * brushRadius * heightmapBrushFalloff), heightmapRampEndPosition - (rampCross * brushRadius * heightmapBrushFalloff));
 							GLUtility.line(heightmapRampBeginPosition + (rampCross * brushRadius * heightmapBrushFalloff), heightmapRampEndPosition + (rampCross * brushRadius * heightmapBrushFalloff));
 						}
@@ -1697,11 +1697,11 @@ namespace SDG.Unturned
 							Vector3 rampDirection = (pointerWorldPosition - brushWorldPosition).normalized;
 							Vector3 rampCross = Vector3.Cross(Vector3.up, rampDirection);
 
-							GL.Color(new Color(0.5f, 0.5f, 0, 0.5f));
+							SDG.Framework.Rendering.GraphGeometry.Color(new Color(0.5f, 0.5f, 0, 0.5f));
 							GLUtility.line(brushWorldPosition - (rampDirection * brushRadius) - rampCross, brushWorldPosition - (rampDirection * brushRadius) + rampCross);
 							GLUtility.line(brushWorldPosition + (rampDirection * brushRadius) - rampCross, brushWorldPosition + (rampDirection * brushRadius) + rampCross);
 
-							GL.Color(Color.yellow);
+							SDG.Framework.Rendering.GraphGeometry.Color(Color.yellow);
 							GLUtility.line(brushWorldPosition - (rampDirection * brushRadius * heightmapBrushFalloff) - rampCross, brushWorldPosition - (rampDirection * brushRadius * heightmapBrushFalloff) + rampCross);
 							GLUtility.line(brushWorldPosition + (rampDirection * brushRadius * heightmapBrushFalloff) - rampCross, brushWorldPosition + (rampDirection * brushRadius * heightmapBrushFalloff) + rampCross);
 						}
@@ -1724,7 +1724,7 @@ namespace SDG.Unturned
 
 						bool usesFalloff = toolMode != EDevkitLandscapeToolMode.SPLATMAP || splatmapMode != EDevkitLandscapeToolSplatmapMode.CUT;
 
-						GL.Color(usesFalloff ? color / 2 : color);
+						SDG.Framework.Rendering.GraphGeometry.Color(usesFalloff ? color / 2 : color);
 						GLUtility.circle(brushWorldPosition, brushRadius, new Vector3(1, 0, 0), new Vector3(0, 0, 1), handleGLCircleOffset);
 						if (toolMode == EDevkitLandscapeToolMode.HEIGHTMAP && heightmapMode == EDevkitLandscapeToolHeightmapMode.FLATTEN)
 						{
@@ -1733,7 +1733,7 @@ namespace SDG.Unturned
 
 						if (usesFalloff)
 						{
-							GL.Color(color);
+							SDG.Framework.Rendering.GraphGeometry.Color(color);
 							GLUtility.circle(brushWorldPosition, brushRadius * brushFalloff, new Vector3(1, 0, 0), new Vector3(0, 0, 1), handleGLCircleOffset);
 							if (toolMode == EDevkitLandscapeToolMode.HEIGHTMAP && heightmapMode == EDevkitLandscapeToolHeightmapMode.FLATTEN)
 							{
@@ -1742,7 +1742,7 @@ namespace SDG.Unturned
 						}
 					}
 
-					GL.End();
+					SDG.Framework.Rendering.GraphGeometry.End();
 				}
 			}
 		}

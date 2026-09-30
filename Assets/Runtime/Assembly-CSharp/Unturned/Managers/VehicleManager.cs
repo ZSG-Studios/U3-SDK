@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define WITH_VEHICLE_ENTER_GIZMOS
 // #define LOG_RECEIVE_VEHICLE
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetPak;
 using SDG.NetTransport;
 using Steamworks;
@@ -426,7 +426,7 @@ namespace SDG.Unturned
 		{
 			if (Player.LocalPlayer.movement.getVehicle() != null)
 			{
-				SendExitVehicleRequest.Invoke(ENetReliability.Unreliable, Player.LocalPlayer.movement.getVehicle().GetComponent<Rigidbody>().velocity);
+				SendExitVehicleRequest.Invoke(ENetReliability.Unreliable, Player.LocalPlayer.movement.getVehicle().GetComponent<Rigidbody>().linearVelocity);
 			}
 		}
 
@@ -1159,7 +1159,7 @@ namespace SDG.Unturned
 
 			LogReceiveVehicle(nameof(reader.RemainingSegmentLength), reader.RemainingSegmentLength);
 		}
-		
+
 		private static readonly ClientStaticMethod SendMultipleVehicles = ClientStaticMethod.Get(ReceiveMultipleVehicles);
 		[SteamCall(ESteamCallValidation.ONLY_FROM_SERVER)]
 		public static void ReceiveMultipleVehicles(in ClientInvocationContext context)
@@ -1206,7 +1206,7 @@ namespace SDG.Unturned
 				WriteVehicle(writer, vehicle);
 			}
 		}
-		
+
 		internal static void SendInitialGlobalState(SteamPlayer client)
 		{
 			const int MAX_TELLVEHICLES_PER_PACKET = 50;
@@ -1359,7 +1359,7 @@ namespace SDG.Unturned
 		{
 			SendVehicleLockState.InvokeAndLoopback(ENetReliability.Reliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID, ownerID, groupID, isLocked);
 		}
-		
+
 		private static readonly ServerStaticMethod SendVehicleLockRequest = ServerStaticMethod.Get(ReceiveVehicleLockRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 4, legacyName = nameof(askVehicleLock))]
 		public static void ReceiveVehicleLockRequest(in ServerInvocationContext context)
@@ -1408,7 +1408,7 @@ namespace SDG.Unturned
 
 			OnToggledVehicleLock.TryInvoke("OnToggledVehicleLock", vehicle);
 		}
-		
+
 		private static readonly ServerStaticMethod SendVehicleSkinRequest = ServerStaticMethod.Get(ReceiveVehicleSkinRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 2, legacyName = nameof(askVehicleSkin))]
 		public static void ReceiveVehicleSkinRequest(in ServerInvocationContext context)
@@ -1459,7 +1459,7 @@ namespace SDG.Unturned
 
 			SendVehicleSkin.InvokeAndLoopback(ENetReliability.Reliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID, skinID, mythicID);
 		}
-		
+
 		private static readonly ServerStaticMethod<bool> SendToggleVehicleHeadlights = ServerStaticMethod<bool>.Get(ReceiveToggleVehicleHeadlights);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 10, legacyName = nameof(askVehicleHeadlights))]
 		public static void ReceiveToggleVehicleHeadlights(in ServerInvocationContext context, bool wantsHeadlightsOn)
@@ -1503,7 +1503,7 @@ namespace SDG.Unturned
 			SendVehicleHeadlights.InvokeAndLoopback(ENetReliability.Reliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID, wantsHeadlightsOn);
 			EffectManager.TriggerFiremodeEffect(vehicle.transform.position);
 		}
-		
+
 		private static readonly ServerStaticMethod<byte> SendUseVehicleBonus = ServerStaticMethod<byte>.Get(ReceiveUseVehicleBonus);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 5, legacyName = nameof(askVehicleBonus))]
 		public static void ReceiveUseVehicleBonus(in ServerInvocationContext context, byte bonusType)
@@ -1546,7 +1546,7 @@ namespace SDG.Unturned
 				SendVehicleBlimp.InvokeAndLoopback(ENetReliability.Reliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID, !vehicle.isBlimpFloating);
 			}
 		}
-		
+
 		private static readonly ServerStaticMethod SendStealVehicleBattery = ServerStaticMethod.Get(ReceiveStealVehicleBattery);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 2, legacyName = nameof(askVehicleStealBattery))]
 		public static void ReceiveStealVehicleBattery(in ServerInvocationContext context)
@@ -1585,7 +1585,7 @@ namespace SDG.Unturned
 
 			vehicle.stealBattery(player);
 		}
-		
+
 		private static readonly ServerStaticMethod SendVehicleHornRequest = ServerStaticMethod.Get(ReceiveVehicleHornRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 10, legacyName = nameof(askVehicleHorn))]
 		public static void ReceiveVehicleHornRequest(in ServerInvocationContext context)
@@ -1621,7 +1621,7 @@ namespace SDG.Unturned
 
 			SendVehicleHorn.InvokeAndLoopback(ENetReliability.Unreliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID);
 		}
-		
+
 		private static readonly ServerStaticMethod<uint, byte[], byte[], byte> SendEnterVehicleRequest = ServerStaticMethod<uint, byte[], byte[], byte>.Get(ReceiveEnterVehicleRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 2, legacyName = nameof(askEnterVehicle))]
 		public static void ReceiveEnterVehicleRequest(in ServerInvocationContext context, uint instanceID, byte[] hash, byte[] physicsProfileHash, byte engine)
@@ -1824,7 +1824,7 @@ namespace SDG.Unturned
 			SendEnterVehicle.InvokeAndLoopback(ENetReliability.Reliable, Provider.GatherRemoteClientConnections(), vehicle.instanceID, seat, player.channel.owner.playerID.steamID);
 			return true;
 		}
-		
+
 		private static readonly ServerStaticMethod<Vector3> SendExitVehicleRequest = ServerStaticMethod<Vector3>.Get(ReceiveExitVehicleRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 2, legacyName = nameof(askExitVehicle))]
 		public static void ReceiveExitVehicleRequest(in ServerInvocationContext context, Vector3 velocity)
@@ -1875,7 +1875,7 @@ namespace SDG.Unturned
 
 			if (seat == 0 && Dedicator.IsDedicatedServer)
 			{
-				vehicle.GetComponent<Rigidbody>().velocity = velocity;
+				vehicle.GetComponent<Rigidbody>().linearVelocity = velocity;
 			}
 		}
 
@@ -1946,7 +1946,7 @@ namespace SDG.Unturned
 				return false;
 			}
 		}
-		
+
 		private static readonly ServerStaticMethod<byte> SendSwapVehicleRequest = ServerStaticMethod<byte>.Get(ReceiveSwapVehicleRequest);
 		[SteamCall(ESteamCallValidation.SERVERSIDE, ratelimitHz = 2, legacyName = nameof(askSwapVehicle))]
 		public static void ReceiveSwapVehicleRequest(in ServerInvocationContext context, byte toSeat)
@@ -2469,7 +2469,7 @@ namespace SDG.Unturned
 				return 0;
 			}
 
-			// e.g. with maxInstances of 64 and 100 vehicles this is 0, or with 50 vehicles it's 16 
+			// e.g. with maxInstances of 64 and 100 vehicles this is 0, or with 50 vehicles it's 16
 			int regularSlots = Mathf.Max(0, (int) maxInstances - vehicles.Count);
 
 			int targetNaturalVehicles = (int) Provider.modeConfigData.Vehicles.Min_Natural_Vehicles;

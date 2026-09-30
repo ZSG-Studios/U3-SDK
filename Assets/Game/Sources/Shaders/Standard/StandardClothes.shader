@@ -15,67 +15,88 @@ Shader "Standard/Clothes"
 		_PantsMetallicTexture("Pants Metallic Texture", 2D) = "black" {}
     }
     SubShader
-    {
-        Tags
-		{
-			"RenderType" = "Opaque"
-		}
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-        LOD 200
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-        CGPROGRAM
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#define _SPECULAR_SETUP 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardClothes.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-        #pragma surface surf StandardSpecular
-        #pragma target 3.0
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define _SPECULAR_SETUP 1
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Standard/StandardClothes.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		float3 _SkinColor;
-		float _FlipShirt;
-		sampler2D _FaceAlbedoTexture;
-		sampler2D _FaceEmissionTexture;
-        sampler2D _ShirtAlbedoTexture;
-		sampler2D _ShirtEmissionTexture;
-		sampler2D _ShirtMetallicTexture;
-		sampler2D _PantsAlbedoTexture;
-		sampler2D _PantsEmissionTexture;
-		sampler2D _PantsMetallicTexture;
+#define _SPECULAR_SETUP 1
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardClothes.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-        struct Input
-        {
-            float2 uv_ShirtAlbedoTexture;
-        };
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-        void surf(Input input, inout SurfaceOutputStandardSpecular output)
-        {
-			float2 faceUV = (input.uv_ShirtAlbedoTexture * 8.0) - float2(6.0, 7.0); // Offset face texture to upper-right.
-			float4 faceAlbedo = tex2D(_FaceAlbedoTexture, faceUV);
-			float4 faceEmission = tex2D(_FaceEmissionTexture, faceUV);
-			float faceMask = step(0.0, faceUV.x) * step(faceUV.x, 1.0) * step(0.0, faceUV.y) * step(faceUV.y, 1.0);
-			float faceAlpha = faceAlbedo.a * faceMask;
+#define _SPECULAR_SETUP 1
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardClothes.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			// Front of shirt occupies the upper left 1/4, and back of shirt is the next 1/4 to the right.
-			float2 shirtUV = input.uv_ShirtAlbedoTexture;
-			float2 flipShirtU = ceil(shirtUV.x * 4.0) * 0.25 - frac(shirtUV.x * 4.0) * 0.25;
-			float flipShirtAlpha = _FlipShirt * (shirtUV.x < 0.5) * (shirtUV.y > 0.75);
-			shirtUV.x = lerp(shirtUV.x, flipShirtU, flipShirtAlpha);
-
-			float4 shirtAlbedo = tex2D(_ShirtAlbedoTexture, shirtUV);
-			float4 pantsAlbedo = tex2D(_PantsAlbedoTexture, input.uv_ShirtAlbedoTexture);
-			output.Albedo = lerp(lerp(lerp(_SkinColor, faceAlbedo.rgb, faceAlpha), shirtAlbedo.rgb, shirtAlbedo.a), pantsAlbedo.rgb, pantsAlbedo.a);
-
-			float4 shirtEmission = tex2D(_ShirtEmissionTexture, shirtUV);
-			float4 pantsEmission = tex2D(_PantsEmissionTexture, input.uv_ShirtAlbedoTexture);
-			output.Emission = lerp(lerp(faceEmission.rgb * faceAlpha, shirtEmission.rgb, shirtAlbedo.a), pantsEmission.rgb, pantsAlbedo.a) * 2.0;
-
-			// Nelson 2025-09-10: previously, this actually was Metallic output, but the character
-			// was noticeably shiny without ambient light. As I understand it, the "0" metallic
-			// corresponds to ~0.04 gray specular, and 1 to the albedo, so we just use albedo as
-			// the specular color.
-			float4 shirtMetallic = tex2D(_ShirtMetallicTexture, shirtUV);
-			float4 pantsMetallic = tex2D(_PantsMetallicTexture, input.uv_ShirtAlbedoTexture);
-			output.Specular = output.Albedo.rgb * lerp(shirtMetallic.r * shirtAlbedo.a, pantsMetallic.r, pantsAlbedo.a);
-			output.Smoothness = lerp(shirtMetallic.a * shirtAlbedo.a, pantsMetallic.a, pantsAlbedo.a);
-        }
-        ENDCG
-    }
-    FallBack "Diffuse"
+#define _SPECULAR_SETUP 1
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardClothes.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

@@ -435,6 +435,8 @@ namespace SDG.Unturned
 			RenderTexture render = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
 			render.name = "Card_Render";
 
+			RenderTexture previousActive = RenderTexture.active;
+			RenderTexture previousTarget = tool.cameraComponent.targetTexture;
 			RenderTexture.active = render;
 
 			tool.cameraComponent.targetTexture = render;
@@ -471,13 +473,13 @@ namespace SDG.Unturned
 			tool.transform.rotation = hook_0.rotation;
 
 			tool.cameraComponent.clearFlags = CameraClearFlags.Color;
-			tool.cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(tool.cameraComponent);
 			texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
 
 			tool.transform.position = hook_1.position;
 			tool.transform.rotation = hook_1.rotation;
 
-			tool.cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(tool.cameraComponent);
 			texture.ReadPixels(new Rect(0, 0, width, height), width, 0);
 
 			if (Provider.isConnected)
@@ -515,6 +517,8 @@ namespace SDG.Unturned
 			}
 			texture.Apply();
 
+			tool.cameraComponent.targetTexture = previousTarget;
+			RenderTexture.active = previousActive;
 			RenderTexture.ReleaseTemporary(render);
 
 			return texture;
@@ -641,6 +645,8 @@ namespace SDG.Unturned
 			RenderTexture render = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB, antiAliasing);
 			render.name = "Render_" + id + "_" + skin;
 
+			RenderTexture previousActive = RenderTexture.active;
+			RenderTexture previousTarget = tool.cameraComponent.targetTexture;
 			RenderTexture.active = render;
 
 			tool.cameraComponent.targetTexture = render;
@@ -671,7 +677,7 @@ namespace SDG.Unturned
 			tool.cameraComponent.cullingMask = RayMasks.ITEM | RayMasks.VEHICLE | RayMasks.MEDIUM | RayMasks.SMALL;
 			tool.cameraComponent.farClipPlane = 16;
 			tool.cameraComponent.clearFlags = CameraClearFlags.Nothing; // We manually clear depth and color.
-			tool.cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(tool.cameraComponent);
 
 			tool.lightComponent.enabled = false;
 
@@ -696,6 +702,8 @@ namespace SDG.Unturned
 			texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
 			texture.Apply(false, !readableOnCPU);
 
+			tool.cameraComponent.targetTexture = previousTarget;
+			RenderTexture.active = previousActive;
 			RenderTexture.ReleaseTemporary(render);
 			return texture;
 		}
@@ -937,7 +945,7 @@ namespace SDG.Unturned
 
 		private static int GetAttachmentEventHookCount(GameObject prefab)
 		{
-			int key = prefab.GetInstanceID();
+			EntityId key = prefab.GetEntityId();
 
 			if (!cachedAttachmentEventHookCount.TryGetValue(key, out int hookCount))
 			{
@@ -957,7 +965,7 @@ namespace SDG.Unturned
 
 		private static ItemTool tool;
 		private static Dictionary<ItemAsset, Texture2D> iconCache = new Dictionary<ItemAsset, Texture2D>();
-		private static Dictionary<int, int> cachedAttachmentEventHookCount = new Dictionary<int, int>();
+		private static Dictionary<EntityId, int> cachedAttachmentEventHookCount = new Dictionary<EntityId, int>();
 		private static List<GunAttachmentEventHook> tempAttachmentEventHooks = new List<GunAttachmentEventHook>();
 	}
 }

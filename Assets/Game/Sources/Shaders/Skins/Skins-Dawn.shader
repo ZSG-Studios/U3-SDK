@@ -1,6 +1,6 @@
-Shader "Skins/Dawn" 
+Shader "Skins/Dawn"
 {
-	Properties 
+	Properties
 	{
 		_AlbedoBase("Albedo Base", 2D) = "black" {}
 		_MetallicBase("Metallic Base", 2D) = "black" {}
@@ -13,73 +13,84 @@ Shader "Skins/Dawn"
 		_RimPower("Rim Power", Float) = 1.0
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
-		
-		CGPROGRAM
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard vertex:vert
-		#pragma target 3.0
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Dawn.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		sampler2D _AlbedoBase;
-		sampler2D _MetallicBase;
-		sampler2D _EmissionBase;
-		fixed4 _SunColor;
-		fixed4 _RaysColor;
-		fixed4 _SkyColor;
-		fixed4 _EquatorColor;
-		fixed4 _GroundColor;
-		float _RimPower;
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Dawn.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		struct Input
-		{
-			float2 uv_AlbedoBase;
-			float3 viewDir;
-			float3 worldNormal;
-			float3 localPos;
-		};
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Dawn.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		void vert(inout appdata_full v, out Input OUT)
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
-			OUT.localPos = v.vertex.xyz;
-		}
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed4 albedoBase = tex2D(_AlbedoBase, IN.uv_AlbedoBase);
-			fixed4 metallicBase = tex2D(_MetallicBase, IN.uv_AlbedoBase);
-			fixed4 emissionBase = tex2D(_EmissionBase, IN.uv_AlbedoBase);
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Dawn.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 sphereColor = saturate(IN.worldNormal.y) * _SkyColor
-				+ saturate(1.0 - abs(IN.worldNormal.y)) * _EquatorColor
-				+ saturate(-IN.worldNormal.y) * _GroundColor;
-
-			float lightAlpha = (sin(_Time.y + IN.localPos.y * -5.0) + 1.0) * 0.5; // Rempap [-1, 1] to [0, 1]
-			fixed4 lightColor = lerp(_SunColor, _RaysColor, lightAlpha);
-
-			float fresnelAlpha = pow(1.0 - saturate(dot(IN.viewDir, IN.worldNormal)), _RimPower);
-			fixed4 skinColor = lerp(sphereColor, lightColor, fresnelAlpha);
-
-			fixed4 albedo = albedoBase * albedoBase.a;
-			fixed4 metallic = metallicBase * albedoBase.a;
-			fixed4 emission = emissionBase * albedoBase.a + skinColor * (1.0 - albedoBase.a);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = albedo.a;
-			OUT.Metallic = metallic.r;
-			OUT.Smoothness = metallic.a;
-			OUT.Emission = emission.rgb;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Dawn.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

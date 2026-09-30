@@ -255,9 +255,9 @@ namespace SDG.Unturned
 #pragma warning restore
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		public CustomSampler instantiationSampler;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 		public override void BuildDescription(ItemDescriptionBuilder builder, Item itemInstance)
 		{
@@ -535,9 +535,9 @@ namespace SDG.Unturned
 				}
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			instantiationSampler = CustomSampler.Create(name);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		}
 
 		internal override void BuildCargoData(CargoBuilder builder)

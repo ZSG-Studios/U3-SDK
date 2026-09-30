@@ -182,12 +182,12 @@ namespace SDG.Unturned
 			register(new CommandRewardList(emptyPlaceholder));
 			register(new CommandDialogue(emptyPlaceholder));
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			register(new CommandLogAssetOrigins(emptyPlaceholder));
 			register(new CommandSpawnAllBarricades(emptyPlaceholder));
 			register(new CommandSpawnAllVehicles(emptyPlaceholder));
 			register(new CommandSteamClearAchievement(emptyPlaceholder));
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 	}
 }

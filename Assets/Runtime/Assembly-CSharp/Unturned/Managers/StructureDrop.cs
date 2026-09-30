@@ -260,12 +260,12 @@ namespace SDG.Unturned
 					StructureRegion newRegion = StructureManager.regions[new_x, new_y];
 
 					bool wasRemoved = oldRegion.drops.Remove(this);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					if (!wasRemoved)
 					{
 						UnturnedLog.warn($"Likely bug in StructureDrop.ReceiveTransform: {asset?.FriendlyName} not removed from old cell {old_x}, {old_y} moving to {new_x}, {new_y}");
 					}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 					if (newRegion.isNetworked || Provider.isServer)
 					{
@@ -277,9 +277,9 @@ namespace SDG.Unturned
 						ReleaseNetId();
 					}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					StructureManager.CheckStructureRegionCoordIsCorrect(this, new_x, new_y, "StructureDrop.ReceiveTransform");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 					if (Provider.isServer)
 					{
@@ -331,9 +331,9 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			StructureManager.CheckStructureRegionCoordIsCorrect(this, old_x, old_y, "StructureDrop.ReceiveTransform");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (StructureManager.onTransformRequested != null)
 			{

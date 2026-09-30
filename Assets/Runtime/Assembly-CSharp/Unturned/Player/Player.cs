@@ -19,7 +19,7 @@ namespace SDG.Unturned
 	{
 		/// <summary>
 		/// If true, light contributes to player spotlight. Defaults to true.
-		/// 
+		///
 		/// Can be set to false for modders with a custom light setup. For example, this was added
 		/// for a modder who is using melee lights to toggle a lightsaber-style glow.
 		/// </summary>
@@ -212,7 +212,7 @@ namespace SDG.Unturned
 
 		public delegate void PluginWidgetFlagsChanged(Player player, EPluginWidgetFlags oldFlags);
 		/// <summary>
-		/// Invoked on client when a plugin changes the widget flags. 
+		/// Invoked on client when a plugin changes the widget flags.
 		/// </summary>
 		public event PluginWidgetFlagsChanged onLocalPluginWidgetFlagsChanged;
 
@@ -228,12 +228,12 @@ namespace SDG.Unturned
 		{
 			get
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (Dedicator.IsDedicatedServer)
 				{
 					throw new System.NotSupportedException("LocalPlayer used on dedicated server!");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				return _localPlayer;
 			}
 		}
@@ -642,9 +642,9 @@ namespace SDG.Unturned
 			}
 
 			text = ItemTool.filterRarityRichText(text); // Matches INPCReward default text filtering.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			UnturnedLog.info($"Replicated hint: \"{text}\" Asset: {asset.FriendlyNameWithFriendlyType} Key: \"{translationKey}\"");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			ReceiveHintMessage(text, durationSeconds);
 		}
 
@@ -1502,7 +1502,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// Note: new official code should be using per-method rate limit attribute.
 		/// This is kept for backwards compatibility with plugins however.
-		/// 
+		///
 		/// Call this method before any requests the client can spam to the server.
 		/// </summary>
 		/// <returns>Should your code proceed with the rate limited action?</returns>

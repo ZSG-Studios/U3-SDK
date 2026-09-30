@@ -78,7 +78,7 @@ public partial class BuildMethods
 
 	public static void setDefineEnabled(string define, bool enabled)
 	{
-		string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+		string defines = PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Standalone);
 		if (defines.Contains(define))
 		{
 			// define is currently enabled
@@ -98,7 +98,7 @@ public partial class BuildMethods
 				defines += ';';
 			defines += define;
 		}
-		PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, defines);
+		PlayerSettings.SetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Standalone, defines);
 	}
 
 	/// <returns>True if successfully built.</returns>
@@ -155,7 +155,21 @@ public partial class BuildMethods
 		disableAudioProperty.boolValue = isDedicatedServerTarget;
 		serializedAudioManager.ApplyModifiedPropertiesWithoutUndo();
 
-		UnityEditor.Build.Reporting.BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+		var namedTarget = isDedicatedServerTarget ? UnityEditor.Build.NamedBuildTarget.Server
+			: UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(group);
+		var previousVariant = PlayerSettings.GetManagedCodeVariant(namedTarget);
+		var variant = (options & BuildOptions.AllowDebugging) != 0 ? ManagedCodeVariant.Debug
+			: (options & BuildOptions.Development) != 0 ? ManagedCodeVariant.Checked : ManagedCodeVariant.Release;
+		UnityEditor.Build.Reporting.BuildReport report;
+		try
+		{
+			PlayerSettings.SetManagedCodeVariant(namedTarget, variant);
+			report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+		}
+		finally
+		{
+			PlayerSettings.SetManagedCodeVariant(namedTarget, previousVariant);
+		}
 		if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
 		{
 			return true;

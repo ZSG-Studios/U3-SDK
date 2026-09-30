@@ -140,9 +140,9 @@ namespace SDG.Unturned
 		{
 			if (textComponent == null)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnturnedLog.error("Text component null when releasing GlazierLabel into uGUI pool!");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				return false;
 			}
 

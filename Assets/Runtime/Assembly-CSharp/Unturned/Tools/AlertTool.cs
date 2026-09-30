@@ -3,10 +3,10 @@
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
 // #define LOG_ALERTS
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define ALERT_SPHERE_GIZMOS
 // #define ALERT_LINE_OF_SIGHT_GIZMOS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using System.Collections.Generic;
 using UnityEngine;

@@ -536,12 +536,12 @@ namespace SDG.Unturned
 			}
 
 			string vanillaImagesPath = PathEx.Join(UnturnedPaths.RootDirectory, "LoadingScreens");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (!Directory.Exists(vanillaImagesPath) && Provider.steamAppInstallDirectory != null)
 			{
 				vanillaImagesPath = PathEx.Join(Provider.steamAppInstallDirectory, "LoadingScreens");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			pickBackgroundImage(vanillaImagesPath, false);
 		}
 

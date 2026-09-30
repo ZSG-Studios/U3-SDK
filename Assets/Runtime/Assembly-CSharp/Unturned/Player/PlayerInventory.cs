@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define LOG_INVENTORY_RPC_FAILURES
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using SDG.NetPak;
 using SDG.NetTransport;
@@ -797,7 +797,7 @@ namespace SDG.Unturned
 		private static readonly ServerInstanceMethod<byte, byte, byte, byte, byte, byte, byte, byte> SendSwapItem = ServerInstanceMethod<byte, byte, byte, byte, byte, byte, byte, byte>.Get(typeof(PlayerInventory), nameof(ReceiveSwapItem));
 		/// <summary>
 		/// Swap coordinates of two existing items.
-		/// Rotation is provided to handle differently shaped items e.g. a 1x2 item with a 2x1 item. 
+		/// Rotation is provided to handle differently shaped items e.g. a 1x2 item with a 2x1 item.
 		/// </summary>
 		[SteamCall(ESteamCallValidation.ONLY_FROM_OWNER, ratelimitHz = 10, legacyName = nameof(askSwapItem))]
 		public void ReceiveSwapItem(byte page_0, byte x_0, byte y_0, byte rot_0, byte page_1, byte x_1, byte y_1, byte rot_1)
@@ -971,7 +971,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Swap coordinates of two existing items.
-		/// Rotation is provided to handle differently shaped items e.g. a 1x2 item with a 2x1 item. 
+		/// Rotation is provided to handle differently shaped items e.g. a 1x2 item with a 2x1 item.
 		/// </summary>
 		public void sendSwapItem(byte page_0, byte x_0, byte y_0, byte rot_0, byte page_1, byte x_1, byte y_1, byte rot_1)
 		{
@@ -1566,7 +1566,7 @@ namespace SDG.Unturned
 		}
 
 		/// <summary>
-		/// Serverside open a storage crate and notify client. 
+		/// Serverside open a storage crate and notify client.
 		/// </summary>
 		public void openStorage(InteractableStorage newStorage)
 		{

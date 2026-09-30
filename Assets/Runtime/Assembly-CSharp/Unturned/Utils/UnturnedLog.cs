@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define USE_UNITY_LOG
 #endif
 
@@ -138,7 +138,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Recursively logs inner exception.
-		/// 
+		///
 		/// Should only be called by itself and exception because notifications
 		/// to CommandWindow would otherwise get re-sent here as errors.
 		/// </summary>
@@ -178,7 +178,7 @@ namespace SDG.Unturned
 		///
 		/// This gives us greater control over how logging is handled. In particular, Unity's
 		/// headless builds route logs (including stack traces) through stdout which is undesirable
-		/// for dedicated servers, so we only call Debug.Log* in the editor and development builds. 
+		/// for dedicated servers, so we only call Debug.Log* in the editor and development builds.
 		/// </summary>
 		private static void onBuiltinUnityLogMessageReceived(string text, string stack, LogType type)
 		{

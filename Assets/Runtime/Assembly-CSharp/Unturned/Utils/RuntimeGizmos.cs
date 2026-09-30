@@ -340,7 +340,7 @@ namespace SDG.Unturned
 
 			for (int layerIndex = 0; layerIndex < LAYER_COUNT; ++layerIndex)
 			{
-				materialLayers[layerIndex].SetPass(0);
+				SDG.Framework.Rendering.GraphGeometry.SetMaterial(materialLayers[layerIndex], 0);
 				RenderBoxes(boxLayers[layerIndex]);
 				RenderLines(lineLayers[layerIndex]);
 				RenderCapsules(capsuleLayers[layerIndex]);
@@ -378,49 +378,49 @@ namespace SDG.Unturned
 
 		private void RenderBoxes(List<BoxData> boxesToRender)
 		{
-			GL.Begin(GL.LINES);
+			SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 			for (int index = boxesToRender.Count - 1; index >= 0; --index)
 			{
 				BoxData box = boxesToRender[index];
-				GL.Color(box.color);
+				SDG.Framework.Rendering.GraphGeometry.Color(box.color);
 				Vector3 extents = box.extents;
 
 				// bottom
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
 
 				// sides
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, -extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
 
 				// top
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
-				GL.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(-extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, -extents.z)));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(box.matrix.MultiplyPoint3x4(box.localCenter + new Vector3(+extents.x, +extents.y, +extents.z)));
 
 				if (renderTime >= box.expireAfter)
 				{
 					boxesToRender.RemoveAtFast(index);
 				}
 			}
-			GL.End();
+			SDG.Framework.Rendering.GraphGeometry.End();
 		}
 
 		private void RenderBoxesUsingLineRenderers(List<BoxData> boxesToRender)
@@ -499,20 +499,20 @@ namespace SDG.Unturned
 
 		private void RenderLines(List<LineData> linesToRender)
 		{
-			GL.Begin(GL.LINES);
+			SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
 			for (int index = linesToRender.Count - 1; index >= 0; --index)
 			{
 				LineData line = linesToRender[index];
-				GL.Color(line.color);
-				GL.Vertex(line.begin);
-				GL.Vertex(line.end);
+				SDG.Framework.Rendering.GraphGeometry.Color(line.color);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(line.begin);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(line.end);
 
 				if (renderTime >= line.expireAfter)
 				{
 					linesToRender.RemoveAtFast(index);
 				}
 			}
-			GL.End();
+			SDG.Framework.Rendering.GraphGeometry.End();
 		}
 
 		private void RenderLinesUsingLineRenderer(List<LineData> linesToRender)
@@ -572,17 +572,17 @@ namespace SDG.Unturned
 				RenderSemicircle(capsule.end, axisU, directionBetweenCaps, capsule.radius, capResolution, capsule.color);
 				RenderSemicircle(capsule.end, axisV, directionBetweenCaps, capsule.radius, capResolution, capsule.color);
 
-				GL.Begin(GL.LINES);
-				GL.Color(capsule.color);
-				GL.Vertex(capsule.begin + (axisU * capsule.radius));
-				GL.Vertex(capsule.end + (axisU * capsule.radius));
-				GL.Vertex(capsule.begin - (axisU * capsule.radius));
-				GL.Vertex(capsule.end - (axisU * capsule.radius));
-				GL.Vertex(capsule.begin + (axisV * capsule.radius));
-				GL.Vertex(capsule.end + (axisV * capsule.radius));
-				GL.Vertex(capsule.begin - (axisV * capsule.radius));
-				GL.Vertex(capsule.end - (axisV * capsule.radius));
-				GL.End();
+				SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINES);
+				SDG.Framework.Rendering.GraphGeometry.Color(capsule.color);
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.begin + (axisU * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.end + (axisU * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.begin - (axisU * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.end - (axisU * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.begin + (axisV * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.end + (axisV * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.begin - (axisV * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(capsule.end - (axisV * capsule.radius));
+				SDG.Framework.Rendering.GraphGeometry.End();
 
 				if (renderTime >= capsule.expireAfter)
 				{
@@ -801,18 +801,18 @@ namespace SDG.Unturned
 
 			Vector3 p0 = center + (axisU * radius);
 
-			GL.Begin(GL.LINE_STRIP);
-			GL.Color(color);
-			GL.Vertex(p0);
+			SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINE_STRIP);
+			SDG.Framework.Rendering.GraphGeometry.Color(color);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(p0);
 			for (int index = 1; index < resolution; ++index)
 			{
 				float angle = index * interval;
 				float u = Mathf.Cos(angle) * radius;
 				float v = Mathf.Sin(angle) * radius;
-				GL.Vertex(center + (axisU * u) + (axisV * v));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(center + (axisU * u) + (axisV * v));
 			}
-			GL.Vertex(p0);
-			GL.End();
+			SDG.Framework.Rendering.GraphGeometry.Vertex(p0);
+			SDG.Framework.Rendering.GraphGeometry.End();
 		}
 
 		private void RenderSemicircle(Vector3 center, Vector3 axisU, Vector3 axisV, float radius, int resolution, Color color)
@@ -820,18 +820,18 @@ namespace SDG.Unturned
 			// Radian interval between vertices.
 			float interval = Mathf.PI / resolution;
 
-			GL.Begin(GL.LINE_STRIP);
-			GL.Color(color);
-			GL.Vertex(center + (axisU * radius));
+			SDG.Framework.Rendering.GraphGeometry.Begin(SDG.Framework.Rendering.GraphGeometry.LINE_STRIP);
+			SDG.Framework.Rendering.GraphGeometry.Color(color);
+			SDG.Framework.Rendering.GraphGeometry.Vertex(center + (axisU * radius));
 			for (int index = 1; index < resolution; ++index)
 			{
 				float angle = index * interval;
 				float u = Mathf.Cos(angle) * radius;
 				float v = Mathf.Sin(angle) * radius;
-				GL.Vertex(center + (axisU * u) + (axisV * v));
+				SDG.Framework.Rendering.GraphGeometry.Vertex(center + (axisU * u) + (axisV * v));
 			}
-			GL.Vertex(center - (axisU * radius));
-			GL.End();
+			SDG.Framework.Rendering.GraphGeometry.Vertex(center - (axisU * radius));
+			SDG.Framework.Rendering.GraphGeometry.End();
 		}
 
 		private void DrawSemicircleUsingLineRenderer(Vector3 center, Vector3 axisU, Vector3 axisV, float radius, int resolution, Color color)
@@ -1011,7 +1011,7 @@ namespace SDG.Unturned
 			// Safe some performance by disabling the layout OnGUI call.
 			useGUILayout = false;
 
-			lineRendererSharedMaterial = new Material(Shader.Find("Sprites/Default"));
+			lineRendererSharedMaterial = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("Sprites/Default"));
 			CommandLogMemoryUsage.OnExecuted += OnLogMemoryUsage;
 		}
 

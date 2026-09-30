@@ -10,6 +10,7 @@ namespace SDG.Unturned
 {
 	public class CustomWeatherComponent : WeatherComponentBase
 	{
+		[System.NonSerialized]
 		public WeatherAsset customAsset;
 
 		public override void InitializeWeather()

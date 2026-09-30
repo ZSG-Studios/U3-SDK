@@ -9,6 +9,7 @@ namespace SDG.Framework.Foliage
 {
 	public class FoliageSurfaceComponent : MonoBehaviour, IFoliageSurface
 	{
+		[System.NonSerialized]
 		public AssetReference<FoliageInfoCollectionAsset> foliage;
 		public Collider surfaceCollider;
 

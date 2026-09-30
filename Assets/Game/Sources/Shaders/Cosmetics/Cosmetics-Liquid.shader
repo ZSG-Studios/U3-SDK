@@ -1,6 +1,6 @@
-Shader "Cosmetics/Liquid" 
+Shader "Cosmetics/Liquid"
 {
-	Properties 
+	Properties
 	{
 		_Albedo0("Albedo 0", 2D) = "black" {}
 		_Albedo1("Albedo 1", 2D) = "black" {}
@@ -11,69 +11,84 @@ Shader "Cosmetics/Liquid"
 		_RainbowScale("Rainbow UV Speed", Vector) = (0, 0, 0, 0)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
-		
-		CGPROGRAM
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard vertex:vert
-		#pragma target 3.0
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Liquid.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		fixed4 _Color;
-		sampler2D _Albedo0;
-		sampler2D _Albedo1;
-		sampler2D _Metallic0;
-		sampler2D _Metallic1;
-		sampler2D _Emission0;
-		sampler2D _Emission1;
-		fixed4 _RainbowScale;
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Liquid.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		struct Input
-		{
-			float2 uv_Albedo0;
-		};
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Liquid.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		void vert(inout appdata_full v, out Input OUT)
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
-		}
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed2 uv0 = float2(_RainbowScale.x, _RainbowScale.y) * _Time.y + IN.uv_Albedo0; // scale uv and offset by time
-			fixed2 uv1 = float2(_RainbowScale.z, _RainbowScale.w) * _Time.y + IN.uv_Albedo0; // scale uv and offset by time
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Liquid.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 albedo0 = tex2D(_Albedo0, uv0);
-			fixed4 albedo1 = tex2D(_Albedo1, uv1);
-
-			fixed4 metallic0 = tex2D(_Metallic0, uv0);
-			fixed4 metallic1 = tex2D(_Metallic1, uv1);
-
-			fixed4 emission0 = tex2D(_Emission0, uv0);
-			fixed4 emission1 = tex2D(_Emission1, uv1);
-
-			fixed4 albedo = albedo0 * albedo0.a + albedo1 * (1.0 - albedo0.a);
-			fixed4 metallic = metallic0 * (1.0 - albedo.a) * metallic0.a + metallic1 * (1.0 - albedo.a) * (1.0 - metallic0.a);
-			fixed4 emission = emission0 * (1.0 - albedo.a) * emission0.a + emission1 * (1.0 - albedo.a) * (1.0 - emission0.a);
-
-			OUT.Albedo = albedo.rgb * albedo.a;
-
-			OUT.Metallic = metallic.r;
-			OUT.Smoothness = metallic.a;
-
-			// 2023-01-31: Multiplying by 2 is hack to make emissive glow consistent throughout the game.
-			// Previously all standard materials with emissive were updated to use color 2.0. (public issue #3680)
-			OUT.Emission = emission.rgb * 2.0;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Liquid.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

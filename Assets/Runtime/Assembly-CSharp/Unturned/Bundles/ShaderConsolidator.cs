@@ -26,7 +26,7 @@ namespace SDG.Unturned
 				throw new System.Exception(string.Format("Dedicated server trying to consolidate '{0}' shader", originalShaderName));
 
 			string consolidatedShaderName = redirectShaderName(originalShaderName);
-			return Shader.Find(consolidatedShaderName);
+			return UniversalShaderCatalog.Find(consolidatedShaderName);
 		}
 
 		/// <summary>

@@ -211,11 +211,11 @@ namespace SDG.Framework.Modules
 				if (fileSettings.loadAsByteArray)
 				{
 					byte[] rawAssembly = File.ReadAllBytes(fileSettings.absolutePath);
-					assembly = Assembly.Load(rawAssembly);
+					assembly = UnityEngine.Assemblies.CurrentAssemblies.LoadFromBytes(rawAssembly);
 				}
 				else
 				{
-					assembly = Assembly.LoadFile(fileSettings.absolutePath);
+					assembly = UnityEngine.Assemblies.CurrentAssemblies.LoadFromPath(fileSettings.absolutePath);
 				}
 
 				nameToAssembly.Add(name, assembly);
@@ -246,7 +246,7 @@ namespace SDG.Framework.Modules
 						if (!nameToAssembly.TryGetValue(assemblyName.Name, out result))
 						{
 							byte[] rawAssembly = File.ReadAllBytes(assemblyPath);
-							result = Assembly.Load(rawAssembly);
+							result = UnityEngine.Assemblies.CurrentAssemblies.LoadFromBytes(rawAssembly);
 							if (result != null)
 							{
 								nameToAssembly.Add(assemblyName.Name, result);
@@ -523,7 +523,7 @@ namespace SDG.Framework.Modules
 						else
 						{
 							UnturnedLog.info($"Discovered duplicate of assembly \"{assemblyName}\" at \"{dllPath}\" (first found at \"{duplicatePath}\")");
-						}						
+						}
 					}
 					catch (System.Exception exception)
 					{

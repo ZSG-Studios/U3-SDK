@@ -306,9 +306,9 @@ namespace SDG.Unturned
 #if !DEDICATED_SERVER
 			if (!Dedicator.IsDedicatedServer)
 			{
-				solidMaterial = new Material(solidShader);
+				solidMaterial = StandardShaderUtils.CreateStandardMaterial(true);
 				solidMaterial.hideFlags = HideFlags.HideAndDontSave;
-				solidMaterial.SetFloat("_Glossiness", 0f);
+				solidMaterial.SetFloat("_Smoothness", 0f);
 				solidMaterial.SetColor("_SpecColor", Color.black);
 			}
 			gizmoUpdateSampler = UnityEngine.Profiling.CustomSampler.Create(GetType().Name + ".UpdateGizmos");
@@ -393,7 +393,7 @@ namespace SDG.Unturned
 		{
 #if !DEDICATED_SERVER
 			this.debugColor = debugColor;
-			solidMaterial.SetColor("_Color", debugColor);
+			solidMaterial.color = debugColor;
 #endif
 		}
 
@@ -446,7 +446,7 @@ namespace SDG.Unturned
 
 		private static TManager instance;
 #if !DEDICATED_SERVER
-		private static Shader solidShader = Shader.Find("Standard (Specular setup)");
+
 #endif
 	}
 }

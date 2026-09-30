@@ -2,12 +2,13 @@ Shader "Hidden/Custom/SkyFog"
 {
 	HLSLINCLUDE
 
-		// StdLib.hlsl holds pre-configured vertex shaders (VertDefault), varying structs (VaryingsDefault), and most of the data you need to write common effects.
-		#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-		#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Fog.hlsl"
+				#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+		float4 _FogColor;
 
-		TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-		TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
+
+
 
 		uniform float4x4 _InverseProjectionMatrix;
 		uniform float4x4 _CameraToWorld;
@@ -41,45 +42,33 @@ Shader "Hidden/Custom/SkyFog"
 			return 0.0;
 		}
 
-		struct Varyings
-		{
-			float4 vertex : SV_POSITION;
-			float2 texcoord : TEXCOORD0;
-			float3 viewDir : TEXCOORD1;
-		};
-		
-		Varyings Vert(AttributesDefault input)
-		{
-			Varyings output;
-			output.vertex = float4(input.vertex.xy, 0.0, 1.0);
-			output.texcoord = TransformTriangleVertexToUV(input.vertex.xy);
-#if UNITY_UV_STARTS_AT_TOP
-			output.texcoord = output.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
-#endif
-
-			// There is probably a smarter way to combine these matrices?
-			// Currently we also use _CameraToWorld in fragment shader to get forward axis.
-			output.viewDir = mul(_InverseProjectionMatrix, float4(output.texcoord * 2.0 - 1.0, 1.0, 1.0)).xyz;
-			output.viewDir = mul(_CameraToWorld, float4(output.viewDir, 0.0)).xyz;
-			return output;
-		}
-
 		float4 Frag(Varyings input) : SV_Target
 		{
-			float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.texcoord);
-			float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, input.texcoord);
-			float depth = LinearEyeDepth(rawDepth);
-			
+			float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, input.texcoord);
+			float rawDepth = SampleSceneDepth(input.texcoord);
+			float depth = LinearEyeDepth(rawDepth, _ZBufferParams);
+#if UNITY_REVERSED_Z
+			float farDepth = 0.00001;
+#else
+			float farDepth = 0.99999;
+#endif
+			float3 farPosition = ComputeWorldSpacePosition(input.texcoord, farDepth, UNITY_MATRIX_I_VP);
+			float3 viewDir = normalize(farPosition - _WorldSpaceCameraPos);
+
 			// 3rd column is the camera's -Z axis in world space.
 			float3 forward = float3(-_CameraToWorld._m02, -_CameraToWorld._m12, -_CameraToWorld._m22);
 
 			// Right angle triangle where adjacent is depth and we want to calculate hypotenuse (spherical depth).
 			// cos = adj / hyp -> hyp = adj / cos
-			float3 viewportDir = normalize(input.viewDir);
+			float3 viewportDir = viewDir;
 			float sphericalDepth = depth / dot(viewportDir, forward);
 
 			// Treat below horizon as "not skybox" so that ocean along horizon gets fog.
-			float notSkybox = rawDepth > 0 || viewportDir.y < 0.0f;
+			#if UNITY_REVERSED_Z
+			float notSkybox = rawDepth > 0 || viewportDir.y < 0.0;
+#else
+			float notSkybox = rawDepth < 1 || viewportDir.y < 0.0;
+#endif
 
 			float farClipDist = _ProjectionParams.z;
 			float fogStartDist = farClipDist * 0.5;
@@ -103,8 +92,8 @@ Shader "Hidden/Custom/SkyFog"
 
 			float3 outputColor = lerp(color.rgb, skyColor, fogAlpha * notSkybox);
 
-			// _ProjectionParams.y is near clip plane distance. 
-			float3 viewPos = _WorldSpaceCameraPos + input.viewDir * _ProjectionParams.y;
+			// _ProjectionParams.y is near clip plane distance.
+			float3 viewPos = _WorldSpaceCameraPos + viewportDir * (_ProjectionParams.y / max(dot(viewportDir, forward), 0.0001));
 			if (abs(_IsCameraUnderwater - IsWithinWater(viewPos)) > 0.5)
 			{
 				// Water mask when fragment is underwater without global fog enabled, or if fragment is not underwater
@@ -119,6 +108,7 @@ Shader "Hidden/Custom/SkyFog"
 
 	SubShader
 	{
+		Tags { "RenderPipeline"="UniversalPipeline" }
 		Cull Off ZWrite Off ZTest Always
 
 		Pass

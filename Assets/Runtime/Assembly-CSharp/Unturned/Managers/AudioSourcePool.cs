@@ -3,9 +3,9 @@
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
 #if !DEDICATED_SERVER
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_AUDIO_SOURCE_POOL
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -253,7 +253,7 @@ namespace SDG.Unturned
 
 			Transform componentTransform = audioSource.component.transform;
 			componentTransform.parent = parameters.parent;
-			componentTransform.localScale = Vector3.one; // Scale gradually drifts when repeatedly attached/detached. 
+			componentTransform.localScale = Vector3.one; // Scale gradually drifts when repeatedly attached/detached.
 			componentTransform.position = parameters.position;
 
 			audioSource.component.outputAudioMixerGroup = parameters.outputAudioMixerGroup;
@@ -293,7 +293,7 @@ namespace SDG.Unturned
 			Debug.Assert(!audioSource.isInPool);
 
 			// Unfortunately component may have been destroyed if it was attached to an object that got destroyed,
-			// e.g. player logged off shortly after reloading, but that is relatively unlikely.  
+			// e.g. player logged off shortly after reloading, but that is relatively unlikely.
 			if (audioSource.component != null)
 			{
 				audioSource.component.enabled = false;

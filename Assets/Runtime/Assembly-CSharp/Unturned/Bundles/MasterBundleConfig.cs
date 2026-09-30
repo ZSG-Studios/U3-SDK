@@ -123,13 +123,13 @@ namespace SDG.Unturned
 			platformBundleName = MasterBundleHelper.getLinuxAssetBundleName(assetBundleName);
 #endif // UNITY_STANDALONE_LINUX
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (string.Equals(assetBundleName, "core.masterbundle"))
 			{
 				// If changing this implementation please make sure to update getHashFilePath() please!
 
 				bool shouldLoadCoreAssetBundleFromSteamInstall =
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					Assets.shouldLoadCoreAssetBundleFromSteamInstall;
 #else
 					false;
@@ -149,7 +149,7 @@ namespace SDG.Unturned
 					return PathEx.Join(Provider.steamAppInstallDirectory, "Bundles", platformBundleName);
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 #if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 			string platformPath = Path.Combine(directoryPath, platformBundleName);
@@ -169,11 +169,11 @@ namespace SDG.Unturned
 		{
 			// 2022-11-16 this does not call getAssetBundlePath() because that has per-platform overrides!
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (string.Equals(assetBundleName, "core.masterbundle"))
 			{
 				bool shouldLoadCoreAssetBundleFromSteamInstall =
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					Assets.shouldLoadCoreAssetBundleFromSteamInstall;
 #else
 					false;
@@ -193,7 +193,7 @@ namespace SDG.Unturned
 					return MasterBundleHelper.getHashFileName(PathEx.Join(Provider.steamAppInstallDirectory, "Bundles", assetBundleName));
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 			return MasterBundleHelper.getHashFileName(Path.Combine(directoryPath, assetBundleName));
 		}
@@ -374,7 +374,9 @@ namespace SDG.Unturned
 		public T LoadAsset<T>(string name) where T : UnityEngine.Object
 		{
 			string formattedPath = formatAssetPath(name);
-			return assetBundle.LoadAsset<T>(formattedPath);
+			var loaded = assetBundle.LoadAsset<T>(formattedPath);
+			UniversalMaterialAdapter.UpgradeObject(loaded);
+			return loaded;
 		}
 
 		/// <summary>
@@ -385,7 +387,9 @@ namespace SDG.Unturned
 		public AssetBundleRequest LoadAssetAsync<T>(string name) where T : UnityEngine.Object
 		{
 			string formattedPath = formatAssetPath(name);
-			return assetBundle.LoadAssetAsync<T>(formattedPath);
+			var request = assetBundle.LoadAssetAsync<T>(formattedPath);
+			request.completed += _ => UniversalMaterialAdapter.UpgradeObject(request.asset);
+			return request;
 		}
 
 		public override string ToString()

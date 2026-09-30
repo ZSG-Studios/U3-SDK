@@ -43,9 +43,9 @@ namespace SDG.Unturned
 
 			if (decal.material == null)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogWarningFormat(decal, "Decal {0} missing material", decal.transform.GetSceneHierarchyPath());
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				return;
 			}
 

@@ -141,7 +141,7 @@ namespace SDG.Unturned
 			ValidateNotDestroyed();
 			states = newStates;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			for (int index = 0; index < states.Length; ++index)
 			{
 				if (states[index] == null)
@@ -149,7 +149,7 @@ namespace SDG.Unturned
 					throw new System.ArgumentNullException($"{nameof(newStates)}[{index}");
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (state >= states.Length)
 			{

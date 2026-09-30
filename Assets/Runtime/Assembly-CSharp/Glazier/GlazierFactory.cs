@@ -15,12 +15,12 @@ namespace SDG.Unturned
 		/// </summary>
 		public static void Create()
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEDICATED_SERVER
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEDICATED_SERVER
 			if (Dedicator.IsDedicatedServer)
 			{
 				throw new System.NotSupportedException("Glazier should not be used by dedicated server");
 			}
-#endif // DEVELOPMENT_BUILD || DEDICATED_SERVER
+#endif // UNITY_ENABLE_CHECKS || DEDICATED_SERVER
 
 #if UNITY_EDITOR
 			int editorOverride = EditorPrefs.GetInt("Glazier");

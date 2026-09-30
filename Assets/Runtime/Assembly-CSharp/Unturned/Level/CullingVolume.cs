@@ -285,10 +285,14 @@ namespace SDG.Unturned
 
 		internal void ClearObjects()
 		{
-			foreach (LevelObject levelObject in objects)
+			// Shutdown has already unloaded bundle materials. Do not re-enable objects being destroyed.
+			if (!Provider.isApplicationQuitting)
 			{
-				levelObject.isSpeciallyCulled = false;
-				levelObject.SetIsVisibleInCullingVolume(true);
+				foreach (LevelObject levelObject in objects)
+				{
+					levelObject.isSpeciallyCulled = false;
+					levelObject.SetIsVisibleInCullingVolume(true);
+				}
 			}
 			objects.Clear();
 		}

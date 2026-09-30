@@ -1,50 +1,94 @@
-Shader "Custom/Card" 
+Shader "Custom/Card"
 {
-	Properties 
+	Properties
 	{
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Cutoff("Cutoff", float) = 0.5
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"Queue" = "AlphaTest" 
-			"IgnoreProjector" = "True" 
-			"RenderType" = "TransparentCutout"
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+Cull Off
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		Cull Off
-		LOD 200
-		
-		CGPROGRAM
-			 
-		#pragma surface surf StandardSpecular addshadow
-		#pragma target 3.0
-		#include "UnityCG.cginc"
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		sampler2D _MainTex;
-		float _Cutoff;
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#define _SPECULAR_SETUP 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Card.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		struct Input 
-		{
-			float2 uv_MainTex;
-		};
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define _SPECULAR_SETUP 1
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Card.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf(Input IN, inout SurfaceOutputStandardSpecular OUT)
-		{
-			fixed4 color = tex2D (_MainTex, IN.uv_MainTex);
-			clip(color.a - _Cutoff);
-			OUT.Albedo = color.rgb;
-			OUT.Alpha = color.a;
-			OUT.Specular = 0.0;
-			OUT.Smoothness = 0.0;
-			OUT.Emission = 0.0;
-		}
+#define _SPECULAR_SETUP 1
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Card.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		ENDCG
-	} 
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-	Fallback "Standard"
+#define _SPECULAR_SETUP 1
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Card.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+
+#define _SPECULAR_SETUP 1
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Card.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

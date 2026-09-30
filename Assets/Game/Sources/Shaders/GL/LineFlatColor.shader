@@ -1,9 +1,8 @@
-﻿Shader "GL/LineFlatColor"
+Shader "GL/LineFlatColor"
 {
 	SubShader
 	{
-		Tags
-		{
+		Tags { "RenderPipeline"="UniversalPipeline"
 			"RenderType" = "Opaque"
 		}
 
@@ -13,11 +12,11 @@
 			Cull Off
 			Blend SrcAlpha OneMinusSrcAlpha
 
-			CGPROGRAM
+			HLSLPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#include "UnityCG.cginc"
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
 			struct appdata
 			{
@@ -34,7 +33,7 @@
 			v2f vert(appdata v)
 			{
 				v2f OUT;
-				OUT.vertex = UnityObjectToClipPos(v.vertex);
+				OUT.vertex = UnturnedGeometryToClip(v.vertex);
 				OUT.color = v.color;
 				return OUT;
 			}
@@ -44,7 +43,7 @@
 				return IN.color;
 			}
 
-			ENDCG
+			ENDHLSL
 		}
 	}
 }

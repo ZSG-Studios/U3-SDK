@@ -28,6 +28,7 @@ namespace SDG.Unturned
 
 		public static EditorInteract instance;
 		private IDevkitTool activeTool;
+		[System.NonSerialized]
 		public TerrainEditor terrainTool;
 
 		public void SetActiveTool(IDevkitTool tool)

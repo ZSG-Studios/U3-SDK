@@ -5,11 +5,11 @@
 
 static const float SNOW_SPARKLE_UV_SCALE = 0.5f;
 
-sampler2D _Snow_Sparkle_Map;
+TEXTURE2D(_Snow_Sparkle_Map); SAMPLER(sampler_Snow_Sparkle_Map);
 
 void snow(float3 worldPos, float3 blend, float3 viewDir, float mask, inout half3 Albedo)
 {
-	float3 sparkleNormal = triplanarSample3(_Snow_Sparkle_Map, worldPos, blend, 4);
+	float3 sparkleNormal = triplanarSample3(TEXTURE2D_ARGS(_Snow_Sparkle_Map, sampler_Snow_Sparkle_Map), worldPos, blend, 4);
 	sparkleNormal = (sparkleNormal * 2) - 1;
 	sparkleNormal = normalize(sparkleNormal); // Maybe the texture itself should be normalized
 

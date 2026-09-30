@@ -1,62 +1,90 @@
-﻿Shader "Custom/Flag" 
+Shader "Custom/Flag"
 {
-	Properties 
+	Properties
 	{
 		_Color("Main Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_WaveAndDistance("Wave and distance", Vector) = (12, 3.6, 1, 1)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType" = "Opaque"
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Off
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		Cull Off
-		LOD 200
-		
-		CGPROGRAM
-			 
-		#pragma multi_compile ___ NICE_FOLIAGE_ON
-		#pragma surface surf Standard addshadow vertex:vert
-		#pragma target 3.0
-		#include "TerrainEngine.cginc"
-		#include "UnityCG.cginc"
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ NICE_FOLIAGE_ON
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Flag.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ NICE_FOLIAGE_ON
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Flag.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ NICE_FOLIAGE_ON
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Flag.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		sampler2D _MainTex;
-		fixed4 _Color;
-
-		struct Input 
-		{
-			float2 uv_MainTex;
-		};
-
-		void vert(inout appdata_full v, out Input OUT) 
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
-
-#ifdef NICE_FOLIAGE_ON
-			float waveAmount = v.color.r * _WaveAndDistance.z;
-			_WaveAndDistance.x += _Time.x;
-
-			TerrainWaveGrass(v.vertex, waveAmount, v.color);
-#endif
-		}
-
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-			OUT.Albedo = c.rgb;
-			OUT.Alpha = c.a;
-			OUT.Metallic = 0.0;
-			OUT.Smoothness = 0.0;
-			OUT.Emission = 0.0;
-		}
-
-		ENDCG
-	} 
-
-	Fallback "Standard"
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ NICE_FOLIAGE_ON
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Flag.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ NICE_FOLIAGE_ON
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Foliage/Custom-Flag.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

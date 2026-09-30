@@ -38,7 +38,7 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		public bool HasEditorLiveConfigFile()
 		{
 			return File.Exists(GetEditorLiveConfigFilePath());
@@ -102,7 +102,7 @@ namespace SDG.Unturned
 		{
 			return PathEx.Join(UnityPaths.AssetsDirectory, "Editor", "LiveConfig", "LiveConfig.dat");
 		}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		public event System.Action OnConfigRefreshed;
 
@@ -149,6 +149,8 @@ namespace SDG.Unturned
 				OnConfigRefreshed?.Invoke();
 			}
 		}
+
+		[System.NonSerialized]
 
 		public LiveConfigData config = new LiveConfigData();
 		public bool wasPopulated = false;

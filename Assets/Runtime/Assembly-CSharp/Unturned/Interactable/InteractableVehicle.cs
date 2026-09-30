@@ -2,12 +2,12 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define DRAW_EXIT_GIZMOS
 // #define LOG_GEAR_SHIFT
 // #define DRAW_BICYCLE_GIZMOS
 // #define ENABLE_VEHICLE_PROFILING
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using Steamworks;
 using System.Collections.Generic;
@@ -170,6 +170,8 @@ namespace SDG.Unturned
 		/// Asset ID. Essentially obsolete at this point.
 		/// </summary>
 		public ushort id;
+
+		[System.NonSerialized]
 
 		public Items trunkItems;
 
@@ -630,6 +632,7 @@ namespace SDG.Unturned
 		private Transform smoke_1;
 
 		[System.Obsolete("Replaced by MarkForReplicationUpdate. Will be removed in a future release.")]
+		[System.NonSerialized]
 		public List<VehicleStateUpdate> updates;
 
 		/// <summary>
@@ -3550,7 +3553,7 @@ namespace SDG.Unturned
 					inputEngineVelocity = inputTargetVelocity;
 
 					rootRigidbody.AddForce(transform.forward * inputEngineVelocity * 2.0f * asset.engineForceMultiplier);
-					rootRigidbody.AddForce(Mathf.Lerp(0.0f, 1.0f, transform.InverseTransformDirection(rootRigidbody.velocity).z / asset.TargetForwardVelocity) * asset.lift * -Physics.gravity);
+					rootRigidbody.AddForce(Mathf.Lerp(0.0f, 1.0f, transform.InverseTransformDirection(rootRigidbody.linearVelocity).z / asset.TargetForwardVelocity) * asset.lift * -Physics.gravity);
 
 					if (_wheels == null || _wheels.Length == 0 || (!_wheels[0].isGrounded && !_wheels[1].isGrounded))
 					{
@@ -3682,7 +3685,7 @@ namespace SDG.Unturned
 			}
 			else
 			{
-				Vector3 worldVelocity = rootRigidbody.velocity;
+				Vector3 worldVelocity = rootRigidbody.linearVelocity;
 				ReplicatedSpeed = worldVelocity.magnitude;
 				Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
 				if (asset.engine == EEngine.HELICOPTER)
@@ -3900,7 +3903,7 @@ namespace SDG.Unturned
 		/// call Update manually. That said, calling Update manually does give us the option to time-slice vehicle
 		/// updates. On the client and singleplayer we now update vehicles outside render distance at a lower
 		/// frequency which saves ~0.1 ms per frame on my PC.
-		/// 
+		///
 		/// 2020-11-26 experimented with dispatching all vehicle updates from C# in VehicleManager because they make up
 		/// a significant portion of the MonoBehaviour Update, but the savings on my PC with 24 vehicles on PEI was
 		/// minor. Not worth the potential troubles.
@@ -4178,8 +4181,8 @@ namespace SDG.Unturned
 				}
 				else
 				{
-					ReplicatedSpeed = rootRigidbody.velocity.magnitude;
-					ReplicatedForwardVelocity = transform.InverseTransformDirection(rootRigidbody.velocity).z;
+					ReplicatedSpeed = rootRigidbody.linearVelocity.magnitude;
+					ReplicatedForwardVelocity = transform.InverseTransformDirection(rootRigidbody.linearVelocity).z;
 					ReplicatedSteeringInput = 0.0f;
 					ReplicatedVelocityInput = 0.0f;
 
@@ -4514,7 +4517,7 @@ namespace SDG.Unturned
 				debugText += $"\nExpected wheel RPM: {expectedWheelRpm:N1}";
 				RuntimeGizmos.Get().Label(transform.position, debugText);
 			}
-			
+
 			float newEngineRpm = averagePoweredWheelRpm;
 			if (asset.UsesEngineRpmAndGears)
 			{

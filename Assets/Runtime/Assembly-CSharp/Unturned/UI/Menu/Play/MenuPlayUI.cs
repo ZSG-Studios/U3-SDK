@@ -230,12 +230,13 @@ namespace SDG.Unturned
 			centerFrame.SizeOffset_Y = verticalOffset;
 			centerFrame.PositionOffset_Y = -(verticalOffset / 2);
 
-#if !UNITY_64
-			lobbiesButton.IsVisible = false;
-			serversButton.IsVisible = false;
-			connectButton.IsVisible = false;
-			serverBookmarksButton.IsVisible = false;
-#endif // !UNITY_64
+if (System.IntPtr.Size == 4)
+{
+				lobbiesButton.IsVisible = false;
+				serversButton.IsVisible = false;
+				connectButton.IsVisible = false;
+				serverBookmarksButton.IsVisible = false;
+}
 
 			connectUI = new MenuPlayConnectUI();
 

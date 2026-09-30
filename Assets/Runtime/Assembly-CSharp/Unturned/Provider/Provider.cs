@@ -1469,7 +1469,7 @@ namespace SDG.Unturned
 		private static float sentConnectRequestTime;
 
 		/* Nelson 2024-07-30: The disconnect timer allows us to kick ourself from multiplayer after a random amount of
-		 * time to mess with cheaters who aren't using hacked clients. (Hacked client could easily disable this.) 
+		 * time to mess with cheaters who aren't using hacked clients. (Hacked client could easily disable this.)
 		 * This is not an xmldoc comment. My intention is to exclude it from the public docs. */
 		internal static float catPouncingMechanism = -33.0f;
 
@@ -1963,7 +1963,7 @@ namespace SDG.Unturned
 			return true;
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		private static CommandLineFlag shouldIgnoreServerWorkshopFiles = new CommandLineFlag(false, "-IgnoreServerWorkshopFiles");
 #else
 		private const bool shouldIgnoreServerWorkshopFiles = false;
@@ -3105,10 +3105,10 @@ namespace SDG.Unturned
 					HostBans.EHostBanFlags flags = HostBans.HostBansManager.Get().MatchBasicDetails(new IPv4Address(publicIp), port, serverName, _server.m_SteamID);
 					flags |= HostBans.HostBansManager.Get().MatchExtendedDetails(configData.Browser.Desc_Server_List, configData.Browser.Thumbnail);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.info($"Checking host bans with these details: IP: {Parser.getIPFromUInt32(publicIp)} Port: {port} Name: \"{serverName}\" SteamID: {_server} Description: \"{configData.Browser.Desc_Server_List}\" Thumbnail: \"{configData.Browser.Thumbnail}\"");
 					UnturnedLog.info($"Host ban flags: {flags}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 					if ((flags & HostBans.EHostBanFlags.RecommendHostCheckWarningsList) != HostBans.EHostBanFlags.None)
 					{
@@ -3490,25 +3490,25 @@ namespace SDG.Unturned
 			return true;
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		/// <summary>
 		/// Should players be allowed to join this server regardless of whether their version number matches ours?
 		/// Useful to allow players to join debug mode servers.
 		/// </summary>
 		private static CommandLineFlag bypassVersion = new CommandLineFlag(false, "-BypassVersion");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		/// <summary>
 		/// Is version number supplied by client compatible with us?
 		/// </summary>
 		internal static bool canClientVersionJoinServer(uint version)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (bypassVersion)
 			{
 				return true;
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			return version == APP_VERSION_PACKED;
 		}
 
@@ -4003,7 +4003,7 @@ namespace SDG.Unturned
 			}
 		}
 
-		// GSPolicyResponse is probably used to deactivate VAC checks if the Steam servers say m_bSecure == 0, but Unturned never did that properly (oops) and it works fine so I'm disabling it 
+		// GSPolicyResponse is probably used to deactivate VAC checks if the Steam servers say m_bSecure == 0, but Unturned never did that properly (oops) and it works fine so I'm disabling it
 		//#pragma warning disable
 		//		private static Callback<GSPolicyResponse_t> gsPolicyResponse;
 		//#pragma warning restore
@@ -6037,7 +6037,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Current UTC as reported by backend servers.
-		/// Used by holiday events to keep timing somewhat synced between players. 
+		/// Used by holiday events to keep timing somewhat synced between players.
 		/// </summary>
 		private static DateTime unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc); // UTC == GMT
 		public static DateTime backendRealtimeDate => unixEpochDateTime.AddSeconds(backendRealtimeSeconds);
@@ -6518,7 +6518,7 @@ namespace SDG.Unturned
 			SleekCustomization.inconspicuousTextContrast = _preferenceData.Graphics.Inconspicuous_Text_Contrast;
 			SleekCustomization.colorfulTextContrast = _preferenceData.Graphics.Colorful_Text_Contrast;
 
-			// Catch exception because if IO fails (e.g. if user marked file read-only) we do not want to break startup. 
+			// Catch exception because if IO fails (e.g. if user marked file read-only) we do not want to break startup.
 			try
 			{
 				ReadWrite.serializeJSON(preferencesFilePath, false, false, preferenceData);
@@ -6753,7 +6753,7 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (steamAppInstallDirectory == null)
 			{
 #if UNITY_EDITOR
@@ -6765,7 +6765,7 @@ namespace SDG.Unturned
 #endif // UNITY_EDITOR
 				return;
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 #if !DEDICATED_SERVER
 			SteamLaunchArguments.Init();
@@ -6911,7 +6911,7 @@ namespace SDG.Unturned
 					}
 				}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				if (!foundSteamLang && steamAppInstallDirectory != null)
 				{
 					string steamPath = PathEx.Join(steamAppInstallDirectory, "Localization");
@@ -6924,7 +6924,7 @@ namespace SDG.Unturned
 						UnturnedLog.info("Found Steam language '{0}' in app install Localization directory", local);
 					}
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 				if (!foundSteamLang)
 				{
@@ -7013,12 +7013,12 @@ namespace SDG.Unturned
 
 		public void start()
 		{
-#if DEVELOPMENT_BUILD
+#if UNITY_ENABLE_CHECKS
 			if(ContinuousIntegration.isRunning)
 			{
 				CommandWindow.Log("Running CI");
 			}
-#endif // DEVELOPMENT_BUILD
+#endif // UNITY_ENABLE_CHECKS
 		}
 
 #if !UNITY_EDITOR
@@ -7095,12 +7095,12 @@ namespace SDG.Unturned
 			Application.Quit();
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 		/// <summary>
 		/// Useful to load files from Steam install of the game while running in the editor.
 		/// </summary>
 		internal static DirectoryInfo steamAppInstallDirectory;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 		private static bool wasQuitGameCalled;
 		public static bool WasQuitGameCalled

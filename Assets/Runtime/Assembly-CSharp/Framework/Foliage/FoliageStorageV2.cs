@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_FOLIAGESTORAGE_THREADS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace SDG.Framework.Foliage
 {
 	/// <summary>
 	/// Replacement foliage storage with all tiles in a single file.
-	/// 
+	///
 	/// In the level editor all tiles are loaded into memory, whereas during gameplay the relevant tiles
 	/// are loaded as-needed by a worker thread.
 	/// </summary>

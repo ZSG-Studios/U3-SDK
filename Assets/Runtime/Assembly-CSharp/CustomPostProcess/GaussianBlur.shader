@@ -2,11 +2,11 @@ Shader "Hidden/Custom/GaussianBlur"
 {
 	HLSLINCLUDE
 
-		// StdLib.hlsl holds pre-configured vertex shaders (VertDefault), varying structs (VaryingsDefault), and most of the data you need to write common effects.
-		#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+				#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
-		TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-		uniform float4 _MainTex_TexelSize;
+
+
 
 		uniform float _StdDeviationSquared;
 		uniform int _HalfKernelSize;
@@ -29,7 +29,7 @@ Shader "Hidden/Custom/GaussianBlur"
 				// Nelson 2025-07-02: *2 here is to sample from a wider radius at a lower cost
 				// (public issue #5086)
 				float2 uvOffset = offsetDirection * x * 2;
-				float3 sampledColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + uvOffset).rgb;
+				float3 sampledColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + uvOffset).rgb;
 				sumColor += sampledColor * weight;
 				sumWeight += weight;
 			}
@@ -41,17 +41,18 @@ Shader "Hidden/Custom/GaussianBlur"
 
 	SubShader
 	{
+		Tags { "RenderPipeline"="UniversalPipeline" }
 		Cull Off ZWrite Off ZTest Always
 
 		Pass // 0, horizontal
 		{
 			HLSLPROGRAM
-				#pragma vertex VertDefault
+				#pragma vertex Vert
 				#pragma fragment FragHorizontal
 
-				float4 FragHorizontal(VaryingsDefault input) : SV_Target
+				float4 FragHorizontal(Varyings input) : SV_Target
 				{
-					return SampleBlur(input.texcoord, float2(_MainTex_TexelSize.x, 0));
+					return SampleBlur(input.texcoord, float2(_BlitTexture_TexelSize.x, 0));
 				}
 			ENDHLSL
 		}
@@ -59,12 +60,12 @@ Shader "Hidden/Custom/GaussianBlur"
 		Pass // 0, vertical
 		{
 			HLSLPROGRAM
-				#pragma vertex VertDefault
+				#pragma vertex Vert
 				#pragma fragment FragVertical
 
-				float4 FragVertical(VaryingsDefault input) : SV_Target
+				float4 FragVertical(Varyings input) : SV_Target
 				{
-					return SampleBlur(input.texcoord, float2(0, _MainTex_TexelSize.y));
+					return SampleBlur(input.texcoord, float2(0, _BlitTexture_TexelSize.y));
 				}
 			ENDHLSL
 		}

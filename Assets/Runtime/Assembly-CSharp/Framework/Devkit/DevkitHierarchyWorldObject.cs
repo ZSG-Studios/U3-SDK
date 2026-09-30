@@ -11,6 +11,7 @@ namespace SDG.Framework.Devkit
 	[System.Obsolete]
 	public class DevkitHierarchyWorldObject : DevkitHierarchyWorldItem
 	{
+		[System.NonSerialized]
 		public AssetReference<MaterialPaletteAsset> customMaterialOverride;
 		public int materialIndexOverride = -1;
 		public Guid GUID;

@@ -8,9 +8,9 @@ using System.Diagnostics;
 using System.Reflection;
 using UnityEditor;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using UnityEngine.Profiling;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetPak;
 
 namespace SDG.Unturned
@@ -28,11 +28,11 @@ namespace SDG.Unturned
 		internal MethodInfo writeMethodInfo;
 		internal uint methodIndex;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		internal int handleCount;
 		internal CustomSampler readSampler;
 		internal CustomSampler deferredReadSampler;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 		public override string ToString()
 		{
@@ -55,10 +55,10 @@ namespace SDG.Unturned
 		/// </summary>
 		internal int rateLimitIndex;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		internal int handleCount;
 		internal CustomSampler readSampler;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 		public override string ToString()
 		{
@@ -100,7 +100,7 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		/// <summary>
 		/// Useful debug check to ensure every built-in handle is claimed exactly once.
 		/// </summary>
@@ -156,7 +156,7 @@ namespace SDG.Unturned
 				Log($"{clientMethodsLength + serverMethodsLength} total methods properly claimed");
 			}
 		}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		public static void SetLogCallback(Action<string> logCallback)
 		{
@@ -392,10 +392,10 @@ namespace SDG.Unturned
 							}
 						}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 						netMethod.readSampler = CustomSampler.Create(netMethod.debugName);
 						netMethod.deferredReadSampler = CustomSampler.Create("Deferred " + netMethod.debugName);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 						netMethod.methodIndex = (uint) clientMethods.Count;
 						clientMethods.Add(netMethod);
@@ -445,9 +445,9 @@ namespace SDG.Unturned
 							netMethod.rateLimitIndex = -1;
 						}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 						netMethod.readSampler = CustomSampler.Create(netMethod.debugName);
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 						netMethod.methodIndex = (uint) serverMethods.Count;
 						serverMethods.Add(netMethod);

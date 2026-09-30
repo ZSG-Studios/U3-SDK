@@ -12,13 +12,16 @@ namespace SDG.Framework.Rendering
 
 	public class GLRenderer : MonoBehaviour
 	{
+		public readonly System.Collections.Generic.List<GraphGeometry.Draw> draws = new System.Collections.Generic.List<GraphGeometry.Draw>();
+        private void OnDestroy() { foreach (var draw in draws) Destroy(draw.mesh); draws.Clear(); }
 		public static event GLRenderHandler render;
 		public static event GLRenderHandler OnGameRender;
 
-		private void OnRenderImage(RenderTexture source, RenderTexture destination)
+		public int RecordGeometry()
 		{
-			// Blit must always be called.
-			Graphics.Blit(source, destination);
+			GraphGeometry.StartRecording(draws);
+			try
+			{
 
 			bool shouldRenderAny = false;
 			bool shouldInvokeRenderEvent = false;
@@ -53,11 +56,11 @@ namespace SDG.Framework.Rendering
 
 			if (shouldRenderAny)
 			{
-				RenderTexture.active = destination;
+
 
 				if (shouldInvokeRenderEvent)
 				{
-					GL.PushMatrix();
+					GraphGeometry.PushMatrix();
 					try
 					{
 						render();
@@ -66,12 +69,12 @@ namespace SDG.Framework.Rendering
 					{
 						UnturnedLog.exception(e);
 					}
-					GL.PopMatrix();
+					GraphGeometry.PopMatrix();
 				}
 
 				if (shouldInvokeGameRenderEvent)
 				{
-					GL.PushMatrix();
+					GraphGeometry.PushMatrix();
 					try
 					{
 						OnGameRender();
@@ -80,12 +83,12 @@ namespace SDG.Framework.Rendering
 					{
 						UnturnedLog.exception(e);
 					}
-					GL.PopMatrix();
+					GraphGeometry.PopMatrix();
 				}
 
 				if (shouldRenderGizmos)
 				{
-					GL.PushMatrix();
+					GraphGeometry.PushMatrix();
 					try
 					{
 						RuntimeGizmos.Get().Render();
@@ -94,11 +97,14 @@ namespace SDG.Framework.Rendering
 					{
 						UnturnedLog.exception(e);
 					}
-					GL.PopMatrix();
+					GraphGeometry.PopMatrix();
 				}
 
-				RenderTexture.active = null;
+
 			}
+			return GraphGeometry.FinishRecording();
+			}
+			finally { GraphGeometry.FinishRecording(); }
 		}
 	}
 }

@@ -1,47 +1,89 @@
 Shader "Unlit/Scope"
 {
-  	Properties 
+    Properties
 	{
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Alpha ("Alpha", Float) = 0.5
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType" = "Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		CGPROGRAM
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/RenderTexture/Scope.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard
-		#pragma target 3.0
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/RenderTexture/Scope.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		sampler2D _MainTex;
-		float _Alpha;
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/RenderTexture/Scope.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		struct Input 
-		{
-			float2 uv_MainTex;
-			float3 worldPos;
-			float3 worldNormal;
-		};
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf (Input IN, inout SurfaceOutputStandard OUT) 
-		{
-			const float3 unscopedAlbedo = float3(0.3333333, 0.3843137, 0.3764706);
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/RenderTexture/Scope.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			float3 albedo = tex2D(_MainTex, IN.uv_MainTex).rgb;
-			OUT.Albedo = lerp(unscopedAlbedo, float3(0, 0, 0), _Alpha);
-			OUT.Emission = lerp(float3(0, 0, 0), albedo, _Alpha);
-			OUT.Metallic = lerp(0.2, 0.0, _Alpha);
-		}
-
-		ENDCG
-	}
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/RenderTexture/Scope.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

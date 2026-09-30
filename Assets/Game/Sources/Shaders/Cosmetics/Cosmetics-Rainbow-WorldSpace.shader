@@ -1,6 +1,6 @@
-Shader "Cosmetics/Rainbow (World Space)" 
+Shader "Cosmetics/Rainbow (World Space)"
 {
-	Properties 
+	Properties
 	{
 		_Albedo("Albedo", 2D) = "white" {}
 		_RainbowUV("Rainbow UV Scale", Vector) = (0, 0, 0, 0)
@@ -8,49 +8,84 @@ Shader "Cosmetics/Rainbow (World Space)"
 		_RainbowOffset("Rainbow Vertex Scale", Vector) = (0, 0, 0, 0)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque"
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
-		
-		CGPROGRAM
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard
-		#pragma target 3.0
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow-WorldSpace.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#include "UnityCG.cginc"
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow-WorldSpace.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		sampler2D _Albedo;
-		fixed2 _RainbowUV;
-		fixed2 _RainbowScale;
-		fixed3 _RainbowOffset;
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow-WorldSpace.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		struct Input
-		{
-			float3 worldPos;
-		};
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed3 vertex = IN.worldPos * _RainbowOffset;
-			fixed rainbow = vertex.x + vertex.y + vertex.z; // get magnitude of vertex
-			fixed2 uv = _RainbowUV * rainbow + _RainbowScale * _Time.y; // scale uv and offset by time
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow-WorldSpace.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 albedo = tex2D(_Albedo, uv);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = 1;
-			OUT.Metallic = 0;
-			OUT.Smoothness = 0;
-			OUT.Emission = albedo.rgb;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow-WorldSpace.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

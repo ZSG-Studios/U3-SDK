@@ -1,4 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnturnedObjectToClip(*)'
 
 // Unlit shader. Simplest possible colored shader.
 // - no lighting
@@ -12,15 +12,15 @@ Properties {
 }
 
 SubShader {
-	Tags{ "Queue" = "AlphaTest" "IgnoreProjector" = "True" "RenderType" = "TransparentCutout" }
+	Tags { "RenderPipeline"="UniversalPipeline"  "Queue" = "AlphaTest" "IgnoreProjector" = "True" "RenderType" = "TransparentCutout" }
 	LOD 200
-	
-	Pass {  
-		CGPROGRAM
+
+	Pass {
+		HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#include "UnityCG.cginc"
+
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
 			struct appdata_t {
 				float4 vertex : POSITION;
@@ -32,25 +32,25 @@ SubShader {
 				float4 uv : TEXCOORD0;
 			};
 
-			sampler2D _MainTex;
-			fixed4 _Color;
-			
+			TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+			half4 _Color;
+
 			v2f vert (appdata_t v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.vertex = UnturnedObjectToClip(v.vertex);
 				o.uv = v.texcoord;
 				return o;
 			}
-			
-			fixed4 frag (v2f i) : COLOR
+
+			half4 frag (v2f i) : SV_Target
 			{
-				fixed4 c = tex2D(_MainTex, i.uv) * _Color;
-				fixed4 col = UNITY_LIGHTMODEL_AMBIENT*c;//_Color;
+				half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy) * _Color;
+				half4 col = UNITY_LIGHTMODEL_AMBIENT*c;//_Color;
 				clip(-0.5 + col.a);
 				return col;
 			}
-		ENDCG
+		ENDHLSL
 	}
 }
 

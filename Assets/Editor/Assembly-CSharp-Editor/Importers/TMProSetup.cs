@@ -3,6 +3,7 @@
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Unturned.SystemEx;
@@ -20,23 +21,44 @@ public static class TMProSetup
 		string expectedPath = PathEx.Join(UnityPaths.AssetsDirectory, "TextMesh Pro");
 		if (Directory.Exists(expectedPath))
 		{
+			UpgradeShaderPragmas(expectedPath);
 			// Already imported.
 			return;
 
 		}
 
-		// Interestingly, it sounds like Unity patches implementation of Path.GetFullPath
-		// explicitly to support package lookup:
-		// https://discussions.unity.com/t/how-unity-packages-redirect-full-path/950312
-		string importPath = Path.GetFullPath(Path.Join("Packages", "com.unity.textmeshpro"));
-		importPath = Path.Join(importPath, "Package Resources", "TMP Essential Resources.unitypackage");
+		// In Unity 6, TextMesh Pro is part of uGUI. Resolve the package that owns
+		// the text assembly rather than assuming the former package name.
+		var package = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(TMPro.TMP_Text).Assembly);
+		if (package == null)
+		{
+			Debug.LogError("Unable to locate the package containing TextMesh Pro.");
+			return;
+		}
+		string importPath = Path.Join(package.resolvedPath, "Package Resources", "TMP Essential Resources.unitypackage");
 		if (!File.Exists(importPath))
 		{
 			Debug.LogError($"Expected to find TextMesh Pro essential resources package at: {importPath}");
 			return;
 		}
 
-		AssetDatabase.ImportPackage(importPath, /*interactive*/ false);
+		UnityEditor.AssetPackage.Package.Import(importPath, /*interactive*/ false);
+		UpgradeShaderPragmas(expectedPath);
 		Debug.Log("Imported TextMesh Pro essential resources!");
+	}
+
+	private static void UpgradeShaderPragmas(string resourcesPath)
+	{
+		if (!Directory.Exists(resourcesPath)) return;
+		// The 6.7 uGUI essential-resources archive still contains the retired directive.
+		// These resources are generated and ignored by Git, so repair existing and fresh imports.
+		foreach (string path in Directory.EnumerateFiles(resourcesPath, "*.shader", SearchOption.AllDirectories))
+		{
+			string source = File.ReadAllText(path);
+			string updated = source.Replace("#pragma enable_d3d11_debug_symbols", "#pragma enable_debug_symbols");
+			// DXC requires SV_Target for fragment outputs. COLOR remains valid on vertex data.
+			updated = Regex.Replace(updated, @"(\bfrag\s*\([^)]*\)\s*:\s*)COLOR\b", "$1SV_Target");
+			if (source != updated) File.WriteAllText(path, updated);
+		}
 	}
 }

@@ -262,14 +262,14 @@ namespace SDG.Unturned
 				typedChild._parent = null;
 				typedChild.InternalDestroy();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				bool wasRemoved =
 #endif
 
 				// Order of children is important for depth and UIs which rely on index.
 				_children.Remove(typedChild);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (!wasRemoved)
 				{
 					UnturnedLog.warn("Child was not in children list");
@@ -440,7 +440,7 @@ namespace SDG.Unturned
 		{
 			transform.SetParent(null, false);
 
-			// Pooled UI is recycled between scenes. We flag DontDestroyOnLoad here because it is reset when reparented. 
+			// Pooled UI is recycled between scenes. We flag DontDestroyOnLoad here because it is reset when reparented.
 			Object.DontDestroyOnLoad(gameObject);
 			poolData.gameObject = gameObject;
 
@@ -475,9 +475,9 @@ namespace SDG.Unturned
 			}
 			else
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnturnedLog.error("InternalDestroy called when gameObject is already null! Was it destroyed twice?");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 #if VALIDATE_GLAZIER_USE_AFTER_DESTROY

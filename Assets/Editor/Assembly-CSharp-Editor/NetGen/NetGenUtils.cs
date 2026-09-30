@@ -37,7 +37,7 @@ namespace SDG.Unturned
 			NetEnumGenerator enumGenerator = new NetEnumGenerator();
 			NetInvokableGenerator methodGenerator = new NetInvokableGenerator();
 
-			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			var assemblies = UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies();
 			foreach (Assembly assembly in assemblies)
 			{
 				Type[] exportedTypes = assembly.GetExportedTypes();
@@ -60,7 +60,7 @@ namespace SDG.Unturned
 			List<Type> componentTypes = new List<Type>();
 			List<Type> nonStaticTypes = new List<Type>();
 
-			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			var assemblies = UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies();
 			foreach (Assembly assembly in assemblies)
 			{
 				Type[] exportedTypes = assembly.GetExportedTypes();

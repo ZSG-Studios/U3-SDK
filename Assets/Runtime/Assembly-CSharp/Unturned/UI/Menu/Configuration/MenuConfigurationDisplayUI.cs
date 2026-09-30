@@ -103,7 +103,7 @@ namespace SDG.Unturned
 
 		private static void OnTypedTargetFrameRate(ISleekUInt32Field field, uint state)
 		{
-			GraphicsSettings.TargetFrameRate = (int) state;
+			GraphicsSettings.TargetFrameRate = (int)System.Math.Min(state, (uint)int.MaxValue);
 			GraphicsSettings.apply("changed target frame rate");
 		}
 
@@ -116,7 +116,7 @@ namespace SDG.Unturned
 
 		private static void OnTypedUnfocusedTargetFrameRate(ISleekUInt32Field field, uint state)
 		{
-			GraphicsSettings.UnfocusedTargetFrameRate = (int) state;
+			GraphicsSettings.UnfocusedTargetFrameRate = (int)System.Math.Min(state, (uint)int.MaxValue);
 			GraphicsSettings.apply("changed unfocused target frame rate");
 		}
 

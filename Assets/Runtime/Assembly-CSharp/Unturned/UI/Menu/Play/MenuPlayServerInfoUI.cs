@@ -808,7 +808,7 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 			sb.AppendLine($"{rulesMap.Count} rule(s):");
 			int logRuleIndex = 0;
@@ -818,7 +818,7 @@ namespace SDG.Unturned
 				++logRuleIndex;
 			}
 			UnturnedLog.info(sb.ToString());
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			string browserIcon;
 			if (rulesMap.TryGetValue("Browser_Icon", out browserIcon) && !string.IsNullOrEmpty(browserIcon))
@@ -841,7 +841,7 @@ namespace SDG.Unturned
 #if !DEDICATED_SERVER
 				if (bookmarkDetails != null)
 				{
-					// Old host may have been valid, but update in case, e.g., the server is changing DNS entries. 
+					// Old host may have been valid, but update in case, e.g., the server is changing DNS entries.
 					bookmarkDetails.host = serverBookmarkHost;
 					ServerBookmarksManager.MarkDirty();
 				}

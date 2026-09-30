@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define LOG_BOUNDS
 #endif
 using System.Collections;
@@ -103,7 +103,7 @@ namespace SDG.Unturned
 
 				Camera itemCamera = GetCamera(itemAsset);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (clothes.overrideMaskMythicId > 0)
 				{
 					// Minor delay to ensure mythic particle effects have time to animate.
@@ -118,7 +118,7 @@ namespace SDG.Unturned
 					}
 				}
 				else
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				{
 					itemCamera = GetCamera(itemAsset);
 
@@ -205,9 +205,9 @@ namespace SDG.Unturned
 			clothes.vestGuid = System.Guid.Empty;
 			clothes.glassesGuid = System.Guid.Empty;
 			clothes.maskGuid = System.Guid.Empty;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			clothes.overrideMaskMythicId = 0;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		private void ApplyItemToOutfit(ItemAsset itemAsset)
@@ -234,9 +234,9 @@ namespace SDG.Unturned
 					break;
 				case EItemType.MASK:
 					clothes.maskGuid = itemAsset.GUID;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					clothes.overrideMaskMythicId = ((ItemMaskAsset) itemAsset).cosmeticPreviewMythicId;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					break;
 			}
 		}
@@ -295,7 +295,7 @@ namespace SDG.Unturned
 			clothes.apply();
 
 			outfitCamera.targetTexture = targetTexture400;
-			outfitCamera.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(outfitCamera);
 
 			outfitCamera.targetTexture = null;
 
@@ -310,7 +310,7 @@ namespace SDG.Unturned
 			yield return new WaitForEndOfFrame();
 
 			cameraComponent.targetTexture = targetTexture;
-			cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(cameraComponent);
 			cameraComponent.targetTexture = null;
 
 			Graphics.Blit(targetTexture, downsampleTexture);

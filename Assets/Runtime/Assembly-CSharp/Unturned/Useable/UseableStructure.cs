@@ -188,9 +188,9 @@ namespace SDG.Unturned
 				{
 					if (!UseableHousingUtils.IsPendingPositionValid(player, serverPlacementPosition)) // Double-check everything is still OK in-case another buildable was placed while we were placing this one.
 					{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						CommandWindow.LogWarning("Placement position no longer valid");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						player.equipment.dequip();
 					}
 					else
@@ -199,9 +199,9 @@ namespace SDG.Unturned
 						EHousingPlacementResult housingResult = UseableHousingUtils.ValidatePendingPlacement(equippedStructureAsset, ref serverPlacementPosition, serverPlacementYaw, ref obstructionHint);
 						if (housingResult != EHousingPlacementResult.Success)
 						{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							CommandWindow.LogWarning($"Housing link result no longer valid: {housingResult} \"{obstructionHint}\"");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 							player.equipment.dequip();
 						}
 						else

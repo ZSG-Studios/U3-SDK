@@ -57,17 +57,13 @@ namespace SDG.Unturned
 			MeshRenderer renderer = getMesh();
 			if (renderer != null)
 			{
-				renderer.enabled = GraphicsSettings.renderMode == ERenderMode.FORWARD;
+				renderer.enabled = false;
 			}
 
-			if (GraphicsSettings.renderMode == ERenderMode.DEFERRED)
-			{
-				DecalSystem.add(this);
-			}
-			else
-			{
-				DecalSystem.remove(this);
-			}
+			DecalSystem.add(this);
+			var projection = gameObject.GetOrAddComponent<UniversalDecal>();
+			projection.enabled = true;
+			projection.Initialize(this);
 		}
 
 		internal void UpdateEditorVisibility()
@@ -103,7 +99,7 @@ namespace SDG.Unturned
 			MeshRenderer renderer = getMesh();
 			if (renderer != null)
 			{
-				renderer.enabled = GraphicsSettings.renderMode == ERenderMode.FORWARD;
+				renderer.enabled = false;
 			}
 		}
 
@@ -114,10 +110,10 @@ namespace SDG.Unturned
 				return;
 			}
 
-			if (GraphicsSettings.renderMode == ERenderMode.DEFERRED)
-			{
-				DecalSystem.add(this);
-			}
+			DecalSystem.add(this);
+			var projection = gameObject.GetOrAddComponent<UniversalDecal>();
+			projection.enabled = true;
+			projection.Initialize(this);
 
 			GraphicsSettings.graphicsSettingsApplied += onGraphicsSettingsApplied;
 		}
@@ -132,6 +128,8 @@ namespace SDG.Unturned
 			GraphicsSettings.graphicsSettingsApplied -= onGraphicsSettingsApplied;
 
 			DecalSystem.remove(this);
+			var projection = GetComponent<UniversalDecal>();
+			if (projection != null) projection.enabled = false;
 		}
 #endif // GAME
 

@@ -118,6 +118,7 @@ namespace SDG.Unturned
 				{
 					string formattedPath = config.FormatAssetPathAndCache(path);
 					asset = config.assetBundle.LoadAsset<T>(formattedPath);
+					UniversalMaterialAdapter.UpgradeObject(asset);
 					if (asset != null)
 					{
 						if (asset is GameObject gameObject)
@@ -167,7 +168,9 @@ namespace SDG.Unturned
 			}
 
 			string formattedPath = config.FormatAssetPathAndCache(path);
-			return config.assetBundle.LoadAssetAsync<T>(formattedPath);
+			var request = config.assetBundle.LoadAssetAsync<T>(formattedPath);
+			request.completed += _ => UniversalMaterialAdapter.UpgradeObject(request.asset);
+			return request;
 		}
 
 		/// <summary>

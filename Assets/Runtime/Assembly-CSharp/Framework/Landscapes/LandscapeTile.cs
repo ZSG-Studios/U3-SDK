@@ -55,7 +55,7 @@ namespace SDG.Framework.Landscapes
 		/// <summary>
 		/// Marked true when level editor or legacy hole volumes modify hole data.
 		/// Defaults to false in which case holes do not need to be saved.
-		/// 
+		///
 		/// Initially this was not going to be marked by hole volumes because they can re-generate the holes, but saving
 		/// hole volume cuts is helpful when upgrading to remove hole volumes from a map.
 		/// </summary>
@@ -807,7 +807,7 @@ namespace SDG.Framework.Landscapes
 			UpdateNames();
 		}
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS")]
 		private void UpdateNames()
 		{
 			gameObject.name = $"Terrain ({coord.x}, {coord.y})";

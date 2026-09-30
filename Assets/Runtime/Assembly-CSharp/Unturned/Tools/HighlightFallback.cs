@@ -16,7 +16,7 @@ namespace SDG.Unturned
 			{
 				foreach (ManagedRenderer renderer in managedRenderers)
 				{
-					renderer.ownedMaterial.SetColor(mainColorId, color);
+					renderer.ownedMaterial.SetColor(StandardShaderUtils.ColorProperty(renderer.ownedMaterial), color);
 				}
 			}
 		}
@@ -34,7 +34,7 @@ namespace SDG.Unturned
 			foreach (Renderer rendererComponent in tempRenderers)
 			{
 				Material originalMaterial = rendererComponent.sharedMaterial;
-				if (originalMaterial == null || !originalMaterial.HasColor(mainColorId))
+				if (originalMaterial == null || !originalMaterial.HasColor(StandardShaderUtils.ColorProperty(originalMaterial)))
 				{
 					return;
 				}
@@ -81,7 +81,7 @@ namespace SDG.Unturned
 
 		private static List<Renderer> tempRenderers = new List<Renderer>();
 		private List<ManagedRenderer> managedRenderers;
-		private static int mainColorId = Shader.PropertyToID("_Color");
+
 	}
 }
 #endif // !WITH_NOREDIST

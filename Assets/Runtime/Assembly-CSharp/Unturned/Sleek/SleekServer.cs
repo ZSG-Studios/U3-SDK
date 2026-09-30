@@ -278,7 +278,7 @@ namespace SDG.Unturned
 					info.deniedByRule.owner.Name, info.deniedByRule.description);
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (!string.IsNullOrEmpty(button.TooltipText))
 			{
 				button.TooltipText += "\n";

@@ -76,9 +76,9 @@ namespace SDG.Unturned
 			{
 				if (!ZombieManager.CheckCustomCooldown(CooldownId, CooldownDuration))
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.info($"NPC zombie reward skipped because custom cooldown \"{CooldownId}\" still pending");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					return;
 				}
 			}
@@ -155,9 +155,9 @@ namespace SDG.Unturned
 			}
 			while (remainingToSpawn > 0 && spawnpointsWorkingCopy.Count > 0);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			UnturnedLog.info($"NPC zombie reward \"{SpawnpointId}\" had {remainingToSpawn} remaining to spawn");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		internal override void PopulateV2(in PopulateRewardParameters p)

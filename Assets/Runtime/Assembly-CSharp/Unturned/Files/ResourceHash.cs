@@ -139,7 +139,7 @@ namespace SDG.Unturned
 			}
 			else
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnturnedLog.info("Unable to hash player resources until test player is exported");
 #else
 				UnturnedLog.error("Hashing resources failed");

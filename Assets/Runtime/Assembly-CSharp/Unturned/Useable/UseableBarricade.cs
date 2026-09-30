@@ -2,12 +2,12 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define LOG_BARRICADE_PLACEMENT
 //#define WITH_BARRICADE_PLACEMENT_GIZMOS
 //#define WITH_OVERLAP_GIZMOS
 //#define LOG_BARRICADE_PLACEMENT_CANCEL
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using SDG.NetTransport;
 using Steamworks;
@@ -718,7 +718,7 @@ namespace SDG.Unturned
 
 						if (Mathf.Abs(Vector3.Dot(colliderTransform.right, Vector3.up)) > 0.5f)
 						{
-							angle_y = Quaternion.LookRotation(colliderTransform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(colliderTransform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, colliderTransform.forward) < 0.0f)
 							{
 								angle_y += 180.0f;
@@ -726,7 +726,7 @@ namespace SDG.Unturned
 						}
 						else
 						{
-							angle_y = Quaternion.LookRotation(colliderTransform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(colliderTransform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, colliderTransform.up) > 0.0f)
 							{
 								angle_y += 180.0f;
@@ -1057,7 +1057,7 @@ namespace SDG.Unturned
 						// Nelson 2024-09-23: It seems some modders did actually have a mix of door slot rotations? (public issue #4661)
 						if (Mathf.Abs(Vector3.Dot(colliderTransform.up, Vector3.up)) > 0.5f)
 						{
-							angle_y = Quaternion.LookRotation(colliderTransform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(colliderTransform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, colliderTransform.forward) < 0.0f)
 							{
 								angle_y += 180.0f;
@@ -1065,7 +1065,7 @@ namespace SDG.Unturned
 						}
 						else
 						{
-							angle_y = Quaternion.LookRotation(colliderTransform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(colliderTransform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, colliderTransform.up) > 0.0f)
 							{
 								angle_y += 180.0f;
@@ -1128,7 +1128,7 @@ namespace SDG.Unturned
 					if (hit.transform.CompareTag("Logic") && hit.transform.name == "Hatch")
 					{
 						point = hit.transform.position;
-						float hitAngle = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+						float hitAngle = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 						angle_y = hitAngle;
 
 						float dot_0 = Vector3.Dot(MainCamera.instance.transform.forward, hit.transform.forward);
@@ -1217,7 +1217,7 @@ namespace SDG.Unturned
 
 						if (Mathf.Abs(Vector3.Dot(hit.transform.up, Vector3.up)) > 0.5f)
 						{
-							angle_y = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, hit.transform.forward) < 0.0f)
 							{
 								angle_y += 180.0f;
@@ -1225,7 +1225,7 @@ namespace SDG.Unturned
 						}
 						else
 						{
-							angle_y = Quaternion.LookRotation(hit.transform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+							angle_y = Quaternion.LookRotation(hit.transform.up).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 							if (Vector3.Dot(MainCamera.instance.transform.forward, hit.transform.up) > 0.0f)
 							{
 								angle_y += 180.0f;
@@ -1298,7 +1298,7 @@ namespace SDG.Unturned
 					if (hit.transform.CompareTag("Logic") && hit.transform.name == "Climb")
 					{
 						point = hit.transform.position;
-						angle_y = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621. 
+						angle_y = Quaternion.LookRotation(hit.transform.forward).eulerAngles.y; // Nelson 2024-08-08: Quickly patching public issue #4621.
 
 						if (Physics.OverlapSphereNonAlloc(point + (hit.transform.up * 0.5f), 0.1f, checkColliders, RayMasks.BLOCK_BARRICADE) > 0)
 						{

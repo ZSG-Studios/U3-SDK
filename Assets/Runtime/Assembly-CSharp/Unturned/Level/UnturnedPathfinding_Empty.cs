@@ -31,13 +31,13 @@ namespace SDG.Unturned
 	{
 		public bool ContainsAnyBakedData => false;
 
-		private Vector3 boundsCenter;
-		private Vector3 boundsSize;
-		private int tileXCount;
-		private int tileZCount;
+		protected Vector3 boundsCenter;
+		protected Vector3 boundsSize;
+		protected int tileXCount;
+		protected int tileZCount;
 
-		private int[][] triangleArrays;
-		private Vector3Int[][] vertexArrays;
+		protected int[][] triangleArrays;
+		protected Vector3Int[][] vertexArrays;
 
 		public void Deserialize(River river)
 		{
@@ -72,7 +72,10 @@ namespace SDG.Unturned
 					++arrayIndex;
 				}
 			}
+			OnDeserialized();
 		}
+
+		protected virtual void OnDeserialized() { }
 
 		public void Serialize(River river)
 		{

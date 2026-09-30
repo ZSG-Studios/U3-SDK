@@ -1,4 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnturnedObjectToClip(*)'
 
 // Unlit shader. Simplest possible colored shader.
 // - no lighting
@@ -11,16 +11,16 @@ Properties {
 }
 
 SubShader {
-	Tags { "RenderType"="Opaque" }
+	Tags { "RenderPipeline"="UniversalPipeline"  "RenderType"="Opaque" }
 	LOD 100
-	
-	Pass {  
-		CGPROGRAM
+
+	Pass {
+		HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fog
-			
-			#include "UnityCG.cginc"
+
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
 			struct appdata_t {
 				float4 vertex : POSITION;
@@ -28,27 +28,27 @@ SubShader {
 
 			struct v2f {
 				float4 vertex : SV_POSITION;
-				UNITY_FOG_COORDS(0)
+				half fogCoord : TEXCOORD0;
 			};
 
-			fixed4 _Color;
-			
+			half4 _Color;
+
 			v2f vert (appdata_t v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.vertex = UnturnedObjectToClip(v.vertex);
+				o.fogCoord = ComputeFogFactor(o.vertex.z);
 				return o;
 			}
-			
-			fixed4 frag (v2f i) : COLOR
+
+			half4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = UNITY_LIGHTMODEL_AMBIENT*_Color;//_Color;
-				UNITY_APPLY_FOG(i.fogCoord, col);
-				UNITY_OPAQUE_ALPHA(col.a);
+				half4 col = UNITY_LIGHTMODEL_AMBIENT*_Color;//_Color;
+				col.rgb = MixFog(col.rgb, i.fogCoord);
+				col.a = 1;
 				return col;
 			}
-		ENDCG
+		ENDHLSL
 	}
 }
 

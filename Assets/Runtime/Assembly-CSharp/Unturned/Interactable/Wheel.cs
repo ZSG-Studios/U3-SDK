@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define ENABLE_REPLICATED_WHEEL_GIZMOS
 // #define ENABLE_WHEEL_PROFILING
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -209,7 +209,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// [0, 360] angle of rotation around wheel axle. Measured in degrees because Quaternion.AngleAxis takes degrees.
-		/// 
+		///
 		/// We track rather than using GetWorldPose so that we can alternate between using replicated and simulated
 		/// results without snapping transforms.
 		/// </summary>
@@ -319,8 +319,8 @@ namespace SDG.Unturned
 			Rigidbody rb = model.gameObject.GetOrAddComponent<Rigidbody>();
 			rb.interpolation = RigidbodyInterpolation.Interpolate;
 			rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-			rb.drag = 0.5f;
-			rb.angularDrag = 0.1f;
+			rb.linearDamping = 0.5f;
+			rb.angularDamping = 0.1f;
 
 			Object.Destroy(model.gameObject, 8f);
 
@@ -402,7 +402,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Calculate suspension state from GetWorldPose result.
-		/// 
+		///
 		/// Nelson 2024-03-25: Originally we used the result of GetWorldPose for the model transform and calculated
 		/// the suspension state from it because I thought Unity was internally using the spring position that isn't
 		/// (currently) exposed to the API. Whether or not it is, it seems fine to calculate the spring position using

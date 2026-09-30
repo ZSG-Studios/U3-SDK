@@ -42,13 +42,13 @@ namespace SDG.Unturned
 			return callingPlayer.transportConnection;
 		}
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
 		public void ReadParameterFailed(string parameterName)
 		{
 			CommandWindow.LogWarningFormat("{0} {1}: unable to read {2}", GetTransportConnection(), serverMethodInfo, parameterName);
 		}
 
-		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
+		[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS"), System.Diagnostics.Conditional("DEBUG_NETINVOKABLES")]
 		public void LogWarning(string message)
 		{
 			CommandWindow.LogWarningFormat("{0} {1}: {2}", GetTransportConnection(), serverMethodInfo, message);

@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define WITH_CAMERASHAKE_GIZMOS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetTransport;
 using Steamworks;
 using System.Collections.Generic;
@@ -1179,7 +1179,7 @@ namespace SDG.Unturned
 
 			if (asset.effect == null)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				asset.ReportAssetError("unable to spawn without Effect prefab");
 #endif
 				return null;
@@ -1484,9 +1484,9 @@ namespace SDG.Unturned
 
 			PoolReference poolRef = pool.Instantiate(asset.effect, point, rotation);
 			Transform effect = poolRef.transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			effect.name = asset.id.ToString();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			effect.localScale = scaleMultiplier;
 			effect.parent = parent;
 			if (parent != null)
@@ -1906,12 +1906,12 @@ namespace SDG.Unturned
 			if (attachedEffects.TryGetValue(root, out list))
 			{
 				bool removed = list.RemoveFast(effect);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (!removed)
 				{
 					UnturnedLog.warn($"Attached effect already removed from list {effect.transform.GetSceneHierarchyPath()}");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 				if (list.Count < 1)
 				{

@@ -150,9 +150,9 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		public bool enableGodMode;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		private bool _isDead;
 		public bool isDead => _isDead;
@@ -575,10 +575,10 @@ namespace SDG.Unturned
 		{
 			kill = EPlayerKill.NONE;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (enableGodMode)
 				return;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (amount == 0 || isDead)
 			{

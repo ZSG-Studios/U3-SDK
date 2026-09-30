@@ -282,9 +282,12 @@ namespace SDG.Unturned
 		}
 
 		private RenderTexture scopeRenderTexture;
+		private int scopeViewportWidth, scopeViewportHeight;
 
 		public void updateScope(EGraphicQuality quality)
 		{
+			scopeViewportWidth = Screen.width;
+			scopeViewportHeight = Screen.height;
 			bool wantsRenderTexture = true;
 			bool isDualRender = false;
 			int desiredResolution = 0;
@@ -1132,6 +1135,12 @@ namespace SDG.Unturned
 		{
 			if (channel.IsLocalPlayer)
 			{
+				// SetResolution applies at the end of a frame, after GraphicsSettings.apply has run.
+				if (GraphicsSettings.scopeQuality == EGraphicQuality.OFF && scopeCamera != null
+					&& (scopeViewportWidth != Screen.width || scopeViewportHeight != Screen.height))
+				{
+					updateScope(GraphicsSettings.scopeQuality);
+				}
 				UnityEngine.Profiling.Profiler.BeginSample("Spectate");
 
 				if (InputEx.GetKey(KeyCode.LeftShift))
@@ -1302,7 +1311,7 @@ namespace SDG.Unturned
 										orbitPosition = parsedPosition - player.first.position;
 									}
 
-									// Nelson 2024-11-11: Since negative pitch is up from horizon (counterintuitive) 
+									// Nelson 2024-11-11: Since negative pitch is up from horizon (counterintuitive)
 									// the negative may be expressed as a positive number below 360. (e.g., 350 to
 									// represent -10 degrees.) In that case we need to clamp it back to [-90, 90].
 									if (parsedPitch > 180.0f)
@@ -1836,7 +1845,7 @@ namespace SDG.Unturned
 				if (isScopeActive && scopeCamera.targetTexture != null && scopeVision != ELightingVision.NONE)
 				{
 					ApplyScopeVisionToLighting();
-					scopeCamera.Render();
+					global::Unturned.UnityEx.CameraRenderEx.Render(scopeCamera);
 					RestoreSavedLightingVision();
 				}
 
@@ -1971,7 +1980,6 @@ namespace SDG.Unturned
 
 				_scopeCamera = MainCamera.instance.transform.Find("Scope").GetComponent<Camera>();
 				scopeCamera.layerCullDistances = MainCamera.instance.layerCullDistances;
-				scopeCamera.layerCullSpherical = MainCamera.instance.layerCullSpherical;
 				scopeCamera.fieldOfView = 10.0f;
 				scopeCamera.eventMask = 0;
 				UnturnedPostProcess.instance.setScopeCamera(scopeCamera);

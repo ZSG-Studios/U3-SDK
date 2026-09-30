@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define ENABLE_HOUSING_GIZMOS
 #endif
 using System.Collections.Generic;
@@ -72,7 +72,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// This check prevents placing roof onto the upper edge of a rampart because ramparts
 		/// create an edge at full wall height even though they are short.
-		/// 
+		///
 		/// Ideally in the future wall height will become configurable and remove
 		/// the need for this check.
 		///
@@ -432,7 +432,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Search grid for existing vertex at approximately equal position.
-		/// Considers adjacent grid cells if near cell boundary to avoid issues with floating point inaccuracy. 
+		/// Considers adjacent grid cells if near cell boundary to avoid issues with floating point inaccuracy.
 		/// </summary>
 		private HousingVertex FindVertex(Vector3 position)
 		{
@@ -449,7 +449,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Search grid for existing edge at approximately equal position.
-		/// Considers adjacent grid cells if near cell boundary to avoid issues with floating point inaccuracy. 
+		/// Considers adjacent grid cells if near cell boundary to avoid issues with floating point inaccuracy.
 		/// </summary>
 		private HousingEdge FindEdge(Vector3 position)
 		{
@@ -493,9 +493,9 @@ namespace SDG.Unturned
 
 			if (!verticesGrid.RemoveFast(vertex.position, vertex, LINK_TOLERANCE))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove vertex from grid at {vertex.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 		}
 
@@ -505,9 +505,9 @@ namespace SDG.Unturned
 			{
 				if (!edge.vertex0.edges.RemoveFast(edge))
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					Debug.LogError($"Failed to remove edge from vertex0 at {edge.vertex0.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				}
 				edge.vertex0 = null;
 			}
@@ -516,9 +516,9 @@ namespace SDG.Unturned
 			{
 				if (!edge.vertex1.edges.RemoveFast(edge))
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					Debug.LogError($"Failed to remove edge from vertex1 at {edge.vertex1.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				}
 				edge.vertex1 = null;
 			}
@@ -537,9 +537,9 @@ namespace SDG.Unturned
 
 			if (!edgesGrid.RemoveFast(edge.position, edge, LINK_TOLERANCE))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove edge from grid at {edge.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 		}
 
@@ -629,9 +629,9 @@ namespace SDG.Unturned
 		{
 			if (!edge.forwardFloors.RemoveFast(floor) && !edge.backwardFloors.RemoveFast(floor))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove floor from edge at {edge.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 			if (edge.ShouldBeRemoved)
@@ -644,9 +644,9 @@ namespace SDG.Unturned
 		{
 			if (!vertex.floors.RemoveFast(floor))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove floor from vertex at {vertex.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 			if (vertex.ShouldBeRemoved)
@@ -883,9 +883,9 @@ namespace SDG.Unturned
 
 			if (!connections.lowerEdge.walls.RemoveFast(wall))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove wall from edge at {connections.lowerEdge.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 			if (connections.lowerEdge.ShouldBeRemoved)
@@ -972,9 +972,9 @@ namespace SDG.Unturned
 
 			if (!connections.lowerVertex.pillars.RemoveFast(pillar))
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				Debug.LogError($"Failed to remove pillar from vertex at {connections.lowerVertex.position}");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 			if (connections.lowerVertex.ShouldBeRemoved)

@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define DRAW_ITEM_DROP_SPHERECAST
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetPak;
 using SDG.NetTransport;
 using Steamworks;
@@ -331,7 +331,7 @@ namespace SDG.Unturned
 					}
 
 					/* Server cannot do a LoS test because client may have simulated the item falling.
-						
+
 					Vector3 viewPosition = player.look.getEyesPosition();
 					bool bHitSomething = Physics.Linecast(itemData.point, viewPosition, RayMasks.BLOCK_BARRICADE_INTERACT_LOS, QueryTriggerInteraction.Ignore);
 					if(bHitSomething)
@@ -495,8 +495,8 @@ namespace SDG.Unturned
 				item.gameObject.AddComponent<Rigidbody>();
 				item.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
 				item.GetComponent<Rigidbody>().collisionDetectionMode = CollisionDetectionMode.Discrete;
-				item.GetComponent<Rigidbody>().drag = 0.5f;
-				item.GetComponent<Rigidbody>().angularDrag = 0.1f;
+				item.GetComponent<Rigidbody>().linearDamping = 0.5f;
+				item.GetComponent<Rigidbody>().angularDamping = 0.1f;
 
 				if (LevelObjects.IsRegionUpdating(new Vector2Int(x, y))) // disable physics if still loading objects
 				{

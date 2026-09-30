@@ -37,6 +37,8 @@ namespace Steamworks
 		{
 				public InputAnalogActionHandle_t actionHandle;
 
+				[System.NonSerialized]
+
 				public InputAnalogActionData_t analogActionData;
 		}
 
@@ -45,6 +47,8 @@ namespace Steamworks
 		public struct DigitalAction_t
 		{
 				public InputDigitalActionHandle_t actionHandle;
+
+				[System.NonSerialized]
 
 				public InputDigitalActionData_t digitalActionData;
 		}

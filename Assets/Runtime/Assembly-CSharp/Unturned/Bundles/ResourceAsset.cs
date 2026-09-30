@@ -393,7 +393,7 @@ namespace SDG.Unturned
 
 							if (!shader)
 							{
-								shader = Shader.Find("Custom/Card");
+								shader = global::SDG.Unturned.UniversalShaderCatalog.Find("Custom/Card");
 							}
 
 							Texture2D texture = ItemTool.getCard(icon, hook_0, hook_1, 64, 64, height / 2, range);

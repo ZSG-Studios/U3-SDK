@@ -1,4 +1,4 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnturnedObjectToClip(*)'
 
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
@@ -33,8 +33,7 @@ Shader "Skybox/Sky"
 
 	SubShader
 	{
-		Tags
-		{
+		Tags { "RenderPipeline"="UniversalPipeline"
 			"Queue" = "Background"
 			"RenderType" = "Background"
 			"PreviewType" = "Skybox"
@@ -45,13 +44,13 @@ Shader "Skybox/Sky"
 
 		Pass
 		{
-		
-			CGPROGRAM
+
+			HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#include "UnityCG.cginc"
-			#include "Lighting.cginc"
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
+
 
 			#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
 			#pragma multi_compile __ WITH_AURORA_BOREALIS
@@ -70,7 +69,7 @@ Shader "Skybox/Sky"
 			uniform float _SunInnerThreshold;
 			uniform float _SunOuterThreshold;
 
-			sampler2D _StarsTexture;
+			TEXTURE2D(_StarsTexture); SAMPLER(sampler_StarsTexture);
 			uniform float _StarsCutoff;
 
 			uniform float3 _MoonDirection;
@@ -78,11 +77,11 @@ Shader "Skybox/Sky"
 			uniform float3 _MoonColor;
 			uniform float _SqrMoonRadius;
 
-			sampler2D _AuroraBorealisColorTexture;
-			sampler2D _AuroraBorealisAlphaTexture;
+			TEXTURE2D(_AuroraBorealisColorTexture); SAMPLER(sampler_AuroraBorealisColorTexture);
+			TEXTURE2D(_AuroraBorealisAlphaTexture); SAMPLER(sampler_AuroraBorealisAlphaTexture);
 			uniform float _AuroraBorealisIntensity;
 
-			sampler2D _CloudsTexture;
+			TEXTURE2D(_CloudsTexture); SAMPLER(sampler_CloudsTexture);
 
 			// Highlight colors change with time of day and are affected by weather, e.g. rain darkens and snow brightens.
 			uniform float3 _CloudColor;
@@ -93,7 +92,7 @@ Shader "Skybox/Sky"
 			// G: macro alpha saturation
 			uniform float4 _CloudParams;
 
-			uniform fixed _AtmosphericFog;
+			uniform half _AtmosphericFog;
 
 			#if defined(UNITY_COLORSPACE_GAMMA)
 			#define GAMMA 2
@@ -117,12 +116,12 @@ Shader "Skybox/Sky"
 			{
 				float4 pos : SV_POSITION;
 				half3 rayDir : TEXCOORD0;	// Vector for incoming ray, normalized ( == -eyeRay )
-   			}; 
+            };
 
 			v2f vert (appdata_t v)
 			{
 				v2f OUT;
-				OUT.pos = UnityObjectToClipPos(v.vertex);
+				OUT.pos = UnturnedObjectToClip(v.vertex);
 
 				// Unity's built-in skybox shaders convert to world space, but it does not really matter because we
 				// normalize in the fragment shader.
@@ -151,7 +150,7 @@ Shader "Skybox/Sky"
 						float normalizedU = (hitPosition.x - minX) / (maxX - minX);
 						float normalizedV = (hitPosition.y - minAuroraBorealisY) / auroraBorealisHeight;
 						float2 alphaTexcoord = float2(hitPosition.x * 0.02 + index * 0.1 + _Time.x * 0.1, normalizedV);
-						float alpha = tex2D(_AuroraBorealisAlphaTexture, alphaTexcoord).a;
+						float alpha = SAMPLE_TEXTURE2D(_AuroraBorealisAlphaTexture, sampler_AuroraBorealisAlphaTexture, alphaTexcoord).a;
 
 						// Older mesh used vertex colors to fade out the ends. Instead we fade out 25% at each end.
 						float distFromCenterU = abs(0.5 - normalizedU) * 2.0; // [0, 1]
@@ -160,7 +159,7 @@ Shader "Skybox/Sky"
 						alpha *= abs(sin(normalizedU * 0.01 + normalizedV * 0.1 + index * 2.0 + _Time.x));
 
 						float2 colorTexcoord = float2(index * 0.01 + _Time.x * 0.2, 0.5);
-						float3 color = tex2D(_AuroraBorealisColorTexture, colorTexcoord).rgb;
+						float3 color = SAMPLE_TEXTURE2D(_AuroraBorealisColorTexture, sampler_AuroraBorealisColorTexture, colorTexcoord).rgb;
 
 						resultColor += color * alpha;
 					}
@@ -177,9 +176,9 @@ Shader "Skybox/Sky"
 				float2 texcoord = viewDir.xz / viewDir.y;
 
 				// Higher-contrast large-scale cloud shapes.
-				float macroAlpha = tex2D(_CloudsTexture, texcoord * 0.1 - float2(0.0, _Time.x * 0.01)).r;
+				float macroAlpha = SAMPLE_TEXTURE2D(_CloudsTexture, sampler_CloudsTexture, texcoord * 0.1 - float2(0.0, _Time.x * 0.01)).r;
 				// Vanilla maps have relatively low (~0.1) intensity values, so treat it as increasing the cloud coverage.
-				macroAlpha += _CloudIntensity * 0.25 * tex2D(_CloudsTexture, texcoord * 0.1 + 0.5 - float2(0.0, _Time.x * 0.01)).r;
+				macroAlpha += _CloudIntensity * 0.25 * SAMPLE_TEXTURE2D(_CloudsTexture, sampler_CloudsTexture, texcoord * 0.1 + 0.5 - float2(0.0, _Time.x * 0.01)).r;
 				// Originally I experimented with making macro texture high contrast in the image editor, but that
 				// makes the intensity transition more obvious. Instead we increase contrast procedurally here.
 				macroAlpha = saturate((macroAlpha - _CloudParams.r) * _CloudParams.g);
@@ -196,8 +195,8 @@ Shader "Skybox/Sky"
 				float moonViewFactor = saturate(-dot(viewDir, _MoonDirection));
 				float moonFactor = moonAtmosphereFactor * moonViewFactor;
 
-				float cloudsMedium = tex2D(_CloudsTexture, texcoord * 0.2 - float2(0.0, _Time.x * 0.04)).g;
-				float cloudsSmall = tex2D(_CloudsTexture, texcoord - float2(0.0, _Time.x * 0.2)).b;
+				float cloudsMedium = SAMPLE_TEXTURE2D(_CloudsTexture, sampler_CloudsTexture, texcoord * 0.2 - float2(0.0, _Time.x * 0.04)).g;
+				float cloudsSmall = SAMPLE_TEXTURE2D(_CloudsTexture, sampler_CloudsTexture, texcoord - float2(0.0, _Time.x * 0.2)).b;
 				float3 cloudBodyColor = _SkyHackAmbientGround.rgb + _CloudRimColor.rgb;
 				cloudBodyColor = lerp(cloudBodyColor, _SunColor, sunFactor * cloudsMedium * 0.5);
 				cloudBodyColor = lerp(cloudBodyColor, _MoonColor, moonFactor * cloudsMedium * 0.05);
@@ -256,7 +255,7 @@ Shader "Skybox/Sky"
 				float2 starsCoord = rayDir.xz / rayDir.y;
 				starsCoord.x += _Time.x * 0.01;
 				starsCoord.y += _Time.y * 0.004;
-				float4 starsColor = tex2D(_StarsTexture, starsCoord * 0.6);
+				float4 starsColor = SAMPLE_TEXTURE2D(_StarsTexture, sampler_StarsTexture, starsCoord * 0.6);
 				float starsMask = saturate(-rayDir.y);
 #endif // WITH_STARS
 
@@ -302,9 +301,9 @@ Shader "Skybox/Sky"
 				return half4(col,1.0);
 
 			}
-			ENDCG 
+			ENDHLSL
 		}
-	} 	
+	}
 
 	Fallback Off
 }

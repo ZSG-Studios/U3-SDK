@@ -9,8 +9,11 @@ namespace SDG.Unturned
 {
 	public class InteractableItem : Interactable
 	{
+		[System.NonSerialized]
 		public Item item;
+		[System.NonSerialized]
 		public ItemJar jar;
+		[System.NonSerialized]
 		public ItemAsset asset;
 
 		private bool wasReset;

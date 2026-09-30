@@ -216,7 +216,7 @@ namespace SDG.Unturned
 		}
 
 		/// <summary>
-		/// Hints/messages are the pop-up texts below the interaction prompt, e.g. "reload" or "full moon rises". 
+		/// Hints/messages are the pop-up texts below the interaction prompt, e.g. "reload" or "full moon rises".
 		/// Got a complaint that the item placement obstructed hint was shown if placing multiple signs.
 		/// </summary>
 		private static bool ShouldIgnoreHintAndMessageRequests()
@@ -2471,9 +2471,13 @@ namespace SDG.Unturned
 			}
 			window = null;
 
-			setIsHallucinating(false); // Disable hallucination FX
-			UnturnedPostProcess.instance.SetIsMainBlurEnabled(false);
-			UnturnedPostProcess.instance.SetSingleRenderScopeIsActive(false);
+			// Camera volumes can be destroyed before the UI when a scene or Play mode ends.
+			if (UnturnedPostProcess.instance != null)
+			{
+				setIsHallucinating(false); // Disable hallucination FX
+				UnturnedPostProcess.instance.SetIsMainBlurEnabled(false);
+				UnturnedPostProcess.instance.SetSingleRenderScopeIsActive(false);
+			}
 		}
 
 		private void OnApplicationFocus(bool focus)

@@ -118,33 +118,52 @@ namespace SDG.Unturned
 					return graphicsSettingsData.UserInterfaceScale;
 				}
 			}
-			set => graphicsSettingsData.UserInterfaceScale = value;
+			set
+			{
+				graphicsSettingsData.UserInterfaceScale = value;
+				// A menu edit takes precedence over the initial launch/config override.
+				didCacheUIScaleOverride = true;
+				cachedUIScaleOverride = null;
+			}
 		}
 
 		private static CommandLineInt clTargetFrameRate = new CommandLineInt("-FrameRateLimit");
+		private static bool userOverrodeFrameRateLimit;
+		private static bool HasLaunchFrameRateLimit => !userOverrodeFrameRateLimit && clTargetFrameRate.hasValue;
+
+		private static void BeginUserFrameRateOverride()
+		{
+			if (HasLaunchFrameRateLimit)
+			{
+				graphicsSettingsData.UseTargetFrameRate = clTargetFrameRate.value > 0;
+				if (clTargetFrameRate.value > 0) graphicsSettingsData.TargetFrameRate = Mathf.Max(clTargetFrameRate.value, 15);
+				graphicsSettingsData.UseUnfocusedTargetFrameRate = false;
+			}
+			userOverrodeFrameRateLimit = true;
+		}
 
 		public static bool UseTargetFrameRate
 		{
-			get => graphicsSettingsData.UseTargetFrameRate;
-			set => graphicsSettingsData.UseTargetFrameRate = value;
+			get => HasLaunchFrameRateLimit ? clTargetFrameRate.value > 0 : graphicsSettingsData.UseTargetFrameRate;
+			set { BeginUserFrameRateOverride(); graphicsSettingsData.UseTargetFrameRate = value; }
 		}
 
 		public static int TargetFrameRate
 		{
-			get => graphicsSettingsData.TargetFrameRate;
-			set => graphicsSettingsData.TargetFrameRate = value;
+			get => HasLaunchFrameRateLimit && clTargetFrameRate.value > 0 ? Mathf.Max(clTargetFrameRate.value, 15) : graphicsSettingsData.TargetFrameRate;
+			set { BeginUserFrameRateOverride(); graphicsSettingsData.TargetFrameRate = value; }
 		}
 
 		public static bool UseUnfocusedTargetFrameRate
 		{
-			get => graphicsSettingsData.UseUnfocusedTargetFrameRate;
-			set => graphicsSettingsData.UseUnfocusedTargetFrameRate = value;
+			get => !HasLaunchFrameRateLimit && graphicsSettingsData.UseUnfocusedTargetFrameRate;
+			set { BeginUserFrameRateOverride(); graphicsSettingsData.UseUnfocusedTargetFrameRate = value; }
 		}
 
 		public static int UnfocusedTargetFrameRate
 		{
 			get => graphicsSettingsData.UnfocusedTargetFrameRate;
-			set => graphicsSettingsData.UnfocusedTargetFrameRate = value;
+			set { BeginUserFrameRateOverride(); graphicsSettingsData.UnfocusedTargetFrameRate = value; }
 		}
 
 		public static EAntiAliasingType antiAliasingType
@@ -480,6 +499,11 @@ namespace SDG.Unturned
 
 		public static void applyResolution()
 		{
+			applyResolution(false);
+		}
+
+		public static void applyResolution(bool useStartupOverrides)
+		{
 			if (Application.isEditor)
 				return;
 
@@ -489,9 +513,11 @@ namespace SDG.Unturned
 			unitySpecifiedResolution |= commandLine.IndexOf("-screen-height", System.StringComparison.InvariantCultureIgnoreCase) >= 0;
 			unitySpecifiedResolution |= commandLine.IndexOf("-screen-fullscreen", System.StringComparison.InvariantCultureIgnoreCase) >= 0;
 			unitySpecifiedResolution |= commandLine.IndexOf("-window-mode", System.StringComparison.InvariantCultureIgnoreCase) >= 0;
-			if (unitySpecifiedResolution)
+			if (useStartupOverrides && unitySpecifiedResolution)
 			{
-				// If player specified one of Unity's built-in resolution command-line flags then we should not override it.
+				// Launch flags choose the initial window. Later menu changes must still work.
+				graphicsSettingsData.Resolution = new GraphicsSettingsResolution { Width = Screen.width, Height = Screen.height };
+				graphicsSettingsData.FullscreenMode = Screen.fullScreenMode;
 				UnturnedLog.info("Ignoring game resolution settings because Unity built-in command-line options were set");
 				return;
 			}
@@ -529,41 +555,45 @@ namespace SDG.Unturned
 			int height = resolution.Height;
 
 			// If zero or unsupported Unity will switch to highest refresh rate supported by the monitor.
-			int preferredRefreshRate = 0;
+			RefreshRate preferredRefreshRate = new RefreshRate
+			{
+				numerator = resolution.RefreshRateNumerator,
+				denominator = resolution.RefreshRateDenominator == 0 ? 1u : resolution.RefreshRateDenominator
+			};
 
-			if (clWidth.hasValue)
+			if (useStartupOverrides && clWidth.hasValue)
 			{
 				width = clWidth.value;
 			}
-			else if (valveWidth.hasValue)
+			else if (useStartupOverrides && valveWidth.hasValue)
 			{
 				width = valveWidth.value;
 			}
-			else if (Provider.preferenceData.Graphics.Override_Resolution_Width > 0)
+			else if (useStartupOverrides && Provider.preferenceData.Graphics.Override_Resolution_Width > 0)
 			{
 				width = Provider.preferenceData.Graphics.Override_Resolution_Width;
 			}
 
-			if (clHeight.hasValue)
+			if (useStartupOverrides && clHeight.hasValue)
 			{
 				height = clHeight.value;
 			}
-			else if (valveHeight.hasValue)
+			else if (useStartupOverrides && valveHeight.hasValue)
 			{
 				height = valveHeight.value;
 			}
-			else if (Provider.preferenceData.Graphics.Override_Resolution_Height > 0)
+			else if (useStartupOverrides && Provider.preferenceData.Graphics.Override_Resolution_Height > 0)
 			{
 				height = Provider.preferenceData.Graphics.Override_Resolution_Height;
 			}
 
-			if (clRefreshRate.hasValue && clRefreshRate.value > 0)
+			if (useStartupOverrides && clRefreshRate.hasValue && clRefreshRate.value > 0)
 			{
-				preferredRefreshRate = clRefreshRate.value;
+				preferredRefreshRate = new RefreshRate { numerator = (uint)clRefreshRate.value, denominator = 1 };
 			}
-			else if (Provider.preferenceData.Graphics.Override_Refresh_Rate > 0)
+			else if (useStartupOverrides && Provider.preferenceData.Graphics.Override_Refresh_Rate > 0)
 			{
-				preferredRefreshRate = Provider.preferenceData.Graphics.Override_Refresh_Rate;
+				preferredRefreshRate = new RefreshRate { numerator = (uint)Provider.preferenceData.Graphics.Override_Refresh_Rate, denominator = 1 };
 			}
 
 			if (clWidth.hasValue != clHeight.hasValue)
@@ -576,7 +606,7 @@ namespace SDG.Unturned
 			}
 
 			FullScreenMode preferredFullscreenMode = fullscreenMode;
-			if (clFullscreenMode.hasValue)
+			if (useStartupOverrides && clFullscreenMode.hasValue)
 			{
 				if (System.Enum.IsDefined(typeof(FullScreenMode), clFullscreenMode.value))
 				{
@@ -587,7 +617,7 @@ namespace SDG.Unturned
 					UnturnedLog.warn($"Invalid fullscreen mode on command-line: {clFullscreenMode.value}");
 				}
 			}
-			else if (Provider.preferenceData.Graphics.Override_Fullscreen_Mode >= 0)
+			else if (useStartupOverrides && Provider.preferenceData.Graphics.Override_Fullscreen_Mode >= 0)
 			{
 				if (System.Enum.IsDefined(typeof(FullScreenMode), Provider.preferenceData.Graphics.Override_Fullscreen_Mode))
 				{
@@ -601,15 +631,10 @@ namespace SDG.Unturned
 
 			// Setting preferred refresh rate is only supported in exclusive fullscreen, so for that reason and also to avoid
 			// any potential per-platform (e.g. Mac) bugs with getting supported refresh rate we only call that method when necessary.
-			if (fullscreenMode == FullScreenMode.ExclusiveFullScreen && preferredRefreshRate > 0)
+			if (preferredFullscreenMode == FullScreenMode.ExclusiveFullScreen && preferredRefreshRate.numerator > 0)
 			{
-				UnturnedLog.info($"Requesting resolution change: {preferredFullscreenMode} {width} x {height} @ {preferredRefreshRate} hz");
-				RefreshRate refreshRateRatio = new RefreshRate()
-				{
-					numerator = (uint) preferredRefreshRate,
-					denominator = 1,
-				};
-				Screen.SetResolution(width, height, preferredFullscreenMode, refreshRateRatio);
+				UnturnedLog.info($"Requesting resolution change: {preferredFullscreenMode} {width} x {height} @ {preferredRefreshRate.value} hz");
+				Screen.SetResolution(width, height, preferredFullscreenMode, preferredRefreshRate);
 			}
 			else
 			{
@@ -630,7 +655,7 @@ namespace SDG.Unturned
 				// player, so turning off frame rate limit to make that clearer. (public issue #4817)
 				newTargetFrameRate = -1;
 			}
-			else if (clTargetFrameRate.hasValue)
+			else if (!userOverrodeFrameRateLimit && clTargetFrameRate.hasValue)
 			{
 				if (clTargetFrameRate.value <= 0)
 				{
@@ -744,6 +769,11 @@ namespace SDG.Unturned
 			if (WantsCinematicMode)
 			{
 				QualitySettings.shadowDistance = farClipPlane;
+			}
+			if (UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline is UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset pipeline)
+			{
+				pipeline.shadowDistance = lightingQuality == EGraphicQuality.OFF ? 0f
+					: Mathf.Min(QualitySettings.shadowDistance, farClipPlane);
 			}
 
 			// Prevent 1024x1024 ground and water titles from popping in too late.
@@ -881,7 +911,7 @@ namespace SDG.Unturned
 
 			if (MainCamera.instance != null)
 			{
-				MainCamera.instance.renderingPath = renderMode == ERenderMode.DEFERRED ? RenderingPath.DeferredShading : RenderingPath.Forward;
+				UniversalCameraSettings.Apply(MainCamera.instance);
 				MainCamera.instance.allowHDR = true;
 				MainCamera.instance.allowMSAA = false; // We no longer use MSAA in any mode.
 
@@ -890,22 +920,20 @@ namespace SDG.Unturned
 
 				MainCamera.instance.farClipPlane = farClipPlane;
 				MainCamera.instance.layerCullDistances = layerCullDistances;
-				MainCamera.instance.layerCullSpherical = true;
 
 				if (Player.LocalPlayer != null)
 				{
 					Player.LocalPlayer.look.scopeCamera.farClipPlane = farClipPlane;
 					Player.LocalPlayer.look.scopeCamera.layerCullDistances = layerCullDistances;
-					Player.LocalPlayer.look.scopeCamera.layerCullSpherical = true;
 					Player.LocalPlayer.look.scopeCamera.depthTextureMode = DepthTextureMode.Depth;
 
 					Player.LocalPlayer.look.updateScope(scopeQuality);
 
-					Player.LocalPlayer.look.scopeCamera.renderingPath = renderMode == ERenderMode.DEFERRED ? RenderingPath.DeferredShading : RenderingPath.Forward;
+					UniversalCameraSettings.Apply(Player.LocalPlayer.look.scopeCamera);
 					Player.LocalPlayer.look.scopeCamera.allowHDR = true;
 					Player.LocalPlayer.look.scopeCamera.allowMSAA = false; // We no longer use MSAA in any mode.
 
-					Player.LocalPlayer.animator.viewmodelCamera.renderingPath = renderMode == ERenderMode.DEFERRED ? RenderingPath.DeferredShading : RenderingPath.Forward;
+					UniversalCameraSettings.Apply(Player.LocalPlayer.animator.viewmodelCamera);
 					Player.LocalPlayer.animator.viewmodelCamera.allowHDR = true;
 					Player.LocalPlayer.animator.viewmodelCamera.allowMSAA = false; // We no longer use MSAA in any mode.
 				}
@@ -1170,7 +1198,7 @@ namespace SDG.Unturned
 		/// Moves legacy image effect dependency out of SDK release.
 		/// </summary>
 		static partial void ApplySunShaftsSettings();
-		
+
 		/// <summary>
 		/// Moves highlighting plugin dependency out of SDK release.
 		/// </summary>

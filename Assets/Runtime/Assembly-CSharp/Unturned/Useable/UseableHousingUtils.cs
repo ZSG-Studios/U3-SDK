@@ -176,12 +176,12 @@ namespace SDG.Unturned
 			if (result == EHousingPlacementResult.Success)
 			{
 				result = ValidatePendingPlacement(asset, ref pendingPlacementPosition, pendingPlacementYaw + rotationOffset, ref obstructionHint);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (result == EHousingPlacementResult.MissingSlot)
 				{
 					UnturnedLog.warn("MissingSlot housing result is probably a bug because we *did* find a slot");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 
 			if (channel.IsLocalPlayer)

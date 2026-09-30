@@ -173,20 +173,19 @@ namespace SDG.Unturned
 							// Orange Hoodie
 							model = ItemTool.getItem(3, 0, 100, itemAsset.getState(), false, getInspectedItemStatTrackerValue);
 							ItemShirtAsset shirtAsset = (ItemShirtAsset) itemAsset;
-							Material shirtMaterial = new Material(Shader.Find("Standard"));
+							Material shirtMaterial = StandardShaderUtils.CreateStandardMaterial();
 							shirtMaterial.mainTexture = shirtAsset.shirt;
-							shirtMaterial.EnableKeyword("_ALPHATEST_ON");
-							shirtMaterial.SetFloat("_Mode", 1);
+							StandardShaderUtils.setModeToCutout(shirtMaterial);
 
 							if (shirtAsset.metallic != null)
 							{
-								shirtMaterial.EnableKeyword("_METALLICGLOSSMAP");
+								shirtMaterial.EnableKeyword("_METALLICSPECGLOSSMAP");
 								shirtMaterial.SetTexture("_MetallicGlossMap", shirtAsset.metallic);
-								shirtMaterial.SetFloat("_Glossiness", 1f);
+								shirtMaterial.SetFloat("_Smoothness", 1f);
 							}
 							else
 							{
-								shirtMaterial.SetFloat("_Glossiness", 0f);
+								shirtMaterial.SetFloat("_Smoothness", 0f);
 							}
 
 							if (shirtAsset.emission != null)
@@ -198,7 +197,7 @@ namespace SDG.Unturned
 
 							model.GetComponent<Renderer>().material = shirtMaterial;
 							model.gameObject.AddComponent<DestroyMaterialOnDestroy>().instantiatedMaterial = shirtMaterial;
-							break; 
+							break;
 						}
 
 						case EItemType.PANTS:
@@ -207,20 +206,19 @@ namespace SDG.Unturned
 							model = ItemTool.getItem(2, 0, 100, itemAsset.getState(), false, getInspectedItemStatTrackerValue);
 
 							ItemPantsAsset pantsAsset = (ItemPantsAsset) itemAsset;
-							Material pantsMaterial = new Material(Shader.Find("Standard"));
+							Material pantsMaterial = StandardShaderUtils.CreateStandardMaterial();
 							pantsMaterial.mainTexture = pantsAsset.pants;
-							pantsMaterial.EnableKeyword("_ALPHATEST_ON");
-							pantsMaterial.SetFloat("_Mode", 1);
+							StandardShaderUtils.setModeToCutout(pantsMaterial);
 
 							if (pantsAsset.metallic != null)
 							{
-								pantsMaterial.EnableKeyword("_METALLICGLOSSMAP");
+								pantsMaterial.EnableKeyword("_METALLICSPECGLOSSMAP");
 								pantsMaterial.SetTexture("_MetallicGlossMap", pantsAsset.metallic);
-								pantsMaterial.SetFloat("_Glossiness", 1f);
+								pantsMaterial.SetFloat("_Smoothness", 1f);
 							}
 							else
 							{
-								pantsMaterial.SetFloat("_Glossiness", 0f);
+								pantsMaterial.SetFloat("_Smoothness", 0f);
 							}
 
 							if (pantsAsset.emission != null)

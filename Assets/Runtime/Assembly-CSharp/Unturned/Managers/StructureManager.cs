@@ -529,7 +529,7 @@ namespace SDG.Unturned
 					Vector3 copyPosition = structure.model.position;
 					Quaternion copyRotation = structure.model.rotation;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					CheckStructureRegionCoordIsCorrect(structure, x, y, "ReceiveDestroyStructure");
 #endif
 
@@ -567,8 +567,8 @@ namespace SDG.Unturned
 					rb.useGravity = true;
 					rb.isKinematic = false;
 					rb.AddForce(ragdoll);
-					rb.drag = 0.5f;
-					rb.angularDrag = 0.1f;
+					rb.linearDamping = 0.5f;
+					rb.angularDamping = 0.1f;
 					debrisTransform.localScale *= 0.75f;
 
 					Destroy(debrisGameObject, 8f);
@@ -657,9 +657,9 @@ namespace SDG.Unturned
 				return null;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			asset.instantiationSampler.Begin();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			Transform structure = null;
 
@@ -667,7 +667,7 @@ namespace SDG.Unturned
 			{
 				if (asset.eligibleForPooling)
 				{
-					int prefabKey = asset.structure.GetInstanceID();
+					EntityId prefabKey = asset.structure.GetEntityId();
 					Stack<GameObject> instances = pool.GetOrAddNew(prefabKey);
 					while (instances.Count > 0)
 					{
@@ -718,7 +718,7 @@ namespace SDG.Unturned
 
 				StructureDrop drop = new StructureDrop(structure, asset);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				CheckStructureRegionCoordIsCorrect(drop, region, "spawnStructure");
 #endif
 
@@ -758,9 +758,9 @@ namespace SDG.Unturned
 				}
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			asset.instantiationSampler.End();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			return structure;
 		}
@@ -1027,7 +1027,7 @@ namespace SDG.Unturned
 					}
 				}
 				instanceCount = 0;
-				pool = new Dictionary<int, Stack<GameObject>>();
+				pool = new Dictionary<EntityId, Stack<GameObject>>();
 				housingConnections = new HousingConnections();
 
 				if (Provider.isServer)
@@ -1269,7 +1269,7 @@ namespace SDG.Unturned
 
 			river.closeRiver();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			HashSet<uint> ids = new HashSet<uint>();
 			for (byte x = 0; x < Regions.WORLD_SIZE; x++)
 			{
@@ -1289,7 +1289,7 @@ namespace SDG.Unturned
 					}
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		private static void loadRegion(byte version, River river)
@@ -1391,7 +1391,7 @@ namespace SDG.Unturned
 					{
 						StructureDrop drop = region.drops.GetTail();
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						CheckStructureRegionCoordIsCorrect(drop, region, "loadRegion");
 #endif
 
@@ -1414,7 +1414,7 @@ namespace SDG.Unturned
 			{
 				StructureData data = structure.serversideData;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				CheckStructureRegionCoordIsCorrect(structure, region, "saveRegion");
 #endif
 
@@ -1493,7 +1493,7 @@ namespace SDG.Unturned
 			if (drop.asset.eligibleForPooling)
 			{
 				drop.model.gameObject.SetActive(false);
-				int prefabKey = drop.asset.structure.GetInstanceID();
+				EntityId prefabKey = drop.asset.structure.GetEntityId();
 				Stack<GameObject> instances = pool.GetOrAddNew(prefabKey);
 				instances.Push(drop.model.gameObject);
 			}
@@ -1506,7 +1506,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// Maps prefab unique id to inactive list.
 		/// </summary>
-		private Dictionary<int, Stack<GameObject>> pool;
+		private Dictionary<EntityId, Stack<GameObject>> pool;
 
 #if !DEDICATED_SERVER
 		internal static void HandleInstantiation(ref PlaceableInstantiationParameters instantiation)
@@ -1523,7 +1523,7 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		internal static void CheckStructureRegionCoordIsCorrect(StructureDrop structure, byte x, byte y, string context)
 		{
 			tryGetRegion(structure.model, out byte expected_x, out byte expected_y, out StructureRegion region);
@@ -1548,7 +1548,7 @@ namespace SDG.Unturned
 				}
 			}
 		}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		private System.Diagnostics.Stopwatch destroyTimer = new System.Diagnostics.Stopwatch();
 		private const int MIN_DESTROY_PER_FRAME = 10;

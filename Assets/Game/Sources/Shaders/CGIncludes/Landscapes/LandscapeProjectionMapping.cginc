@@ -18,32 +18,32 @@ float _Triplanar_Tertiary_Weight;
 //	return triplanarBlend(worldPos, worldNormal);
 //}
 
-float3 landscapePlanarSample3(sampler2D map, float3 worldPos)
+float3 landscapePlanarSample3(TEXTURE2D_PARAM(map, samplermap), float3 worldPos)
 {
-	return planarSample3(map, worldPos, _Triplanar_Primary_Size);
+	return planarSample3(TEXTURE2D_ARGS(map, samplermap), worldPos, _Triplanar_Primary_Size);
 }
 
-float4 landscapePlanarSample4(sampler2D map, float3 worldPos)
+float4 landscapePlanarSample4(TEXTURE2D_PARAM(map, samplermap), float3 worldPos)
 {
-	return planarSample4(map, worldPos, _Triplanar_Primary_Size);
+	return planarSample4(TEXTURE2D_ARGS(map, samplermap), worldPos, _Triplanar_Primary_Size);
 }
 
-float3 landscapeTriplanarSample3(sampler2D map, float3 worldPos, float3 blend)
+float3 landscapeTriplanarSample3(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float3 blend)
 {
-	return triplanarSample3(map, worldPos, blend, _Triplanar_Primary_Size);
-	//float3 primary = triplanarSample3(map, worldPos, blend, _Triplanar_Primary_Size);
-	//float3 secondary = triplanarSample3(map, worldPos, blend, _Triplanar_Secondary_Size);
-	//float3 tertiary = triplanarSample3(map, worldPos, blend, _Triplanar_Tertiary_Size);
+	return triplanarSample3(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Primary_Size);
+	//float3 primary = triplanarSample3(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Primary_Size);
+	//float3 secondary = triplanarSample3(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Secondary_Size);
+	//float3 tertiary = triplanarSample3(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Tertiary_Size);
 
 	//return primary * _Triplanar_Primary_Weight + secondary * _Triplanar_Secondary_Weight + tertiary * _Triplanar_Tertiary_Weight;
 }
 
-float4 landscapeTriplanarSample4(sampler2D map, float3 worldPos, float3 blend)
+float4 landscapeTriplanarSample4(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float3 blend)
 {
-	return triplanarSample4(map, worldPos, blend, _Triplanar_Primary_Size);
-	//float4 primary = triplanarSample4(map, worldPos, blend, _Triplanar_Primary_Size);
-	//float4 secondary = triplanarSample4(map, worldPos, blend, _Triplanar_Secondary_Size);
-	//float4 tertiary = triplanarSample4(map, worldPos, blend, _Triplanar_Tertiary_Size);
+	return triplanarSample4(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Primary_Size);
+	//float4 primary = triplanarSample4(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Primary_Size);
+	//float4 secondary = triplanarSample4(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Secondary_Size);
+	//float4 tertiary = triplanarSample4(TEXTURE2D_ARGS(map, samplermap), worldPos, blend, _Triplanar_Tertiary_Size);
 
 	//return primary * _Triplanar_Primary_Weight + secondary * _Triplanar_Secondary_Weight + tertiary * _Triplanar_Tertiary_Weight;
 }

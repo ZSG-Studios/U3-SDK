@@ -81,9 +81,9 @@ namespace SDG.Unturned
 			}
 			else
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				CommandWindow.LogWarning("Fuel tank ServerSetAmount invalid region");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 		}
 	}

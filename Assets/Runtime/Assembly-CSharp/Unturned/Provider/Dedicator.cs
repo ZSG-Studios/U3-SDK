@@ -119,14 +119,14 @@ namespace SDG.Unturned
 
 				int targetFrameRate = 50;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				string targetFrameRateString;
 				if (CommandLine.TryParseValue("-ApplicationTargetFrameRate", out targetFrameRateString))
 				{
 					// CommandLineValue<int> cannot be used at this point during startup.
 					int.TryParse(targetFrameRateString, out targetFrameRate);
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 				Application.targetFrameRate = targetFrameRate;
 				UnturnedLog.info($"Dedicated server set target update rate to {targetFrameRate}");

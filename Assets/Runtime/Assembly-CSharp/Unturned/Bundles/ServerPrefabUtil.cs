@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define LOG_SERVER_PREFAB_CLEANUP
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using System.Collections.Generic;
 using UnityEngine;
 using Unturned.SystemEx;
@@ -35,7 +35,7 @@ namespace SDG.Unturned
 					return true;
 				}
 
-				if (typesToRemove.Contains(component.GetType()))
+				if (typesToRemove.Contains(component.GetType()) || legacyClientTypes.Contains(component.GetType().FullName))
 				{
 					// Do *not* remove from list, will be destroyed later.
 					return false;
@@ -85,7 +85,7 @@ namespace SDG.Unturned
 			{
 				// Avoid inconsistent ordering exception if object has multiple components of the
 				// same type. (public issue #5525)
-				return lhs.GetInstanceID().CompareTo(rhs.GetInstanceID());
+				return lhs.GetEntityId().CompareTo(rhs.GetEntityId());
 			}
 
 			// Nelson 2025-12-04: if adding more dependencies here please make sure the dependency is ALSO in the typesToRemove set. ;)
@@ -93,7 +93,13 @@ namespace SDG.Unturned
 		}
 
 		private static List<Component> workingComponents = new List<Component>();
-		private static HashSet<System.Type> typesToRemove = new HashSet<System.Type>()
+		// Recognize old bundle components without depending on retired rendering APIs.
+        private static readonly HashSet<string> legacyClientTypes = new HashSet<string>
+        {
+            "UnityEngine.LensFlare", "UnityEngine.Projector", "UnityEngine.FlareLayer",
+            "UnityEngine.LightProbeProxyVolume"
+        };
+        private static HashSet<System.Type> typesToRemove = new HashSet<System.Type>()
 		{
 			typeof(LODGroup),
 			typeof(LODGroupAdditionalData),
@@ -103,18 +109,18 @@ namespace SDG.Unturned
 			typeof(TMPro.TextMeshPro),
 			typeof(TMPro.TextMeshProUGUI),
 			typeof(WindZone),
-			typeof(LensFlare),
 			// 2026-04-13: replacing ParticleSystemRenderer removal with ParticleSystem removal because some maps have a huge number of
 			// particle systems on the server. (100k+) This *may* have unintended side effects for mods using particle system collision
 			// for gameplay purposes (highly uncommon?), in which case a server-specific prefab can be used (or likely already is).
 			typeof(ParticleSystem),
-			typeof(Projector),
 			typeof(Camera),
+            typeof(UnityEngine.Rendering.Universal.UniversalAdditionalCameraData),
+            typeof(UnityEngine.Rendering.Universal.DecalProjector),
+            typeof(UnityEngine.Rendering.LensFlareComponentSRP),
+            typeof(UnityEngine.Rendering.Volume),
 			typeof(Skybox),
-			typeof(FlareLayer),
 			typeof(Light),
 			typeof(LightProbeGroup),
-			typeof(LightProbeProxyVolume),
 			typeof(ReflectionProbe),
 			typeof(Tree), // SpeedTree
 
@@ -170,7 +176,7 @@ namespace SDG.Unturned
 
 		static ServerPrefabUtil()
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			// Sanity-check list is valid.
 			foreach (System.Type componentType in typesToRemove)
 			{
@@ -179,7 +185,7 @@ namespace SDG.Unturned
 					Debug.LogWarning($"ServerPrefabUtil type \"{componentType}\" is not a component");
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		}
 
 		private static CommandLineFlag shouldLogAutoPlayAnimsInServerPrefabs = new CommandLineFlag(false, "-LogAutoPlayAnimsInServerPrefabs");

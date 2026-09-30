@@ -1,6 +1,6 @@
-Shader "Cosmetics/Rainbow" 
+Shader "Cosmetics/Rainbow"
 {
-	Properties 
+	Properties
 	{
 		_Albedo("Albedo", 2D) = "white" {}
 		_RainbowUV("Rainbow UV Scale", Vector) = (0, 0, 0, 0)
@@ -8,58 +8,84 @@ Shader "Cosmetics/Rainbow"
 		_RainbowOffset("Rainbow Vertex Scale", Vector) = (0, 0, 0, 0)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque"
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-			// Nelson 2026-04-09: noticed discontinuity with some effects, traced back to dynamic batching changing object-space coords. ;)
-			"DisableBatching" = "True"
-		}
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		LOD 200
-		
-		CGPROGRAM
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard vertex:vert 
-		#pragma target 3.0
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#include "UnityCG.cginc"
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		sampler2D _Albedo;
-		fixed2 _RainbowUV;
-		fixed2 _RainbowScale;
-		fixed3 _RainbowOffset;
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		struct Input
-		{
-			float3 localPos;
-		};
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void vert(inout appdata_full v, out Input OUT)
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
-			OUT.localPos = v.vertex.xyz;
-		}
-
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed3 vertex = IN.localPos * _RainbowOffset; // local vertex with unused axis removed
-			fixed rainbow = vertex.x + vertex.y + vertex.z; // get magnitude of vertex
-			fixed2 uv = _RainbowUV * rainbow + _RainbowScale * _Time.y; // scale uv and offset by time
-
-			fixed4 albedo = tex2D(_Albedo, uv);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = 1;
-			OUT.Metallic = 0;
-			OUT.Smoothness = 0;
-			OUT.Emission = albedo.rgb;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Cosmetics/Cosmetics-Rainbow.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

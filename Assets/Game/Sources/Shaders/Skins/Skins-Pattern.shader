@@ -1,6 +1,6 @@
-Shader "Skins/Pattern" 
+Shader "Skins/Pattern"
 {
-	Properties 
+	Properties
 	{
 		_ColorBase("Color Base", Color) = (1,1,1,1)
 		_AlbedoBase("Albedo Base", 2D) = "" {}
@@ -14,70 +14,84 @@ Shader "Skins/Pattern"
 		_EmissionSkin("Emission Skin", 2D) = "black" {}
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType"="Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
-		
-		CGPROGRAM
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard
-		#pragma target 3.0
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Pattern.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		fixed4 _ColorBase;
-		sampler2D _AlbedoBase;
-		fixed4 _ColorSkin;
-		sampler2D _AlbedoSkin;
-		sampler2D _MetallicBase;
-		sampler2D _MetallicSkin;
-		sampler2D _NormalBase;
-		sampler2D _NormalSkin;
-		sampler2D _EmissionBase;
-		sampler2D _EmissionSkin;
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Pattern.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		struct Input
-		{
-			float2 uv_AlbedoBase;
-			float2 uv_AlbedoSkin;
-		};
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Pattern.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			fixed4 albedoBase = tex2D(_AlbedoBase, IN.uv_AlbedoBase);
-			fixed4 albedoSkin = tex2D(_AlbedoSkin, IN.uv_AlbedoSkin);
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 metallicBase = tex2D(_MetallicBase, IN.uv_AlbedoBase);
-			fixed4 metallicSkin = tex2D(_MetallicSkin, IN.uv_AlbedoSkin);
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Pattern.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 normalBase = tex2D(_NormalBase, IN.uv_AlbedoBase);
-			fixed4 normalSkin = tex2D(_NormalSkin, IN.uv_AlbedoSkin);
-
-			fixed4 emissionBase = tex2D(_EmissionBase, IN.uv_AlbedoBase);
-			fixed4 emissionSkin = tex2D(_EmissionSkin, IN.uv_AlbedoSkin);
-
-			fixed4 albedo = albedoBase * _ColorBase * albedoBase.a + albedoSkin * _ColorSkin * (1.0 - albedoBase.a);
-			fixed4 metallic = metallicBase * albedoBase.a + metallicSkin * (1.0 - albedoBase.a);
-			fixed4 normal = normalBase * albedoBase.a + normalSkin * (1.0 - albedoBase.a);
-			fixed4 emission = emissionBase * albedoBase.a + emissionSkin * (1.0 - albedoBase.a);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = albedo.a;
-
-			OUT.Metallic = metallic.r;
-			OUT.Normal = UnpackNormal(normal);
-			OUT.Smoothness = metallic.a;
-
-			// 2023-01-31: Multiplying by 2 is hack to make emissive glow consistent throughout the game.
-			// Previously all standard materials with emissive were updated to use color 2.0. (public issue #3680)
-			OUT.Emission = emission.rgb * 2.0;
-		}
-
-		ENDCG
-	} 
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Skins/Skins-Pattern.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

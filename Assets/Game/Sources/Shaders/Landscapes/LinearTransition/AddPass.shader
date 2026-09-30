@@ -1,111 +1,191 @@
-Shader "Landscapes/LinearTransition/AddPass" 
+// Adapted from Unity URP 17.7.0. Copyright Unity Technologies. See Unity package LICENSE.md.
+Shader "Landscapes/LinearTransition/AddPass"
 {
-	Properties 
-	{
-		[HideInInspector] _Control("Control (RGBA)", 2D) = "Black" {}
-		[HideInInspector] _Splat3("Layer 3 (A)", 2D) = "Black" {}
-		[HideInInspector] _Splat2("Layer 2 (B)", 2D) = "Black" {}
-		[HideInInspector] _Splat1("Layer 1 (G)", 2D) = "Black" {}
-		[HideInInspector] _Splat0("Layer 0 (R)", 2D) = "Black" {}
-		[HideInInspector] _Normal3("Mask 3 (A)", 2D) = "Black" {} // Named normal so that the terrain engine will pass them in
-		[HideInInspector] _Normal2("Mask 2 (B)", 2D) = "Black" {} // Named normal so that the terrain engine will pass them in
-		[HideInInspector] _Normal1("Mask 1 (G)", 2D) = "Black" {} // Named normal so that the terrain engine will pass them in
-		[HideInInspector] _Normal0("Mask 0 (R)", 2D) = "Black" {} // Named normal so that the terrain engine will pass them in
+    Properties
+    {
+        _UnturnedHeightBlend("Height blending", Float) = 0
+        _Fade("Height transition fade", Float) = 0.2
+        // Layer count is passed down to guide height-blend enable/disable, due
+        // to the fact that heigh-based blend will be broken with multipass.
+        [HideInInspector] [PerRendererData] _NumLayersCount ("Total Layer Count", Float) = 1.0
 
-		[HideInInspector] _TerrainHolesTexture("Holes Map (RGB)", 2D) = "white" {}
-	}
+        // set by terrain engine
+        [HideInInspector] _Control("Control (RGBA)", 2D) = "red" {}
+        [HideInInspector] _Splat3("Layer 3 (A)", 2D) = "white" {}
+        [HideInInspector] _Splat2("Layer 2 (B)", 2D) = "white" {}
+        [HideInInspector] _Splat1("Layer 1 (G)", 2D) = "white" {}
+        [HideInInspector] _Splat0("Layer 0 (R)", 2D) = "white" {}
+        [HideInInspector] _Normal3("Normal 3 (A)", 2D) = "bump" {}
+        [HideInInspector] _Normal2("Normal 2 (B)", 2D) = "bump" {}
+        [HideInInspector] _Normal1("Normal 1 (G)", 2D) = "bump" {}
+        [HideInInspector] _Normal0("Normal 0 (R)", 2D) = "bump" {}
+        [HideInInspector][Gamma] _Metallic0("Metallic 0", Range(0.0, 1.0)) = 0.0
+        [HideInInspector][Gamma] _Metallic1("Metallic 1", Range(0.0, 1.0)) = 0.0
+        [HideInInspector][Gamma] _Metallic2("Metallic 2", Range(0.0, 1.0)) = 0.0
+        [HideInInspector][Gamma] _Metallic3("Metallic 3", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] _Mask3("Mask 3 (A)", 2D) = "grey" {}
+        [HideInInspector] _Mask2("Mask 2 (B)", 2D) = "grey" {}
+        [HideInInspector] _Mask1("Mask 1 (G)", 2D) = "grey" {}
+        [HideInInspector] _Mask0("Mask 0 (R)", 2D) = "grey" {}
+        [HideInInspector] _Smoothness0("Smoothness 0", Range(0.0, 1.0)) = 1.0
+        [HideInInspector] _Smoothness1("Smoothness 1", Range(0.0, 1.0)) = 1.0
+        [HideInInspector] _Smoothness2("Smoothness 2", Range(0.0, 1.0)) = 1.0
+        [HideInInspector] _Smoothness3("Smoothness 3", Range(0.0, 1.0)) = 1.0
 
-	SubShader
-	{
-		Tags 
-		{
-			"Queue" = "Geometry-99"
-			"RenderType" = "AlphaTest"
-		}
+        // used in fallback on old cards & base map
+        [HideInInspector] _BaseMap("BaseMap (RGB)", 2D) = "white" {}
+        [HideInInspector] _BaseColor("Main Color", Color) = (1,1,1,1)
 
-		Stencil
-		{
-			Ref 1
-			WriteMask 1
-			Pass Replace
-		}
+        [HideInInspector] _TerrainHolesTexture("Holes Map (RGB)", 2D) = "white" {}
+    }
 
-		CGPROGRAM
+    HLSLINCLUDE
 
-		#pragma surface surf StandardSpecular decal:add vertex:SplatmapVert finalcolor:splatmapFinalColor finalprepass:splatmapFinalPrepass finalgbuffer:splatmapFinalGBuffer fullforwardshadows nometa
-		#pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap forwardadd
-		#pragma multi_compile_fog
-		#pragma target 3.0
+    #pragma multi_compile_fragment __ _ALPHATEST_ON
 
-		#pragma multi_compile_local __ _ALPHATEST_ON
+    ENDHLSL
 
-		#define TERRAIN_SPLAT_ADDPASS
-		#define TERRAIN_STANDARD_SHADER
-		#include "UnityPBSLighting.cginc"
-		#define TERRAIN_SURFACE_OUTPUT SurfaceOutputStandardSpecular
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Landscapes/LandscapeProjectionMapping.cginc"
-		#pragma multi_compile ___ TRIPLANAR_MAPPING_ON
-		#pragma multi_compile ___ IS_RAINING IS_SNOWING
-#ifdef IS_SNOWING
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Snow.cginc"
+    SubShader
+    {
+        Tags { "Queue" = "Geometry-99" "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "UniversalMaterialType" = "Lit" "IgnoreProjector" = "True"}
+
+        Pass
+        {
+            Name "ForwardLit"
+            Tags { "LightMode" = "UniversalForward" }
+            ZWrite Off
+            Blend One One
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 3.0
+
+            #pragma vertex SplatmapVert
+            #pragma fragment SplatmapFragment
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _LIGHT_FALLOFF_LINEAR
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile_fragment _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _EXPOSURE
+#if defined(UNITY_PLATFORM_META_QUEST)
+            #pragma multi_compile _ META_QUEST_ORTHO_PROJ
+            #pragma multi_compile _ META_QUEST_NO_SPOTLIGHTS_LIGHT_LOOP
 #endif
-#ifdef IS_RAINING
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Rain.cginc"
-#endif
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Landscapes/LandscapeCommon.cginc"
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Landscapes/LandscapeLinearTransition.cginc"
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_ATLAS
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_REFLECTION
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile_fragment _ _VOLUMETRIC_FOG
+            #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
 
-		void surf(Input IN, inout SurfaceOutputStandardSpecular OUT)
-		{
-			#ifdef _ALPHATEST_ON
-				ClipHoles(IN.tc.xy);
-			#endif
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
+            #pragma multi_compile_fragment _ REFLECTION_PROBE_ROTATION
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+            #pragma multi_compile_fragment _ DEBUG_DISPLAY
 
-			float4 sc = tex2D(_Control, IN.tc);
+            #pragma shader_feature_local_fragment _TERRAIN_BLEND_HEIGHT
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local_fragment _MASKMAP
+            // Sample normal in pixel shader when doing instancing
+            #pragma shader_feature_local _TERRAIN_INSTANCED_PERPIXEL_NORMAL
+            #define TERRAIN_SPLAT_ADDPASS
 
-#if defined(TRIPLANAR_MAPPING_ON) || defined(IS_SNOWING)
-			float3 blend = landscapeTriplanarBlend(IN.worldPos, IN.worldNormal);
-#endif
+            #if USE_DYNAMIC_BRANCH_FOG_KEYWORD && SHADER_API_VULKAN && SHADER_API_MOBILE
+            #define SKIP_SHADOWS_LIGHT_INDEX_CHECK 1
+            #endif
 
-			float weight = dot(sc, half4(1, 1, 1, 1));
-			sc /= (weight + 0.001);
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            ENDHLSL
+        }
 
-#ifdef TRIPLANAR_MAPPING_ON
-			float4 tex0 = landscapeTriplanarSample4(_Splat0, IN.worldPos, blend);
-			float4 tex1 = landscapeTriplanarSample4(_Splat1, IN.worldPos, blend);
-			float4 tex2 = landscapeTriplanarSample4(_Splat2, IN.worldPos, blend);
-			float4 tex3 = landscapeTriplanarSample4(_Splat3, IN.worldPos, blend);
-			float4 mask0 = landscapeTriplanarSample4(_Normal0, IN.worldPos, blend);
-			float4 mask1 = landscapeTriplanarSample4(_Normal1, IN.worldPos, blend);
-			float4 mask2 = landscapeTriplanarSample4(_Normal2, IN.worldPos, blend);
-			float4 mask3 = landscapeTriplanarSample4(_Normal3, IN.worldPos, blend);
-#else
-			float4 tex0 = landscapePlanarSample4(_Splat0, IN.worldPos);
-			float4 tex1 = landscapePlanarSample4(_Splat1, IN.worldPos);
-			float4 tex2 = landscapePlanarSample4(_Splat2, IN.worldPos);
-			float4 tex3 = landscapePlanarSample4(_Splat3, IN.worldPos);
-			float4 mask0 = landscapePlanarSample4(_Normal0, IN.worldPos);
-			float4 mask1 = landscapePlanarSample4(_Normal1, IN.worldPos);
-			float4 mask2 = landscapePlanarSample4(_Normal2, IN.worldPos);
-			float4 mask3 = landscapePlanarSample4(_Normal3, IN.worldPos);
-#endif
+        Pass
+        {
+            Name "GBuffer"
+            Tags{"LightMode" = "UniversalGBuffer"}
 
-			OUT.Albedo = tex0.rgb * sc.r + tex1.rgb * sc.g + tex2 * sc.b + tex3 * sc.a;
-			OUT.Alpha = weight;
+            ZWrite Off
+            Blend 0 One One
+            Blend 1 One One
+            Blend 2 One One
+            Blend 3 One One
+            // disable the features that aren't needed for add pass deferred rendering
+            Blend 4 Off
+            Blend 5 Off
+            Blend 6 Off
+            ColorMask RGB 0 // Don't write .a to RT0.
+            ColorMask 0 4 // Don't write to RT4~6 (depth as color, shadow mask, rendering layer)
+            ColorMask 0 5
+            ColorMask 0 6
 
-			#ifdef IS_RAINING
-			float puddle;
-			rainSpecular(IN.worldPos, IN.worldNormal, 1, OUT.Albedo, OUT.Specular, OUT.Smoothness);
-			#endif
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 4.5
 
-			#ifdef IS_SNOWING
-			float snowMask = mask0.r * sc.r + mask1.r * sc.g + mask2.r * sc.b + mask3.r * sc.a;
-			snow(IN.worldPos, blend, IN.viewDir, snowMask, OUT.Albedo);
-			#endif
-		}
+            // Deferred Rendering Path does not support the OpenGL-based graphics API:
+            // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
+            #pragma exclude_renderers gles3 glcore
 
-		ENDCG
-	}
+            #pragma vertex SplatmapVert
+            #pragma fragment SplatmapFragment
 
-	Fallback Off
+            //Note that the GBuffer pass in TerrainLitAdd disables all of the lighting related features
+            //as any deferred lighting is calculated in the base pass or later in the lighting shaders
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _EXPOSURE
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
+            #pragma multi_compile_fragment _ REFLECTION_PROBE_ROTATION
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            #pragma multi_compile_fragment _ _RENDER_PASS_ENABLED
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+
+            #pragma shader_feature_local _TERRAIN_BLEND_HEIGHT
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _MASKMAP
+            // Sample normal in pixel shader when doing instancing
+            #pragma shader_feature_local _TERRAIN_INSTANCED_PERPIXEL_NORMAL
+            #define TERRAIN_SPLAT_ADDPASS 1
+            #define TERRAIN_GBUFFER 1
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GBufferOutputFormat.hlsl"
+            ENDHLSL
+        }
+    }
+    Fallback "Hidden/Universal Render Pipeline/FallbackError"
 }

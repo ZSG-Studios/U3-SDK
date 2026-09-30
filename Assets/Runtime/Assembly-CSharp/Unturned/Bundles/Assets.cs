@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define WITH_ASSETS_PROFILING
 #define LOG_ASSET_REDIRECTORS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 using SDG.Framework.Devkit;
 using System;
@@ -279,9 +279,9 @@ namespace SDG.Unturned
 		/// </summary>
 		private static CommandLineFlag shouldLogSpawnInsertions = new CommandLineFlag(false, "-LogSpawnInsertions");
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		internal static CommandLineFlag shouldLoadCoreAssetBundleFromSteamInstall = new CommandLineFlag(false, "-LoadCoreAssetBundleFromSteamInstall");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		/// <summary>
 		/// Loaded master bundles.
@@ -595,6 +595,7 @@ namespace SDG.Unturned
 			{
 				string formattedPath = config.FormatAssetPathAndCache(reference.path);
 				T asset = config.assetBundle.LoadAsset<T>(formattedPath);
+				UniversalMaterialAdapter.UpgradeObject(asset);
 				if (asset == null)
 				{
 					UnturnedLog.warn("Failed to load content reference '{0}' from master bundle '{1}' as {2}", formattedPath, reference.name, typeof(T).Name);
@@ -2317,7 +2318,7 @@ namespace SDG.Unturned
 			if (shouldLoadAnyAssets)
 			{
 				string coreBundlesPath = Path.Combine(ReadWrite.PATH, "Bundles");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				if (!Directory.Exists(coreBundlesPath))
 				{
 					if (Provider.steamAppInstallDirectory != null)
@@ -2330,7 +2331,7 @@ namespace SDG.Unturned
 						yield break;
 					}
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				AddSearchLocation(coreBundlesPath, coreOrigin);
 
 				if (Dedicator.IsDedicatedServer)
@@ -2463,7 +2464,7 @@ namespace SDG.Unturned
 				try
 				{
 					asset.PreResaveAsset(asset.OriginParsedData);
-					
+
 					const bool append = false;
 					using (StreamWriter fileStream = new StreamWriter(asset.absoluteOriginFilePath, append, System.Text.Encoding.UTF8))
 					{
@@ -2582,13 +2583,13 @@ namespace SDG.Unturned
 				}
 
 				// Test builds can still host dedicated server for convenience.
-#if !DEDICATED_SERVER && !UNITY_EDITOR && !DEVELOPMENT_BUILD
+#if !DEDICATED_SERVER && !UNITY_EDITOR && !UNITY_ENABLE_CHECKS
 				CommandWindow.LogError("Hosting dedicated servers using client files has been deprecated since June 2019.");
 				CommandWindow.Log("Please use the standalone dedicated server app ID 1110390 available through SteamCMD instead.");
 				CommandWindow.Log("For more information and an installation guide read more at:");
 				CommandWindow.Log("https://docs.smartlydressedgames.com/en/stable/servers/server-hosting.html");
 				return; // Abort startup.
-#endif // !DEDICATED_SERVER && !UNITY_EDITOR && !DEVELOPMENT_BUILD
+#endif // !DEDICATED_SERVER && !UNITY_EDITOR && !UNITY_ENABLE_CHECKS
 
 				// AFTER the client-as-server error, whoops the initial Steam redist error update was confusing.
 				if (!TestDedicatedServerSteamRedist())
@@ -2666,7 +2667,7 @@ namespace SDG.Unturned
 		public static void ReceiveKickForHashMismatch(System.Guid guid, string serverName, string serverFriendlyName, byte[] serverHash, string serverAssetBundleNameWithoutExtension, string serverAssetOrigin)
 		{
 			bool shouldVerifyGameFiles;
-			
+
 			Asset asset = find(guid);
 			if (asset != null)
 			{

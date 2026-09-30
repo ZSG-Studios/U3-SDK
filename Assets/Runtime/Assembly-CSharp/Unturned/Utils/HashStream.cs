@@ -44,12 +44,12 @@ namespace SDG.Unturned
 				{
 					hashAlgo.Initialize();
 				}
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				else
 				{
 					UnityEngine.Debug.LogErrorFormat("Unsupported hash stream position change? {0}", value);
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				underlyingStream.Position = value;
 			}
 		}
@@ -73,7 +73,7 @@ namespace SDG.Unturned
 			{
 				hashAlgo.Initialize();
 			}
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			else
 			{
 				bool seekingToCurrentPosition = origin == SeekOrigin.Begin && offset == Position;
@@ -82,7 +82,7 @@ namespace SDG.Unturned
 					UnityEngine.Debug.LogErrorFormat("Unsupported hash stream seek from {0} to {1} ({2})", Position, offset, origin);
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			return underlyingStream.Seek(offset, origin);
 		}
 

@@ -19,32 +19,32 @@ float3 triplanarBlend(float3 worldPos, float3 worldNormal, float sharpness)
 	return blend;
 }
 
-float3 planarSample3(sampler2D map, float3 worldPos, float scale)
+float3 planarSample3(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float scale)
 {
-	float3 sample_y = tex2D(map, worldPos.xz / scale);
+	float3 sample_y = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xz / scale).rgb;
 	return sample_y;
 }
 
-float4 planarSample4(sampler2D map, float3 worldPos, float scale)
+float4 planarSample4(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float scale)
 {
-	float4 sample_y = tex2D(map, worldPos.xz / scale);
+	float4 sample_y = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xz / scale);
 	return sample_y;
 }
 
-float3 triplanarSample3(sampler2D map, float3 worldPos, float3 blend, float scale)
+float3 triplanarSample3(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float3 blend, float scale)
 {
-	float3 sample_x = tex2D(map, worldPos.zy / scale);
-	float3 sample_y = tex2D(map, worldPos.xz / scale);
-	float3 sample_z = tex2D(map, worldPos.xy / scale);
+	float3 sample_x = SAMPLE_TEXTURE2D(map, samplermap, worldPos.zy / scale).rgb;
+	float3 sample_y = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xz / scale).rgb;
+	float3 sample_z = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xy / scale).rgb;
 
 	return sample_x * blend.x + sample_y * blend.y + sample_z * blend.z;
 }
 
-float4 triplanarSample4(sampler2D map, float3 worldPos, float3 blend, float scale)
+float4 triplanarSample4(TEXTURE2D_PARAM(map, samplermap), float3 worldPos, float3 blend, float scale)
 {
-	float4 sample_x = tex2D(map, worldPos.zy / scale);
-	float4 sample_y = tex2D(map, worldPos.xz / scale);
-	float4 sample_z = tex2D(map, worldPos.xy / scale);
+	float4 sample_x = SAMPLE_TEXTURE2D(map, samplermap, worldPos.zy / scale);
+	float4 sample_y = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xz / scale);
+	float4 sample_z = SAMPLE_TEXTURE2D(map, samplermap, worldPos.xy / scale);
 
 	return sample_x * blend.x + sample_y * blend.y + sample_z * blend.z;
 }

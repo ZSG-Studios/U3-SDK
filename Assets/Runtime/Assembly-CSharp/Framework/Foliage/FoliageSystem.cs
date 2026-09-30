@@ -440,7 +440,7 @@ namespace SDG.Framework.Foliage
 		{
 			// 0 draw distance
 			new FoliageCoord[0],
-			
+
 			// 1 draw distance
 			// X X X
 			// X X X
@@ -643,7 +643,7 @@ namespace SDG.Framework.Foliage
 				new FoliageCoord(1, -4),
 				new FoliageCoord(2, -4),
 			},
-			
+
 			// 5 draw distance
 			//         X X X
 			//     X X X X X X X
@@ -773,7 +773,7 @@ namespace SDG.Framework.Foliage
 				activeMatrixLists = matrixListPool;
 				matrixListPool = temp;
 			}
-			
+
 			FoliageCoord cameraCoord = new FoliageCoord(position);
 
 			UnityEngine.Profiling.Profiler.BeginSample("Draw Tiles");
@@ -954,21 +954,30 @@ namespace SDG.Framework.Foliage
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void DrawInstances(in FoliageInstancingBatchConfig config, Matrix4x4[] matrices, int matrixCount, Camera camera)
 		{
+			var parameters = new RenderParams(config.material) { camera = camera, layer = foliageRenderLayer,
+				shadowCastingMode = config.castShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off,
+				receiveShadows = true };
 			// Nelson 2025-05-02: branching here is ~0.2 ms faster than calling DrawInstanced vs DrawNonInstanced
 			if (shouldDrawWithoutInstancing)
 			{
 				UnityEngine.Profiling.Profiler.BeginSample("DrawMesh");
 				for (int matrixIndex = 0; matrixIndex < matrixCount; matrixIndex++)
 				{
-					Graphics.DrawMesh(config.mesh, matrices[matrixIndex], config.material, foliageRenderLayer, camera, 0, null, config.castShadows, true);
+					var matrix = matrices[matrixIndex];
+					var bounds = config.mesh.bounds;
+					var x = matrix.MultiplyVector(new Vector3(bounds.extents.x, 0f, 0f));
+					var y = matrix.MultiplyVector(new Vector3(0f, bounds.extents.y, 0f));
+					var z = matrix.MultiplyVector(new Vector3(0f, 0f, bounds.extents.z));
+					parameters.worldBounds = new Bounds(matrix.MultiplyPoint3x4(bounds.center), 2f * new Vector3(
+						Mathf.Abs(x.x) + Mathf.Abs(y.x) + Mathf.Abs(z.x), Mathf.Abs(x.y) + Mathf.Abs(y.y) + Mathf.Abs(z.y), Mathf.Abs(x.z) + Mathf.Abs(y.z) + Mathf.Abs(z.z)));
+					Graphics.RenderMesh(parameters, config.mesh, 0, matrix);
 				}
 				UnityEngine.Profiling.Profiler.EndSample();
 			}
 			else
 			{
-				UnityEngine.Rendering.ShadowCastingMode shadowCastingMode = config.castShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
 				UnityEngine.Profiling.Profiler.BeginSample("DrawMeshInstanced");
-				Graphics.DrawMeshInstanced(config.mesh, 0, config.material, matrices, matrixCount, null, shadowCastingMode, true, foliageRenderLayer, camera);
+				Graphics.RenderMeshInstanced(parameters, config.mesh, 0, matrices, matrixCount);
 				UnityEngine.Profiling.Profiler.EndSample();
 			}
 		}

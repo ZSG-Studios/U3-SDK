@@ -229,7 +229,7 @@ namespace SDG.HostBans
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		public void Dump(System.Text.StringBuilder sb)
 		{
 			foreach (HostBanIPv4Filter bannedAddress in addresses)
@@ -260,6 +260,6 @@ namespace SDG.HostBans
 				sb.AppendLine(bannedSteamId.ToString());
 			}
 		}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 	}
 }

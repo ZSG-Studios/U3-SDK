@@ -61,9 +61,10 @@ namespace SDG.Unturned
 			active = true;
 
 			// Only show browse servers button if multiplayer warning has already been shown.
-#if UNITY_64
-			browseServersButton.IsVisible = !OptionsSettings.ShouldShowOnlineSafetyMenu;
-#endif
+if (System.IntPtr.Size == 8)
+{
+				browseServersButton.IsVisible = !OptionsSettings.ShouldShowOnlineSafetyMenu;
+}
 
 			container.AnimateIntoView();
 		}
@@ -740,9 +741,10 @@ namespace SDG.Unturned
 			browseServersButton.OnClicked += onClickedBrowseServersButton;
 			container.AddChild(browseServersButton);
 
-#if !UNITY_64
-			browseServersButton.IsVisible = false;
-#endif // !UNITY_64
+if (System.IntPtr.Size == 4)
+{
+				browseServersButton.IsVisible = false;
+}
 
 			modeButtonState = new SleekButtonState(new GUIContent(localization.format("Easy_Button"), icons.load<Texture>("Easy")), new GUIContent(localization.format("Normal_Button"), icons.load<Texture>("Normal")), new GUIContent(localization.format("Hard_Button"), icons.load<Texture>("Hard")));
 			modeButtonState.PositionOffset_X = -305;

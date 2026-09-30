@@ -31,6 +31,8 @@ namespace SDG.Unturned
 		protected Transform displayModel;
 		protected ItemAsset displayAsset;
 
+		[System.NonSerialized]
+
 		public Item displayItem;
 		public ushort displaySkin;
 		public ushort displayMythic;

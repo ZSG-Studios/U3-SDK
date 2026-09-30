@@ -471,7 +471,7 @@ namespace SDG.Unturned
 				UnturnedLog.info("UnityEventMsg {0}: '{1}'", player.playerID.steamID, text);
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (player != null)
 			{
 				if (text == "fly")
@@ -483,7 +483,7 @@ namespace SDG.Unturned
 					player.player.life.enableGodMode = !player.player.life.enableGodMode;
 				}
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			Color color = Color.white;
 			if (player.isAdmin && !Provider.hideAdmins)
@@ -895,7 +895,7 @@ namespace SDG.Unturned
 			bool addedToAny = false;
 			List<ReverbGizmoComponent> gizmoComponents = new List<ReverbGizmoComponent>();
 
-			AudioReverbZone[] zones = FindObjectsByType<AudioReverbZone>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+			AudioReverbZone[] zones = FindObjectsByType<AudioReverbZone>(FindObjectsInactive.Exclude);
 			if (!zones.IsNullOrEmpty())
 			{
 				foreach (AudioReverbZone zone in zones)

@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define WITH_EXPLOSION_GIZMOS
 // #define WITH_BULLET_IMPACT_GIZMOS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetTransport;
 using Steamworks;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace SDG.Unturned
 
 	/// <summary>
 	/// Implemented by components to support taking damage from explosions.
-	/// Not intended for external use (yet?) and may need to change. 
+	/// Not intended for external use (yet?) and may need to change.
 	/// </summary>
 	public interface IExplosionDamageable
 		// Implements equatable for HashSet<IExplosionDamageable>

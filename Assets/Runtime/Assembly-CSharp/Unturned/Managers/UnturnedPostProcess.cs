@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.Universal;
 
 namespace SDG.Unturned
 {
@@ -26,13 +26,17 @@ namespace SDG.Unturned
 				if (_disableAntiAliasingForScreenshot != value)
 				{
 					_disableAntiAliasingForScreenshot = value;
-					if (basePostProcessLayer != null)
+					if (baseCameraData != null)
 					{
-						applyAntiAliasing(basePostProcessLayer);
+						applyAntiAliasing(baseCameraData);
 					}
-					if (scopePostProcessLayer != null)
+					if (scopeCameraData != null)
 					{
-						applyAntiAliasing(scopePostProcessLayer);
+						applyAntiAliasing(scopeCameraData);
+					}
+					if (viewmodelCameraData != null)
+					{
+						applyAntiAliasing(viewmodelCameraData);
 					}
 				}
 			}
@@ -46,25 +50,44 @@ namespace SDG.Unturned
 
 		public void setBaseCamera(Camera baseCamera)
 		{
-			basePostProcessLayer = baseCamera.GetComponent<PostProcessLayer>();
-
-			// Deferred fog excludes skybox because Unturned treats "atmosphere" fog separately.
-			basePostProcessLayer.fog.enabled = true;
-			basePostProcessLayer.fog.excludeSkybox = true;
+			if (baseCameraData != null && viewmodelCameraData != null)
+				baseCameraData.cameraStack.Remove(viewmodelCameraData.GetComponent<Camera>());
+			baseCameraData = baseCamera.GetUniversalAdditionalCameraData();
+			baseCameraData.renderType = CameraRenderType.Base;
+			baseCameraData.renderPostProcessing = true;
+			baseCameraData.volumeLayerMask = 1 << BASE_LAYER;
+			baseCameraData.requiresDepthTexture = true;
+			baseCameraData.requiresColorTexture = true;
+			UniversalCameraSettings.Apply(baseCamera);
+			if (viewmodelCameraData != null)
+				baseCameraData.cameraStack.Add(viewmodelCameraData.GetComponent<Camera>());
+			applyAntiAliasing(baseCameraData);
 		}
 
 		public void setOverlayCamera(Camera overlayCamera)
 		{
-			viewmodelPostProcessLayer = overlayCamera.GetComponent<PostProcessLayer>();
-			viewmodelPostProcessLayer.fog.enabled = false;
-			viewmodelPostProcessLayer.fog.excludeSkybox = true;
+			if (baseCameraData != null && viewmodelCameraData != null)
+				baseCameraData.cameraStack.Remove(viewmodelCameraData.GetComponent<Camera>());
+			viewmodelCameraData = overlayCamera.GetUniversalAdditionalCameraData();
+			viewmodelCameraData.renderType = CameraRenderType.Overlay;
+			// Overlay cameras clear depth by default in URP.
+			viewmodelCameraData.renderPostProcessing = true;
+			viewmodelCameraData.volumeLayerMask = 1 << VIEWMODEL_LAYER;
+			UniversalCameraSettings.Apply(overlayCamera, true);
+			if (baseCameraData != null && !baseCameraData.cameraStack.Contains(overlayCamera))
+				baseCameraData.cameraStack.Add(overlayCamera);
+			applyAntiAliasing(baseCameraData);
 		}
 
 		public void setScopeCamera(Camera scopeCamera)
 		{
-			scopePostProcessLayer = scopeCamera.GetComponent<PostProcessLayer>();
-			scopePostProcessLayer.fog.enabled = true; // Refer to setBaseCamera.
-			scopePostProcessLayer.fog.excludeSkybox = true;
+			scopeCameraData = scopeCamera.GetUniversalAdditionalCameraData();
+			scopeCameraData.renderType = CameraRenderType.Base;
+			scopeCameraData.renderPostProcessing = true;
+			scopeCameraData.volumeLayerMask = 1 << SCOPE_LAYER;
+			scopeCameraData.requiresDepthTexture = true;
+			UniversalCameraSettings.Apply(scopeCamera);
+			applyAntiAliasing(scopeCameraData);
 		}
 
 		public bool IsSingleRenderScopeActive()
@@ -108,7 +131,7 @@ namespace SDG.Unturned
 			baseProfile.vignette.active = isHallucinating;
 		}
 
-		private void tickHallucinationColorGrading(PostProcessProfileWrapper profile, float deltaTime)
+		private void tickHallucinationColorGrading(VolumeProfileWrapper profile, float deltaTime)
 		{
 			float cgSpeed = 2.5f; // How much to increase hue shift per second. Hue shift ranges from -180 to 180
 			float hueShift = profile.colorGrading.hueShift.value;
@@ -141,13 +164,17 @@ namespace SDG.Unturned
 		/// </summary>
 		public void applyUserSettings()
 		{
-			if (basePostProcessLayer != null)
+			if (baseCameraData != null)
 			{
-				applyAntiAliasing(basePostProcessLayer);
+				applyAntiAliasing(baseCameraData);
 			}
-			if (scopePostProcessLayer != null)
+			if (scopeCameraData != null)
 			{
-				applyAntiAliasing(scopePostProcessLayer);
+				applyAntiAliasing(scopeCameraData);
+			}
+			if (viewmodelCameraData != null)
+			{
+				applyAntiAliasing(viewmodelCameraData);
 			}
 
 			syncAmbientOcclusion();
@@ -169,9 +196,13 @@ namespace SDG.Unturned
 
 		private void syncAmbientOcclusion()
 		{
-			baseProfile.ambientOcclusion.active = GraphicsSettings.isAmbientOcclusionEnabled;
-			viewmodelProfile.ambientOcclusion.active = GraphicsSettings.isAmbientOcclusionEnabled;
-			scopeProfile.ambientOcclusion.active = GraphicsSettings.isAmbientOcclusionEnabled;
+			// Inactive components fall back to URP's default stack values. Override zero explicitly.
+			baseProfile.ambientOcclusion.active = true;
+			viewmodelProfile.ambientOcclusion.active = true;
+			scopeProfile.ambientOcclusion.active = true;
+			baseProfile.ambientOcclusion.intensity = GraphicsSettings.isAmbientOcclusionEnabled ? .25f : 0f;
+			viewmodelProfile.ambientOcclusion.intensity = GraphicsSettings.isAmbientOcclusionEnabled ? 1f : 0f;
+			scopeProfile.ambientOcclusion.intensity = GraphicsSettings.isAmbientOcclusionEnabled ? .25f : 0f;
 		}
 
 		private void syncBloom()
@@ -222,45 +253,33 @@ namespace SDG.Unturned
 
 		private void syncScreenSpaceReflections()
 		{
-			bool active = GraphicsSettings.reflectionQuality != EGraphicQuality.OFF && GraphicsSettings.renderMode == ERenderMode.DEFERRED;
-			baseProfile.screenSpaceReflections.active = active;
-			scopeProfile.screenSpaceReflections.active = false;
+			// Current URP SSR supplies a depth/normal prepass for Forward+ as well as Deferred+.
+			bool active = GraphicsSettings.reflectionQuality != EGraphicQuality.OFF;
+			baseProfile.screenSpaceReflections.active = true;
+			baseProfile.screenSpaceReflections.mode.Override(active ? ScreenSpaceReflectionVolumeSettings.ReflectionMode.OpaquesOnly
+				: ScreenSpaceReflectionVolumeSettings.ReflectionMode.Disabled);
+			viewmodelProfile.screenSpaceReflections.active = true;
+			viewmodelProfile.screenSpaceReflections.mode.Override(ScreenSpaceReflectionVolumeSettings.ReflectionMode.Disabled);
+			scopeProfile.screenSpaceReflections.active = true;
+			scopeProfile.screenSpaceReflections.mode.Override(ScreenSpaceReflectionVolumeSettings.ReflectionMode.Disabled);
 
 			if (!active)
 				return;
 
-			ScreenSpaceReflectionPreset preset;
-			switch (GraphicsSettings.reflectionQuality)
-			{
-				default:
-					preset = ScreenSpaceReflectionPreset.Low;
-					break;
-
-				case EGraphicQuality.LOW:
-					preset = ScreenSpaceReflectionPreset.Low;
-					break;
-
-				case EGraphicQuality.MEDIUM:
-					preset = ScreenSpaceReflectionPreset.Medium;
-					break;
-
-				case EGraphicQuality.HIGH:
-					preset = ScreenSpaceReflectionPreset.High;
-					break;
-
-				case EGraphicQuality.ULTRA:
-					preset = ScreenSpaceReflectionPreset.Ultra;
-					break;
-			}
-
-			baseProfile.screenSpaceReflections.preset.Override(preset);
+			// Native URP SSR quality: preserve user quality intent through its current parameters.
+			int steps = GraphicsSettings.reflectionQuality == EGraphicQuality.LOW ? 16
+				: GraphicsSettings.reflectionQuality == EGraphicQuality.MEDIUM ? 32 : 64;
+			baseProfile.screenSpaceReflections.maxRaySteps.Override(steps);
+			baseProfile.screenSpaceReflections.resolution.Override(GraphicsSettings.reflectionQuality >= EGraphicQuality.HIGH
+				? ScreenSpaceReflectionVolumeSettings.Resolution.Full : ScreenSpaceReflectionVolumeSettings.Resolution.Half);
 		}
 
-		private void applyAntiAliasing(PostProcessLayer layer)
+		private void applyAntiAliasing(UniversalAdditionalCameraData layer)
 		{
+			if (layer == null) return;
 			if (_disableAntiAliasingForScreenshot)
 			{
-				layer.antialiasingMode = PostProcessLayer.Antialiasing.None;
+				layer.antialiasing = AntialiasingMode.None;
 				return;
 			}
 
@@ -268,34 +287,37 @@ namespace SDG.Unturned
 			{
 				default:
 				case EAntiAliasingType.OFF:
-					layer.antialiasingMode = PostProcessLayer.Antialiasing.None;
+					layer.antialiasing = AntialiasingMode.None;
 					break;
 
 				case EAntiAliasingType.FXAA:
-					layer.antialiasingMode = PostProcessLayer.Antialiasing.FastApproximateAntialiasing;
+					layer.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
 					break;
 
 				case EAntiAliasingType.TAA:
-					layer.antialiasingMode = PostProcessLayer.Antialiasing.TemporalAntialiasing;
+					// URP does not support temporal AA on a camera stack. Use its native SMAA for that case.
+					layer.antialiasing = layer.renderType == CameraRenderType.Base && layer.cameraStack.Count == 0
+						? AntialiasingMode.TemporalAntiAliasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
 					break;
 
 				case EAntiAliasingType.SMAA:
-					layer.antialiasingMode = PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing;
+					layer.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
 					break;
 			}
 		}
 
-		private PostProcessProfileWrapper createGlobalProfile(string name, int physicsLayer, EPostProcessLayer layer)
+		private VolumeProfileWrapper createGlobalProfile(string name, int physicsLayer, EVolumeLayer layer)
 		{
 			GameObject volumeGameObject = new GameObject(name);
 			volumeGameObject.transform.parent = transform;
 			volumeGameObject.layer = physicsLayer;
 
-			PostProcessVolume volume = volumeGameObject.AddComponent<PostProcessVolume>();
+			Volume volume = volumeGameObject.AddComponent<Volume>();
 			volume.isGlobal = true;
 			volume.priority = 1.0f;
 
-			return new PostProcessProfileWrapper(volume.profile, layer); // Instantiates an empty profile.
+			volume.sharedProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+			return new VolumeProfileWrapper(volume.sharedProfile, layer); // Instantiates an empty profile.
 		}
 
 		public void initialize()
@@ -309,12 +331,12 @@ namespace SDG.Unturned
 			instance = this;
 			DontDestroyOnLoad(this);
 
-			baseProfile = createGlobalProfile("Base", BASE_LAYER, EPostProcessLayer.Base);
-			viewmodelProfile = createGlobalProfile("Viewmodel", VIEWMODEL_LAYER, EPostProcessLayer.Viewmodel);
-			scopeProfile = createGlobalProfile("Scope", SCOPE_LAYER, EPostProcessLayer.Scope);
+			baseProfile = createGlobalProfile("Base", BASE_LAYER, EVolumeLayer.Base);
+			viewmodelProfile = createGlobalProfile("Viewmodel", VIEWMODEL_LAYER, EVolumeLayer.Viewmodel);
+			scopeProfile = createGlobalProfile("Scope", SCOPE_LAYER, EVolumeLayer.Scope);
 
 			// Base AO is weak due to artifacts, but strong AO on the gun looks nice.
-			viewmodelProfile.ambientOcclusion.intensity.Override(1.0f);
+			viewmodelProfile.ambientOcclusion.intensity = 1.0f;
 
 			if (Provider.preferenceData.Graphics.Use_Lens_Dirt)
 			{
@@ -327,86 +349,102 @@ namespace SDG.Unturned
 			baseProfile.chromaticAberration.intensity.Override(Provider.preferenceData.Graphics.Chromatic_Aberration_Intensity);
 			viewmodelProfile.chromaticAberration.intensity.Override(Provider.preferenceData.Graphics.Chromatic_Aberration_Intensity);
 			scopeProfile.chromaticAberration.intensity.Override(Provider.preferenceData.Graphics.Chromatic_Aberration_Intensity);
+			applyUserSettings();
+		}
+
+		private void OnDestroy()
+		{
+			foreach (var wrapper in new[] { baseProfile, viewmodelProfile, scopeProfile })
+			{
+				if (wrapper?.profile == null) continue;
+				foreach (var component in wrapper.profile.components) Destroy(component);
+				Destroy(wrapper.profile);
+			}
+			if (instance == this) instance = null;
 		}
 
 		public Texture dirtTexture;
 
-		private PostProcessProfileWrapper baseProfile;
-		private PostProcessProfileWrapper viewmodelProfile;
-		private PostProcessProfileWrapper scopeProfile;
+		private VolumeProfileWrapper baseProfile;
+		private VolumeProfileWrapper viewmodelProfile;
+		private VolumeProfileWrapper scopeProfile;
 
-		private PostProcessLayer basePostProcessLayer;
-		private PostProcessLayer viewmodelPostProcessLayer;
-		private PostProcessLayer scopePostProcessLayer;
+		private UniversalAdditionalCameraData baseCameraData;
+		private UniversalAdditionalCameraData viewmodelCameraData;
+		private UniversalAdditionalCameraData scopeCameraData;
 
-		private bool hasActiveOverlay => viewmodelPostProcessLayer != null && viewmodelPostProcessLayer.gameObject.activeInHierarchy;
+		private bool hasActiveOverlay => viewmodelCameraData != null
+			&& viewmodelCameraData.gameObject.activeInHierarchy
+			&& viewmodelCameraData.GetComponent<Camera>().enabled;
 
-		private enum EPostProcessLayer
+		private enum EVolumeLayer
 		{
 			Base,
 			Viewmodel,
 			Scope,
 		}
 
-		private class PostProcessProfileWrapper
+		private class VolumeProfileWrapper
 		{
-			public PostProcessProfile profile;
-			public AmbientOcclusion ambientOcclusion;
+			public VolumeProfile profile;
+			public ScreenSpaceAmbientOcclusionVolumeOverride ambientOcclusion;
 			public Bloom bloom;
 			public ChromaticAberration chromaticAberration;
-			public ColorGrading colorGrading;
-			public Grain filmGrain;
-			public ScreenSpaceReflections screenSpaceReflections;
+			public ColorAdjustments colorGrading;
+			public FilmGrain filmGrain;
+			public ScreenSpaceReflectionVolumeSettings screenSpaceReflections;
 			public Vignette vignette;
 			public DepthOfField dof;
 			public SrScope singleRenderScope;
 
-			public PostProcessProfileWrapper(PostProcessProfile profile, EPostProcessLayer layer)
+			public VolumeProfileWrapper(VolumeProfile profile, EVolumeLayer layer)
 			{
 				this.profile = profile;
 
-				ambientOcclusion = profile.AddSettings<AmbientOcclusion>();
+				ambientOcclusion = profile.Add<ScreenSpaceAmbientOcclusionVolumeOverride>(true);
 				ambientOcclusion.active = false;
-				ambientOcclusion.intensity.Override(0.25f);
+				ambientOcclusion.mode = ScreenSpaceAmbientOcclusionMode.GTAO;
+				ambientOcclusion.intensity = 0.25f;
 
-				bloom = profile.AddSettings<Bloom>();
+				bloom = profile.Add<Bloom>(true);
 				bloom.active = false;
 				bloom.intensity.Override(1f);
-				bloom.softKnee.Override(0f);
+				bloom.scatter.Override(0.5f);
 
-				colorGrading = profile.AddSettings<ColorGrading>();
+				colorGrading = profile.Add<ColorAdjustments>(true);
 				colorGrading.active = false;
 
-				chromaticAberration = profile.AddSettings<ChromaticAberration>();
+				chromaticAberration = profile.Add<ChromaticAberration>(true);
 				chromaticAberration.active = false;
 
-				filmGrain = profile.AddSettings<Grain>();
+				filmGrain = profile.Add<FilmGrain>(true);
 				filmGrain.active = false;
 				filmGrain.intensity.Override(0.25f);
 
-				screenSpaceReflections = profile.AddSettings<ScreenSpaceReflections>();
+				screenSpaceReflections = profile.Add<ScreenSpaceReflectionVolumeSettings>(true);
 				screenSpaceReflections.active = false;
 
-				vignette = profile.AddSettings<Vignette>();
+				vignette = profile.Add<Vignette>(true);
 				vignette.active = false;
 				vignette.rounded.Override(true);
 
-				if (layer == EPostProcessLayer.Base)
+				if (layer == EVolumeLayer.Base)
 				{
 					// We currently use depth of field to as a background blur for the in-game dashboard. ;)
-					dof = profile.AddSettings<DepthOfField>();
+					dof = profile.Add<DepthOfField>(true);
 					dof.active = false;
+					dof.mode.Override(DepthOfFieldMode.Bokeh);
 					dof.focusDistance.Override(1.0f);
 				}
 
-				if (layer != EPostProcessLayer.Viewmodel)
+				if (layer != EVolumeLayer.Viewmodel)
 				{
-					profile.AddSettings<SkyFog>();
+					profile.Add<SkyFog>(true).effectEnabled.Override(true);
 				}
 
-				if (layer == EPostProcessLayer.Base)
+				if (layer == EVolumeLayer.Base)
 				{
-					singleRenderScope = profile.AddSettings<SrScope>();
+					singleRenderScope = profile.Add<SrScope>(true);
 					singleRenderScope.active = false;
 				}
 			}

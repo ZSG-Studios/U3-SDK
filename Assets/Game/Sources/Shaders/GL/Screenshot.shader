@@ -6,16 +6,17 @@ Shader "Unturned/Screenshot"
     }
     SubShader
     {
+        Tags { "RenderPipeline"="UniversalPipeline" }
         // No culling or depth
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
+            #include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
             struct appdata
             {
@@ -32,21 +33,21 @@ Shader "Unturned/Screenshot"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = UnturnedObjectToClip(v.vertex);
                 o.uv = v.uv;
                 return o;
             }
 
-            sampler2D _MainTex;
+            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv);
+                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
 				// The purpose of this shader is to override alpha to 1.0 during CaptureScreenshotAsTexture. (public issue #3670)
 				col.a = 1.0;
                 return col;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

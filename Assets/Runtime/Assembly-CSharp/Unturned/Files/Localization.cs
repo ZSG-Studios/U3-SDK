@@ -216,12 +216,12 @@ namespace SDG.Unturned
 		static Localization()
 		{
 			englishLocalizationRoot = Path.Combine(ReadWrite.PATH, "Localization", "English");
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (!Directory.Exists(englishLocalizationRoot) && Provider.steamAppInstallDirectory != null)
 			{
 				englishLocalizationRoot = PathEx.Join(Provider.steamAppInstallDirectory, "Localization", "English");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 		}
 
 		private static string englishLocalizationRoot;

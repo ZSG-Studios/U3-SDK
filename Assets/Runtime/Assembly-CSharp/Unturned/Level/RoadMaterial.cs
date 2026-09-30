@@ -15,7 +15,7 @@ namespace SDG.Unturned
 			{
 				if (_shader == null)
 				{
-					_shader = Shader.Find("Standard/Diffuse");
+					_shader = global::SDG.Unturned.UniversalShaderCatalog.Find("Standard/Diffuse");
 					if (_shader == null)
 					{
 						UnturnedLog.error("Road Standard/Diffuse shader is missing!");

@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 // Prior to the server-side "auto_stack" property the client was responsible for stack consolidation using TransferItemQuantity.
 //#define CLIENT_CONSOLIDATE_STACKS
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define ENABLE_TEST_INVENTORY
 #endif
 
@@ -136,9 +136,9 @@ namespace SDG.Provider
 						return true;
 					}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.warn($"Unable to parse unknown ragdoll effect from tags \"{tags}\"");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				}
 			}
 
@@ -967,7 +967,7 @@ namespace SDG.Provider
 			{
 				if(item.m_iDefinition.m_SteamItemDef != itemdefid)
 					continue;
-				
+
 				if(item.m_unQuantity > destinationStackQuantity)
 				{
 					sourceStackInstance = destinationStackInstance;
@@ -1876,12 +1876,12 @@ namespace SDG.Provider
 				econInfoPath = PathEx.Join(UnturnedPaths.RootDirectory, "EconInfo.bin");
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 			if (!File.Exists(econInfoPath) && SDG.Unturned.Provider.steamAppInstallDirectory != null)
 			{
 				econInfoPath = PathEx.Join(SDG.Unturned.Provider.steamAppInstallDirectory, "EconInfo.bin");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || !WITH_NOREDIST
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 
 			econInfo = new Dictionary<int, UnturnedEconInfo>();
 			bundleContents = new Dictionary<int, List<int>>();

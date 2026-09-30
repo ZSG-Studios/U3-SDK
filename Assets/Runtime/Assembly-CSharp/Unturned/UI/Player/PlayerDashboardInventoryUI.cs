@@ -2,10 +2,10 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define WITH_INVENTORY_CLICK_GIZMOS
 #define WITH_NEARBY_ITEM_LOS_DEBUG
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -848,12 +848,12 @@ namespace SDG.Unturned
 		// Called when right clicking on item
 		private static void onSelectedItem(byte page, byte x, byte y)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (isDragging)
 			{
 				UnturnedLog.warn("onSelectedItem should not happen during drag after glazier refactor!");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (page == 255 || (page == selectedPage && x == selected_x && y == selected_y))
 			{
@@ -1083,12 +1083,12 @@ namespace SDG.Unturned
 		// Called when left clicking on an item
 		private static void onGrabbedItem(byte page, byte x, byte y, SleekItem item)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (isDragging)
 			{
 				UnturnedLog.warn("onGrabbedItem should not happen during drag after glazier refactor!");
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			if (InputEx.GetKey(ControlsSettings.other))
 			{
@@ -2043,7 +2043,7 @@ namespace SDG.Unturned
 		//				if(ItemTool.checkUseable(PlayerInventory.SLOTS, item.jar.item.id))
 		//				{
 		//					items[0].items[index].updateHotkey(hotkey);
-		//				
+		//
 		//					hotkey ++;
 		//
 		//					if(hotkey >= 9)

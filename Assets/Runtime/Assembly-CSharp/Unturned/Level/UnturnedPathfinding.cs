@@ -20,7 +20,7 @@ namespace SDG.Unturned
 #if WITH_ASPFP
 			instance = new UnturnedPathfinding_ASPFP();
 #else
-			instance = new UnturnedPathfinding_Empty();
+			instance = new UnturnedPathfinding_Unity();
 #endif
 		}
 

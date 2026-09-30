@@ -2,12 +2,12 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define DISABLE_SCOPE_SWAY
 // #define DISABLE_SPREAD
 // #define DISABLE_MAIN_CAMERA_RECOIL
 // #define WITH_BALLISTIC_TRAJECTORY_GIZMOS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.Framework.Devkit;
 using SDG.Framework.Water;
 using SDG.NetTransport;
@@ -281,7 +281,7 @@ namespace SDG.Unturned
 				}
 			}
 		}
-		
+
 		private uint steadyAccuracy;
 		private bool canSteady;
 		private float swayTime;
@@ -3318,11 +3318,11 @@ namespace SDG.Unturned
 					if (shell != null && shell.effect != null)
 					{
 						Transform emitter = EffectManager.InstantiateFromPool(shell).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = $"{shell.FriendlyName} (1p shell)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = "Emitter";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.parent = firstAttachments.ejectHook;
 						emitter.localPosition = Vector3.zero;
 						emitter.localRotation = Quaternion.identity;
@@ -3339,11 +3339,11 @@ namespace SDG.Unturned
 					if (muzzle != null && muzzle.effect != null)
 					{
 						Transform emitter = EffectManager.InstantiateFromPool(muzzle).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = $"{muzzle.FriendlyName} (1p muzzle)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = "Emitter";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.parent = firstAttachments.barrelHook;
 						emitter.localPosition = Vector3.zero;
 						emitter.localRotation = Quaternion.identity;
@@ -3430,11 +3430,11 @@ namespace SDG.Unturned
 				if (shell != null && shell.effect != null)
 				{
 					Transform emitter = EffectManager.InstantiateFromPool(shell).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.name = $"{shell.FriendlyName} (3p shell)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.name = "Emitter";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.localPosition = Vector3.zero;
 
 					thirdShellEmitter = emitter.GetComponent<ParticleSystem>();
@@ -3470,11 +3470,11 @@ namespace SDG.Unturned
 				if (muzzle != null && muzzle.effect != null)
 				{
 					Transform emitter = EffectManager.InstantiateFromPool(muzzle).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.name = $"{muzzle.FriendlyName} (3p muzzle)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.name = "Emitter";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					emitter.parent = equippedGunAsset.isTurret ? null : thirdAttachments.barrelHook;
 					emitter.localPosition = Vector3.zero;
 					emitter.localRotation = Quaternion.identity;
@@ -3494,11 +3494,11 @@ namespace SDG.Unturned
 					if (muzzle != null && muzzle.effect != null)
 					{
 						firstFakeLight = GameObject.Instantiate(muzzle.effect).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						firstFakeLight.name = $"{muzzle.FriendlyName} (1p muzzle light)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						firstFakeLight.name = "Emitter";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 						Light muzzleLight = firstFakeLight.GetComponent<Light>();
 						if (muzzleLight != null)
@@ -4853,11 +4853,11 @@ namespace SDG.Unturned
 					if (newTracerEffectAsset != null && newTracerEffectAsset.effect != null)
 					{
 						Transform emitter = EffectManager.InstantiateFromPool(newTracerEffectAsset).transform;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = $"{newTracerEffectAsset.FriendlyName} (tracer)";
-#else // UNITY_EDITOR || DEVELOPMENT_BUILD
+#else // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.name = "Tracer";
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						emitter.localPosition = Vector3.zero;
 						emitter.localRotation = Quaternion.identity;
 
@@ -6183,7 +6183,7 @@ namespace SDG.Unturned
 
 			if (scopeDistanceMarkerMaterial == null)
 			{
-				scopeDistanceMarkerMaterial = new Material(Shader.Find("Sprites/Default"));
+				scopeDistanceMarkerMaterial = new Material(global::SDG.Unturned.UniversalShaderCatalog.Find("Sprites/Default"));
 				scopeDistanceMarkerMaterial.hideFlags = HideFlags.HideAndDontSave;
 			}
 

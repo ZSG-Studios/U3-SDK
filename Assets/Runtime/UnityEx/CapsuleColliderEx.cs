@@ -41,11 +41,11 @@ namespace SDG.Unturned
 					return new Vector3(0.0f, 0.0f, 1.0f);
 
 				default:
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					throw new System.Exception($"Capsule collider {collider.GetSceneHierarchyPath()} has invalid direction {collider.direction}");
 #else
 					return Vector3.up; // Unit vector to avoid breaking things.
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 		}
 

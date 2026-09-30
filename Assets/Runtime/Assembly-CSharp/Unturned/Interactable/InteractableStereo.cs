@@ -31,6 +31,8 @@ namespace SDG.Unturned
 			set => volume = Mathf.Clamp01(value / 100f);
 		}
 
+		[System.NonSerialized]
+
 		public AssetReference<StereoSongAsset> track;
 		public AudioSource audioSource;
 

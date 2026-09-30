@@ -2,90 +2,103 @@
 // Initially, assume uniform scale was an option using:
 // [Toggle] ASSUME_UNIFORM_SCALE ("Uniform Scale", Float) = 0
 // However, setting #pragma instancing_options inside #ifdef does not seem to be supported.
-Shader "Framework/Grass" 
+Shader "Framework/Grass"
 {
-	Properties 
+	Properties
 	{
 		_Color("Main Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo", 2D) = "white" {}
 		_Cutoff("Cutoff", float) = 0.5
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"Queue" = "AlphaTest"
-			"RenderType" = "TransparentCutout"
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+Cull Off
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		Cull Off
-		LOD 200
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
+#pragma multi_compile ___ GRASS_WIND_ON
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#define _SPECULAR_SETUP 1
+#include "Assets/Game/Sources/Shaders/Framework/Foliage/Grass.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
+#pragma multi_compile ___ GRASS_WIND_ON
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define _SPECULAR_SETUP 1
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Framework/Foliage/Grass.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
+#pragma multi_compile ___ GRASS_WIND_ON
+#define _SPECULAR_SETUP 1
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Framework/Foliage/Grass.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		Stencil
-		{
-			Ref 192
-			ReadMask 255
-			WriteMask 207
-			Comp Always
-			Fail Keep
-			ZFail Keep
-			Pass Replace
-		}
-
-		CGPROGRAM
-			 
-		#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
-		#pragma multi_compile ___ GRASS_WIND_ON
-
-		#pragma multi_compile_instancing
-
-		#pragma surface surf StandardSpecular addshadow vertex:vert alphatest:_Cutoff
-		#pragma target 3.0
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Landscapes/FoliageWind.cginc"
-		#include "UnityCG.cginc"
-
-		sampler2D _MainTex;
-		fixed4 _Color;
-
-		struct appdata
-		{
-			float4 vertex : POSITION;
-			float3 normal : NORMAL;
-			float4 texcoord : TEXCOORD0;
-			float4 texcoord1 : TEXCOORD1;
-			float4 texcoord2 : TEXCOORD2;
-			float4 color : COLOR;
-			UNITY_VERTEX_INPUT_INSTANCE_ID
-		};
-
-		struct Input 
-		{
-			float2 uv_MainTex;
-		};
-
-		void vert(inout appdata IN, out Input OUT)
-		{
-			UNITY_INITIALIZE_OUTPUT(Input, OUT);
-
-#ifdef GRASS_WIND_ON
-			float windInfluence = IN.color.r;
-			float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
-			windAnimation(worldPos, windInfluence);
-			IN.vertex = mul(unity_WorldToObject, worldPos);
-#endif
-		}
-
-		void surf(Input IN, inout SurfaceOutputStandardSpecular OUT)
-		{
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-			OUT.Albedo = c.rgb;
-			OUT.Alpha = c.a;
-			OUT.Specular = 0.0;
-		}
-
-		ENDCG
-	}
-
-	FallBack "Standard"
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
+#pragma multi_compile ___ GRASS_WIND_ON
+#define _SPECULAR_SETUP 1
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Framework/Foliage/Grass.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ GRASS_DISPLACEMENT_ON
+#pragma multi_compile ___ GRASS_WIND_ON
+#define _SPECULAR_SETUP 1
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Framework/Foliage/Grass.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

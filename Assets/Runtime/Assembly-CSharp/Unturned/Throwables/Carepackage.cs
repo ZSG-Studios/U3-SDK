@@ -17,6 +17,7 @@ namespace SDG.Unturned
 		/// <summary>
 		/// Barricade to spawn after landing.
 		/// </summary>
+		[System.NonSerialized]
 		public ItemBarricadeAsset barricadeAsset;
 
 		/// <summary>
@@ -24,6 +25,8 @@ namespace SDG.Unturned
 		/// </summary>
 		[System.Obsolete]
 		public ushort id;
+
+		[System.NonSerialized]
 
 		public SpawnAsset cargoSpawnTable;
 

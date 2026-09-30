@@ -553,9 +553,9 @@ namespace SDG.Unturned
 			using (StreamWriter fileWriter = new StreamWriter(path))
 			{
 				NetGenWriter writer = new NetGenWriter(fileWriter);
-				writer.WriteLine("#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES");
+				writer.WriteLine("#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES");
 				writer.WriteLine("#define LOG_INVOKE_READ_ERRORS");
-				writer.WriteLine("#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES");
+				writer.WriteLine("#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES");
 				writer.WriteLine("using SDG.NetPak;");
 				writer.WriteLine("namespace SDG.Unturned");
 				writer.WriteLine('{');

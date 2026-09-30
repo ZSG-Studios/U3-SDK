@@ -1,9 +1,8 @@
-﻿Shader "GL/TriCheckeredColor"
+Shader "GL/TriCheckeredColor"
 {
 	SubShader
 	{
-		Tags
-		{
+		Tags { "RenderPipeline"="UniversalPipeline"
 			"RenderType" = "Opaque"
 		}
 
@@ -13,11 +12,11 @@
 			Cull Back
 			Blend SrcAlpha OneMinusSrcAlpha
 
-			CGPROGRAM
+			HLSLPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#include "UnityCG.cginc"
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
 			struct appdata
 			{
@@ -35,7 +34,7 @@
 			v2f vert(appdata v)
 			{
 				v2f OUT;
-				OUT.vertex = UnityObjectToClipPos(v.vertex);
+				OUT.vertex = UnturnedGeometryToClip(v.vertex);
 				OUT.color = v.color;
 				OUT.ref = ComputeScreenPos(OUT.vertex);
 
@@ -48,7 +47,7 @@
 				return IN.color;
 			}
 
-			ENDCG
+			ENDHLSL
 		}
 	}
 }

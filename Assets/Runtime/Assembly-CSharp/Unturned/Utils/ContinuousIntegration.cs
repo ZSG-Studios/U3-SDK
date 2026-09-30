@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if DEVELOPMENT_BUILD
+#if UNITY_ENABLE_CHECKS
 using UnityEngine;
-#endif // DEVELOPMENT_BUILD
+#endif // UNITY_ENABLE_CHECKS
 
 namespace SDG.Unturned
 {
@@ -13,19 +13,19 @@ namespace SDG.Unturned
 	/// </summary>
 	public class ContinuousIntegration
 	{
-#if DEVELOPMENT_BUILD
+#if UNITY_ENABLE_CHECKS
 		public static CommandLineFlag isRunning = new CommandLineFlag(false, "-runningCI");
 		protected static bool isExiting = false;
-#endif // DEVELOPMENT_BUILD
+#endif // UNITY_ENABLE_CHECKS
 
 		/// <summary>
 		/// Call when the server is done all loading without running into errors.
 		/// Ignored if not running in CI mode, otherwise exits the server successfully with error code 0.
 		/// </summary>
-		[System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+		[System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS")]
 		public static void reportSuccess()
 		{
-#if DEVELOPMENT_BUILD
+#if UNITY_ENABLE_CHECKS
 			if(!isRunning)
 				return;
 
@@ -40,17 +40,17 @@ namespace SDG.Unturned
 			Provider.shutdown();
 #else
 			throw new System.NotImplementedException();
-#endif // DEVELOPMENT_BUILD
+#endif // UNITY_ENABLE_CHECKS
 		}
 
 		/// <summary>
 		/// Call when the server encounters any error.
 		/// Ignored if not running in CI mode, otherwise exits the server with error code 1.
 		/// </summary>
-		[System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+		[System.Diagnostics.Conditional("UNITY_ENABLE_CHECKS")]
 		public static void reportFailure(object message)
 		{
-#if DEVELOPMENT_BUILD
+#if UNITY_ENABLE_CHECKS
 			if(!isRunning)
 				return;
 
@@ -81,7 +81,7 @@ namespace SDG.Unturned
 			Application.Quit();
 #else
 			throw new System.NotImplementedException();
-#endif // DEVELOPMENT_BUILD
+#endif // UNITY_ENABLE_CHECKS
 		}
 	}
 }

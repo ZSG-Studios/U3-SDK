@@ -1,6 +1,6 @@
 Shader "Standard/Lava"
 {
-	Properties 
+	Properties
 	{
 		_Albedo0("Albedo 0", 2D) = "black" {}
 		_Albedo1("Albedo 1", 2D) = "black" {}
@@ -10,68 +10,84 @@ Shader "Standard/Lava"
 		_RainbowScale1("Rainbow UV Speed 1", Vector) = (0, 0, 0, 0)
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType" = "Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		CGPROGRAM
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Standard/StandardLava.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		#pragma surface surf Standard
-		#pragma target 3.0
-		#include "Assets/Game/Sources/Shaders/CGIncludes/ProjectionMapping.cginc"
-		#pragma multi_compile_instancing
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Standard/StandardLava.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		fixed4 _Color;
-		sampler2D _Albedo0;
-		sampler2D _Albedo1;
-		sampler2D _Emission0;
-		sampler2D _Emission1;
-		fixed4 _RainbowScale0;
-		fixed4 _RainbowScale1;
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardLava.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		struct Input
-		{
-			float3 worldPos;
-			float3 worldNormal;
-			float3 viewDir;
-		};
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-		void surf(Input IN, inout SurfaceOutputStandard OUT)
-		{
-			float3 worldPos0 = IN.worldPos + _RainbowScale0 * _Time.y;
-			float3 worldPos1 = IN.worldPos + _RainbowScale1 * _Time.y;
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardLava.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
 
-			fixed4 albedo0 = planarSample4(_Albedo0, worldPos0, _RainbowScale0.w);
-			fixed4 albedo1 = planarSample4(_Albedo1, worldPos1, _RainbowScale1.w);
-
-			fixed4 emission0 = planarSample4(_Emission0, worldPos0, _RainbowScale0.w);
-			fixed4 emission1 = planarSample4(_Emission1, worldPos1, _RainbowScale1.w);
-
-			//float3 blend0 = triplanarBlend(worldPos0, IN.worldNormal, 2);
-			//float3 blend1 = triplanarBlend(worldPos1, IN.worldNormal, 2);
-
-			//fixed4 albedo0 = triplanarSample4(_Albedo0, worldPos0, blend0, _RainbowScale0.w);
-			//fixed4 albedo1 = triplanarSample4(_Albedo1, worldPos1, blend1, _RainbowScale1.w);
-
-			//fixed4 emission0 = triplanarSample4(_Emission0, worldPos0, blend0, _RainbowScale0.w);
-			//fixed4 emission1 = triplanarSample4(_Emission1, worldPos1, blend1, _RainbowScale1.w);
-
-			fixed4 albedo = albedo0 * albedo0.a + albedo1 * (1.0 - albedo0.a);
-			fixed4 emission = emission0 * (1.0 - albedo.a) * emission0.a + emission1 * (1.0 - albedo.a) * (1.0 - emission0.a);
-
-			OUT.Albedo = albedo.rgb;
-			OUT.Alpha = albedo.a;
-
-			OUT.Emission = emission.rgb;
-		}
-
-		ENDCG
-	}
-
-	FallBack "Diffuse"
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardLava.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

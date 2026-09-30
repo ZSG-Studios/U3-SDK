@@ -10,11 +10,15 @@ namespace SDG.Unturned
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
+		public uint RefreshRateNumerator { get; set; }
+		public uint RefreshRateDenominator { get; set; } = 1;
 
 		public GraphicsSettingsResolution(Resolution resolution)
 		{
 			this.Width = resolution.width;
 			this.Height = resolution.height;
+			RefreshRateNumerator = resolution.refreshRateRatio.numerator;
+			RefreshRateDenominator = resolution.refreshRateRatio.denominator;
 		}
 
 		public GraphicsSettingsResolution()

@@ -22,7 +22,7 @@ namespace SDG.Unturned
 			RenderTexture blackTargetTexture = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
 			cameraComponent.targetTexture = blackTargetTexture;
 			cameraComponent.backgroundColor = new Color(0.0f, 0.0f, 0.0f, 0.0f);
-			cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(cameraComponent);
 
 			RenderTexture.active = blackTargetTexture;
 			// Copy rendered data from GPU to CPU texture.
@@ -46,12 +46,12 @@ namespace SDG.Unturned
 			RenderTexture blackTargetTexture = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
 			cameraComponent.targetTexture = blackTargetTexture;
 			cameraComponent.backgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-			cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(cameraComponent);
 
 			RenderTexture greenTargetTexture = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
 			cameraComponent.targetTexture = greenTargetTexture;
 			cameraComponent.backgroundColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-			cameraComponent.Render();
+			global::Unturned.UnityEx.CameraRenderEx.Render(cameraComponent);
 
 			RenderTexture.active = blackTargetTexture;
 			// Copy rendered data from GPU to CPU texture.

@@ -48,7 +48,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Send asset hash (or lack thereof) to server.
-		/// 
+		///
 		/// IMPORTANT: should only be called in cases where the server has verified the asset exists by loading it,
 		/// otherwise only if the asset exists on the client. This is because the server kicks if the asset does not
 		/// exist in order to prevent hacked clients from spamming requests. Context parameter is intended to help
@@ -127,13 +127,13 @@ namespace SDG.Unturned
 				return;
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			if (Player.LocalPlayer?.channel?.owner?.playerID?.BypassIntegrityChecks ?? false)
 			{
 				pendingValidation.Clear();
 				return;
 			}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 			NetMessages.SendMessageToServer(EServerMessage.ValidateAssets, ENetReliability.Reliable, (NetPakWriter writer) =>
 			{

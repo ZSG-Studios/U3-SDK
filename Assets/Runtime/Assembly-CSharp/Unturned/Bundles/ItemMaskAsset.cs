@@ -24,12 +24,12 @@ namespace SDG.Unturned
 			protected set;
 		} = 1.0f;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		/// <summary>
 		/// Hack for previewing the "aura" cosmetic items.
 		/// </summary>
 		public ushort cosmeticPreviewMythicId;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		public override void BuildDescription(ItemDescriptionBuilder builder, Item itemInstance)
 		{
@@ -68,9 +68,9 @@ namespace SDG.Unturned
 
 			if (isPro)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				cosmeticPreviewMythicId = p.data.ParseUInt16("CosmeticPreviewMythicId");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			}
 			else
 			{

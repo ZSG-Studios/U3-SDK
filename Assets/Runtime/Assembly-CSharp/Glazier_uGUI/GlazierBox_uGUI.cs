@@ -174,9 +174,9 @@ namespace SDG.Unturned
 		{
 			if (imageComponent == null || textComponent == null)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnturnedLog.error("Image or text component null when releasing GlazierBox into uGUI pool!");
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				return false;
 			}
 

@@ -211,7 +211,7 @@ namespace SDG.Unturned
 		}
 
 		/// <summary>
-		/// Defaults to true because most objects are not inside a culling volume. 
+		/// Defaults to true because most objects are not inside a culling volume.
 		/// </summary>
 		internal bool isVisibleInCullingVolume
 		{
@@ -260,7 +260,7 @@ namespace SDG.Unturned
 
 			if (_instanceID > 0)
 			{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				bool wasRegistered = LevelObjects.instanceIdToObject.TryGetValue(_instanceID, out LevelObject existingObject);
 				if (wasRegistered)
 				{
@@ -273,7 +273,7 @@ namespace SDG.Unturned
 				{
 					UnturnedLog.error($"Destroying object with instance ID {_instanceID} that wasn't in instanceIdToObject dictionary!");
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 				LevelObjects.instanceIdToObject.Remove(_instanceID);
 			}
@@ -527,7 +527,7 @@ namespace SDG.Unturned
 
 				// Unfortunately this is done per-object rather than per-asset for now because
 				// it depends which assets are loaded at the time it is called. In particular
-				// NPCQuestCondition needs to look up the quest asset when using GUIDs. 
+				// NPCQuestCondition needs to look up the quest asset when using GUIDs.
 				associatedFlags = asset.GetConditionAssociatedFlags();
 				if (associatedFlags != null)
 				{
@@ -832,6 +832,9 @@ namespace SDG.Unturned
 					if (navPrefab != null)
 					{
 						navGameObject = Object.Instantiate(navPrefab);
+						var worldScale = transform.lossyScale;
+						if (worldScale.x < 0 || worldScale.y < 0 || worldScale.z < 0)
+							MirroredColliderAdapter.ConvertBoxes(navGameObject.transform);
 						Transform nav = navGameObject.transform;
 						nav.name = "Nav";
 						nav.parent = transform;

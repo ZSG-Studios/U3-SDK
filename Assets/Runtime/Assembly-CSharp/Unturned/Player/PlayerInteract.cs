@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define LOG_INTERACT_HIT
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetTransport;
 using Steamworks;
 using UnityEngine;
@@ -553,7 +553,7 @@ namespace SDG.Unturned
 		{
 			Debug.Assert(hitTransform != null);
 			Debug.Assert(interactableTransform != null);
-			
+
 			// Nelson 2024-09-18: Previously, this searched the interactableTransform only. I'm removing door hinge
 			// interactable components which each had their own Target transform, so to keep the pre-existing behavior
 			// we now look through children for each item in hierarchy.

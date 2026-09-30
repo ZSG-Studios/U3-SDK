@@ -2,11 +2,11 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define WITH_MOVEMENT_GIZMOS
 // #define LOG_FOOTSTEP_AUDIO
 // #define WITH_FLOOR_SNAPPING_GIZMOS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.Framework.Devkit;
 using SDG.Framework.Water;
 using SDG.NetTransport;
@@ -128,9 +128,9 @@ namespace SDG.Unturned
 					* (player.equipment.asset?.equipableMovementSpeedMultiplier ?? 1.0f)
 					* (player.equipment.useable?.movementSpeedMultiplier ?? 1.0f);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		public bool enableFly;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		private float lastFootstep;
 
@@ -188,6 +188,8 @@ namespace SDG.Unturned
 			set => _isSafe = value;
 		}
 
+		[System.NonSerialized]
+
 		public SafezoneNode isSafeInfo;
 
 		private bool _isRadiated;
@@ -235,6 +237,8 @@ namespace SDG.Unturned
 
 		// Plays swimming audio if true. Placeholder-ish if we want to support custom liquids in the future.
 		private bool materialIsWater;
+
+		[System.NonSerialized]
 
 		public RaycastHit ground;
 
@@ -364,6 +368,7 @@ namespace SDG.Unturned
 		public Vector3 real => transform.position;
 
 		private Vector3 lastUpdatePos;
+		[System.NonSerialized]
 		public PitchYawSnapshotInfo snapshot;
 		private NetworkSnapshotBuffer<PitchYawSnapshotInfo> nsb;
 
@@ -383,7 +388,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Was set to true during teleport, and restored to false during the next movement tick.
-		/// 
+		///
 		/// Server pauses movement when this is set until next client update that matches,
 		/// in order to prevent rubberbanding following a teleport.
 		/// </summary>
@@ -392,6 +397,8 @@ namespace SDG.Unturned
 
 		[System.Obsolete]
 		public bool isUpdated;
+
+		[System.NonSerialized]
 
 		public List<PlayerStateUpdate> updates;
 		public bool canAddSimulationResultsToUpdates;
@@ -964,7 +971,7 @@ namespace SDG.Unturned
 			{
 				byte angle = MeasurementTool.angleToByte(transform.rotation.eulerAngles.y);
 				VehicleManager.sendExitVehicle(pendingVehicle, pendingSeatIndex, transform.position, angle, true);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				UnityEngine.Assertions.Assert.IsNull(pendingVehicle);
 #endif
 				return true;
@@ -1317,7 +1324,7 @@ namespace SDG.Unturned
 				velocity += pendingLaunchVelocity;
 				pendingLaunchVelocity = Vector3.zero;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 				if (enableFly && MainCamera.instance != null)
 				{
 					velocity = MainCamera.instance.transform.rotation * move * speed;
@@ -1326,7 +1333,7 @@ namespace SDG.Unturned
 						velocity *= 2.0f;
 					}
 				}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 				if (channel.IsLocalPlayer && LoadingUI.isBlocked)
 				{
@@ -1343,7 +1350,7 @@ namespace SDG.Unturned
 						controller.CheckedMove(velocity * deltaTime);
 					}
 
-					// Moved from the earlier ground test because we want onLanded to happen before updateVelocityAfterMove 
+					// Moved from the earlier ground test because we want onLanded to happen before updateVelocityAfterMove
 					if (!wasGrounded)
 					{
 						checkGround(transform.position);

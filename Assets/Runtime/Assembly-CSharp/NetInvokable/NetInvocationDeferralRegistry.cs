@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES
 #define LOG_INVOKE_ERRORS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD || DEBUG_NETINVOKABLES
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS || DEBUG_NETINVOKABLES
 
 using SDG.NetPak;
 using System.Collections.Generic;
@@ -107,9 +107,9 @@ namespace SDG.Unturned
 
 			ClientInvocationContext context = new ClientInvocationContext(ClientInvocationContext.EOrigin.Deferred, reader, invocation.methodInfo);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			invocation.methodInfo.deferredReadSampler.Begin();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 
 			try
 			{
@@ -131,9 +131,9 @@ namespace SDG.Unturned
 				UnturnedLog.exception(e, "Exception invoking {0} deferred:", invocation.methodInfo);
 			}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 			invocation.methodInfo.deferredReadSampler.End();
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_INCLUDE_INSTRUMENTATION
 		}
 
 		/// <summary>
@@ -179,7 +179,7 @@ namespace SDG.Unturned
 		private struct DeferredInvocation
 		{
 			/// <summary>
-			/// Invocations are grouped by net id block to ensure order is preserved between related objects. 
+			/// Invocations are grouped by net id block to ensure order is preserved between related objects.
 			/// </summary>
 			public NetId netId;
 

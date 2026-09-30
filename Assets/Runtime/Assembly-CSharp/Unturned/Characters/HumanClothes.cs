@@ -795,10 +795,10 @@ namespace SDG.Unturned
 			Material material = extraHairOverrideMaterials[index];
 			if (material == null)
 			{
-				material = new Material(shader);
+				material = StandardShaderUtils.CreateStandardMaterial(true);
 				material.name = $"ExtraHair_{index}";
 				material.hideFlags = HideFlags.HideAndDontSave;
-				material.SetFloat("_Glossiness", 0f);
+				material.SetFloat("_Smoothness", 0f);
 				material.SetColor("_SpecColor", Color.black);
 				extraHairOverrideMaterials[index] = material;
 			}
@@ -1338,12 +1338,12 @@ namespace SDG.Unturned
 							mythicID = Provider.provider.economyService.getInventoryMythicID(visualMask);
 						}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 						if (overrideMaskMythicId != 0)
 						{
 							mythicID = overrideMaskMythicId;
 						}
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 						if (mythicID != 0)
 						{
@@ -1646,11 +1646,11 @@ namespace SDG.Unturned
 			{
 				if (shader == null)
 				{
-					shader = Shader.Find("Standard (Specular setup)");
+					shader = StandardShaderUtils.StandardShader;
 				}
 				if (clothingShader == null)
 				{
-					clothingShader = Shader.Find("Standard/Clothes");
+					clothingShader = global::SDG.Unturned.UniversalShaderCatalog.Find("Standard/Clothes");
 				}
 
 				humanMeshes = new Mesh[characterMeshRenderers.Length];
@@ -1665,16 +1665,16 @@ namespace SDG.Unturned
 				materialClothing = new Material(clothingShader);
 				materialClothing.hideFlags = HideFlags.HideAndDontSave;
 
-				materialHair = new Material(shader);
+				materialHair = StandardShaderUtils.CreateStandardMaterial(true);
 				materialHair.name = "Hair";
 				materialHair.hideFlags = HideFlags.HideAndDontSave;
-				materialHair.SetFloat("_Glossiness", 0f);
+				materialHair.SetFloat("_Smoothness", 0f);
 				materialHair.SetColor("_SpecColor", Color.black);
 
-				materialBeard = new Material(shader);
+				materialBeard = StandardShaderUtils.CreateStandardMaterial(true);
 				materialBeard.name = "Hair";
 				materialBeard.hideFlags = HideFlags.HideAndDontSave;
-				materialBeard.SetFloat("_Glossiness", 0f);
+				materialBeard.SetFloat("_Smoothness", 0f);
 				materialBeard.SetColor("_SpecColor", Color.black);
 			}
 
@@ -1716,12 +1716,12 @@ namespace SDG.Unturned
 			}
 		}
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 		/// <summary>
 		/// Hack for previewing the "aura" cosmetic items.
 		/// </summary>
 		internal ushort overrideMaskMythicId;
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 
 		/// <summary>
 		/// If true, this character is for capturing clothing icons.

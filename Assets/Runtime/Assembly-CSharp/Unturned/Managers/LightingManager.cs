@@ -648,7 +648,7 @@ namespace SDG.Unturned
 					}
 				}
 			}
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			else if (scheduledWeatherStage == EScheduledWeatherStage.PerpetuallyActive)
 			{
 				shouldTickScheduledWeather = false;

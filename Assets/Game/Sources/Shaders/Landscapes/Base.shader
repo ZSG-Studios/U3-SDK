@@ -1,71 +1,267 @@
-// Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see THIRDPARTYNOTICES.txt)
-
+// Adapted from Unity URP 17.7.0. Copyright Unity Technologies. See Unity package LICENSE.md.
 Shader "Landscapes/Base"
 {
     Properties
-	{
-        _MainTex ("Base (RGB) Smoothness (A)", 2D) = "white" {}
-
-        // used in fallback on old cards
-        _Color ("Main Color", Color) = (1,1,1,1)
-
-		[HideInInspector] _TerrainHolesTexture("Holes Map (RGB)", 2D) = "white" {}
+    {
+        _UnturnedHeightBlend("Height blending", Float) = 0
+        _Fade("Height transition fade", Float) = 0.2
+        [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
+        _MainTex("Albedo(RGB), Smoothness(A)", 2D) = "white" {}
+        _MetallicTex ("Metallic (R)", 2D) = "black" {}
+        [HideInInspector] _TerrainHolesTexture("Holes Map (RGB)", 2D) = "white" {}
     }
+
+    HLSLINCLUDE
+
+    #pragma multi_compile_fragment __ _ALPHATEST_ON
+
+    ENDHLSL
 
     SubShader
-	{
-        Tags
-		{
-            "RenderType" = "Opaque"
-            "Queue" = "Geometry-100"
-        }
-
-		Stencil
-		{
-			Ref 1
-			WriteMask 1
-			Pass Replace
-		}
-
+    {
+        Tags { "Queue" = "Geometry-100" "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "UniversalMaterialType" = "Lit" "IgnoreProjector" = "True"}
         LOD 200
 
-        CGPROGRAM
-        #pragma surface surf StandardSpecular vertex:SplatmapVert addshadow fullforwardshadows
-        #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap forwardadd
-        #pragma target 3.0
+        // ------------------------------------------------------------------
+        //  Forward pass. Shades all light in a single pass. GI + emission + Fog
+        Pass
+        {
+            Name "ForwardLit"
+            // Lightmode matches the ShaderPassName set in UniversalPipeline.cs. SRPDefaultUnlit and passes with
+            // no LightMode tag are also rendered by Universal Pipeline
+            Tags{"LightMode" = "UniversalForward"}
 
-		#pragma multi_compile_local __ _ALPHATEST_ON
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 2.0
 
-        #define TERRAIN_BASE_PASS
-		#define TERRAIN_INSTANCED_PERPIXEL_NORMAL
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Landscapes/LandscapeCommon.cginc"
-        #include "UnityPBSLighting.cginc"
+            // -------------------------------------
+            // Material Keywords
+            #define _METALLICSPECGLOSSMAP 1
+            #define _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A 1
 
-        sampler2D _MainTex;
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _LIGHT_FALLOFF_LINEAR
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile_fragment _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _EXPOSURE
+#if defined(UNITY_PLATFORM_META_QUEST)
+            #pragma multi_compile _ META_QUEST_ORTHO_PROJ
+            #pragma multi_compile _ META_QUEST_NO_SPOTLIGHTS_LIGHT_LOOP
+#endif
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_ATLAS
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_REFLECTION
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile_fragment _ _VOLUMETRIC_FOG
+            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+            #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
 
-        void surf (Input IN, inout SurfaceOutputStandardSpecular o)
-		{
-			#ifdef _ALPHATEST_ON
-				ClipHoles(IN.tc.xy);
-			#endif
-            half4 c = tex2D (_MainTex, IN.tc.xy);
-            o.Albedo = c.rgb;
-            o.Alpha = 1;
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
+            #pragma multi_compile_fragment _ REFLECTION_PROBE_ROTATION
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+            #pragma multi_compile_fragment _ DEBUG_DISPLAY
 
-            #if defined(INSTANCING_ON) && defined(SHADER_TARGET_SURFACE_ANALYSIS) && defined(TERRAIN_INSTANCED_PERPIXEL_NORMAL)
-                o.Normal = float3(0, 0, 1); // make sure that surface shader compiler realizes we write to normal, as UNITY_INSTANCING_ENABLED is not defined for SHADER_TARGET_SURFACE_ANALYSIS.
+            #pragma vertex SplatmapVert
+            #pragma fragment SplatmapFragment
+
+            #pragma shader_feature_local _NORMALMAP
+            // Sample normal in pixel shader when doing instancing
+            #pragma shader_feature_local _TERRAIN_INSTANCED_PERPIXEL_NORMAL
+            #define TERRAIN_SPLAT_BASEPASS 1
+
+            #if USE_DYNAMIC_BRANCH_FOG_KEYWORD && SHADER_API_VULKAN && SHADER_API_MOBILE
+            #define SKIP_SHADOWS_LIGHT_INDEX_CHECK 1
             #endif
 
-            #if defined(UNITY_INSTANCING_ENABLED) && !defined(SHADER_API_D3D11_9X) && defined(TERRAIN_INSTANCED_PERPIXEL_NORMAL)
-                o.Normal = normalize(tex2D(_TerrainNormalmapTexture, IN.tc.zw).xyz * 2 - 1).xzy;
-            #endif
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            ENDHLSL
         }
 
-        ENDCG
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags{"LightMode" = "ShadowCaster"}
+
+            ZWrite On
+            ColorMask 0
+
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 2.0
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            ENDHLSL
+        }
+
+        // ------------------------------------------------------------------
+        //  GBuffer pass. Does GI + emission. All additional lights are done deferred as well as fog
+        Pass
+        {
+            Name "GBuffer"
+            Tags{"LightMode" = "UniversalGBuffer"}
+
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 4.5
+
+            // Deferred Rendering Path does not support the OpenGL-based graphics API:
+            // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
+            #pragma exclude_renderers gles3 glcore
+
+            // -------------------------------------
+            // Material Keywords
+            #define _METALLICSPECGLOSSMAP 1
+            #define _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A 1
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            //#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            //#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _EXPOSURE
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
+            #pragma multi_compile_fragment _ REFLECTION_PROBE_ROTATION
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            #pragma multi_compile_fragment _ _RENDER_PASS_ENABLED
+            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+
+            #pragma vertex SplatmapVert
+            #pragma fragment SplatmapFragment
+
+            #pragma shader_feature_local _NORMALMAP
+            // Sample normal in pixel shader when doing instancing
+            #pragma shader_feature_local _TERRAIN_INSTANCED_PERPIXEL_NORMAL
+            #define TERRAIN_SPLAT_BASEPASS 1
+            #define TERRAIN_GBUFFER 1
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/GBufferOutputFormat.hlsl"
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthOnly"
+            Tags{"LightMode" = "DepthOnly"}
+
+            ZWrite On
+            ColorMask R
+
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 2.0
+
+            #pragma vertex DepthOnlyVertex
+            #pragma fragment DepthOnlyFragment
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitPasses.hlsl"
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthNormals"
+            Tags{"LightMode" = "DepthNormals"}
+
+            ZWrite On
+
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma target 2.0
+
+            #pragma vertex DepthNormalOnlyVertex
+            #pragma fragment DepthNormalOnlyFragment
+
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+            #pragma shader_feature_local _NORMALMAP
+            #pragma multi_compile _ _WRITE_SMOOTHNESS
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitDepthNormalsPass.hlsl"
+            ENDHLSL
+        }
+
+        // This pass it not used during regular rendering, only for lightmap baking.
+        Pass
+        {
+            Name "Meta"
+            Tags{"LightMode" = "Meta"}
+
+            Cull Off
+
+            HLSLPROGRAM
+#pragma multi_compile_fragment _ TRIPLANAR_MAPPING_ON
+#pragma multi_compile_fragment _ IS_RAINING IS_SNOWING
+            #pragma vertex TerrainVertexMeta
+            #pragma fragment TerrainFragmentMeta
+
+            #pragma shader_feature EDITOR_VISUALIZATION
+            #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
+            #define _METALLICSPECGLOSSMAP 1
+            #define _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A 1
+
+            #include "Assets/Game/Sources/Shaders/Landscapes/URP/TerrainLitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitMetaPass.hlsl"
+
+            ENDHLSL
+        }
 
         UsePass "Hidden/Nature/Terrain/Utilities/PICKING"
-        UsePass "Hidden/Nature/Terrain/Utilities/SELECTION"
+        UsePass "Universal Render Pipeline/Terrain/Lit/SceneSelectionPass"
     }
-
-    FallBack "Diffuse"
+    FallBack "Hidden/Universal Render Pipeline/FallbackError"
+    //CustomEditor "LitShaderGUI"
 }

@@ -1,4 +1,4 @@
-﻿Shader "Custom/Intersect"
+Shader "Custom/Intersect"
 {
 	Properties
 	{
@@ -8,10 +8,9 @@
 
 	Subshader
 	{
-		Tags
-		{
-			"Queue" = "AlphaTest" 
-			"IgnoreProjector" = "True" 
+		Tags { "RenderPipeline"="UniversalPipeline"
+			"Queue" = "AlphaTest"
+			"IgnoreProjector" = "True"
 			"RenderType" = "TransparentCutout"
 		}
 
@@ -19,45 +18,45 @@
 
 		Pass
 		{
-			CGPROGRAM
+			HLSLPROGRAM
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#include "UnityCG.cginc"
+			#include "Assets/Game/Sources/Shaders/CGIncludes/UnturnedUnlit.hlsl"
 
 			half4 _IntersectColor;
 			half _IntersectSize;
-			sampler2D _CameraDepthTexture; //Depth Texture
+			 //Depth Texture
 
-			struct v2f 
+			struct v2f
 			{
 				float4 pos : SV_POSITION;
 				float4 ref : TEXCOORD0;
 			};
 
-			v2f vert(appdata_base v)
+			v2f vert(UnturnedUnlitAttributes v)
 			{
 				v2f o;
 
-				o.pos = UnityObjectToClipPos(v.vertex);
+				o.pos = UnturnedObjectToClip(v.vertex);
 				o.ref = ComputeScreenPos(o.pos);
-				COMPUTE_EYEDEPTH(o.ref.z);
+				o.ref.z = -TransformWorldToView(TransformObjectToWorld(v.vertex.xyz)).z;
 
 				return o;
 			}
 
 			half4 frag(v2f i) : SV_Target
 			{
-				float sceneZ = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.ref)).r);
+				float sceneZ = UnturnedLinearEyeDepth(SampleSceneDepth(i.ref.xy / i.ref.w));
 				float objectZ = i.ref.z;
 
 				float diff = 1 - saturate((sceneZ - objectZ) / _IntersectSize);
-		
+
 				clip(diff - 0.5);
 				return _IntersectColor;
 			}
 
-			ENDCG
+			ENDHLSL
 		}
 	}
 }

@@ -7,24 +7,25 @@ using SDG.Framework.Water;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace SDG.Unturned
 {
 	[Serializable]
-	[PostProcess(typeof(SkyFogRenderer), PostProcessEvent.BeforeTransparent, "Custom/SkyFog")]
-	public sealed class SkyFog : PostProcessEffectSettings
+	[VolumeComponentMenu("Unturned/Sky and underwater fog")]
+	[SupportedOnRenderPipeline(typeof(UniversalRenderPipelineAsset))]
+	public sealed class SkyFog : VolumeComponent, IPostProcessComponent
 	{
-
+		public BoolParameter effectEnabled = new BoolParameter(false);
+		public bool IsActive() => active && effectEnabled.value && RenderSettings.skybox != null;
 	}
 
-	public sealed class SkyFogRenderer : PostProcessEffectRenderer<SkyFog>
+	public sealed class SkyFogRenderer
 	{
-		public override void Init()
+		public SkyFogRenderer()
 		{
-			base.Init();
 
-			shader = Shader.Find("Hidden/Custom/SkyFog");
 			fogColorId = Shader.PropertyToID("_FogColor");
 			skyColorId = Shader.PropertyToID("_SkyColor");
 			equatorColorId = Shader.PropertyToID("_EquatorColor");
@@ -38,34 +39,34 @@ namespace SDG.Unturned
 			waterMatricesId = Shader.PropertyToID("_WaterMatrices");
 		}
 
-		public override void Render(PostProcessRenderContext context)
+		public MaterialPropertyBlock Prepare(Camera camera)
 		{
-			PropertySheet sheet = context.propertySheets.Get(shader);
+			var properties = new MaterialPropertyBlock();
 
 			// _FogColor uniform is declared in Fog.hlsl
-			sheet.properties.SetColor(fogColorId, RenderSettings.fogColor);
+			properties.SetColor(fogColorId, RenderSettings.fogColor);
 
-			sheet.properties.SetColor(skyColorId, RenderSettings.skybox.GetColor(skyColorId));
-			sheet.properties.SetColor(equatorColorId, RenderSettings.skybox.GetColor(equatorColorId));
-			sheet.properties.SetColor(groundColorId, RenderSettings.skybox.GetColor(groundColorId));
+			properties.SetColor(skyColorId, RenderSettings.skybox.GetColor(skyColorId));
+			properties.SetColor(equatorColorId, RenderSettings.skybox.GetColor(equatorColorId));
+			properties.SetColor(groundColorId, RenderSettings.skybox.GetColor(groundColorId));
 
-			sheet.properties.SetMatrix(inverseProjectionMatrixId, context.camera.projectionMatrix.inverse);
-			sheet.properties.SetMatrix(cameraToWorldMatrixId, context.camera.cameraToWorldMatrix);
+			properties.SetMatrix(inverseProjectionMatrixId, camera.projectionMatrix.inverse);
+			properties.SetMatrix(cameraToWorldMatrixId, camera.cameraToWorldMatrix);
 
-			FindRelevantWaterVolumes(context.camera.transform.position);
+			FindRelevantWaterVolumes(camera.transform.position);
 			int waterCount = LevelLighting.enableUnderwaterEffects ? Mathf.Min(relevantWaterVolumes.Count, MAX_WATER_COUNT) : 0;
 			// Disable underwater effects if we do not have any water, otherwise values from level may affect the menu.
 			bool isCameraUnderwater = LevelLighting.isSea && waterCount > 0;
-			sheet.properties.SetColor(waterColorId, LevelLighting.getSeaColor("_BaseColor"));
-			sheet.properties.SetFloat(isCameraUnderwaterId, isCameraUnderwater ? 1.0f : 0.0f);
-			sheet.properties.SetInt(waterCountId, waterCount);
+			properties.SetColor(waterColorId, LevelLighting.getSeaColor("_BaseColor"));
+			properties.SetFloat(isCameraUnderwaterId, isCameraUnderwater ? 1.0f : 0.0f);
+			properties.SetInt(waterCountId, waterCount);
 			for (int waterIndex = 0; waterIndex < waterCount; ++waterIndex)
 			{
 				waterMatrices[waterIndex] = relevantWaterVolumes[waterIndex].volume.transform.worldToLocalMatrix;
 			}
-			sheet.properties.SetMatrixArray(waterMatricesId, waterMatrices);
+			properties.SetMatrixArray(waterMatricesId, waterMatrices);
 
-			context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
+			return properties;
 		}
 
 		private void FindRelevantWaterVolumes(Vector3 viewPosition)
@@ -97,7 +98,6 @@ namespace SDG.Unturned
 			UnityEngine.Profiling.Profiler.EndSample();
 		}
 
-		private Shader shader;
 		private int fogColorId;
 		private int skyColorId;
 		private int equatorColorId;

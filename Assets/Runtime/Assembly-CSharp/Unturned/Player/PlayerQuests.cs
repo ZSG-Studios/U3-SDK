@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 #define LOG_NPC_DIALOGUE_RPCS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetPak;
 using SDG.NetTransport;
 using Steamworks;
@@ -2456,7 +2456,7 @@ namespace SDG.Unturned
 		{
 			DialogueAsset dialogueAsset = Assets.find<DialogueAsset>(dialogueAssetGuid);
 			ClientAssetIntegrity.QueueRequest(dialogueAssetGuid, dialogueAsset, "open dialogue");
-			
+
 			if (dialogueAsset == null)
 			{
 				context.LogWarning("missing dialogue asset");

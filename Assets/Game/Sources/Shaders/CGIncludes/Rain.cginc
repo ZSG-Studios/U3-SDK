@@ -1,12 +1,12 @@
 #ifndef RAIN_CGINC_INCLUDED
 #define RAIN_CGINC_INCLUDED
 
-#include "UnityCG.cginc"
+
 
 static float rippleFrequency = 4; // Display on every 4th cycle
 
-sampler2D _Rain_Puddle_Map;
-sampler2D _Rain_Ripple_Map;
+TEXTURE2D(_Rain_Puddle_Map); SAMPLER(sampler_Rain_Puddle_Map);
+TEXTURE2D(_Rain_Ripple_Map); SAMPLER(sampler_Rain_Ripple_Map);
 float _Rain_Water_Level;
 float _Rain_Intensity;
 float _Rain_Min_Height;
@@ -17,7 +17,7 @@ void rain(float3 worldPos, float3 worldNormal, float mask, inout half3 Albedo, i
 
 	// Grab puddle sample
 	// A channel is the height of the puddle
-	float puddleSample = tex2D(_Rain_Puddle_Map, worldPos.xz / 64).a;
+	float puddleSample = SAMPLE_TEXTURE2D(_Rain_Puddle_Map, sampler_Rain_Puddle_Map, worldPos.xz / 64).a;
 	puddleSample = lerp(1, puddleSample, mask); // Lower (or 0) water height in masked areas
 	float puddle = saturate((_Rain_Water_Level - puddleSample) / 0.05) * saturate(worldNormal.y);
 
@@ -25,7 +25,7 @@ void rain(float3 worldPos, float3 worldNormal, float mask, inout half3 Albedo, i
 	Smoothness = saturate(puddle * 4);
 
 	// Grab ripple texture
-	float3 rippleSample_0 = tex2D(_Rain_Ripple_Map, worldPos.xz / 5);
+	float3 rippleSample_0 = SAMPLE_TEXTURE2D(_Rain_Ripple_Map, sampler_Rain_Ripple_Map, worldPos.xz / 5).rgb;
 	// R channel is 0 in the middle, 1 in the outer edge
 	float rippleGradient_0 = rippleSample_0.r;
 	// G channel prevents all raindrops from occuring at the same time
@@ -36,7 +36,7 @@ void rain(float3 worldPos, float3 worldNormal, float mask, inout half3 Albedo, i
 	float ripple_0 = (1.0 - saturate(abs(rippleGradient_0 - frac(rippleTimeOffset_0) * rippleFrequency) / 0.05)) * pow(1.0 - rippleGradient_0, 2) * rippleMask_0;
 	ripple_0 *= saturate(_Rain_Intensity);
 
-	float3 rippleSample_1 = tex2D(_Rain_Ripple_Map, worldPos.xz / 4 + 70);
+	float3 rippleSample_1 = SAMPLE_TEXTURE2D(_Rain_Ripple_Map, sampler_Rain_Ripple_Map, worldPos.xz / 4 + 70).rgb;
 	float rippleGradient_1 = rippleSample_1.r;
 	float rippleTimeOffset_1 = _Time.y * 1.521 / rippleFrequency + rippleSample_1.g + 0.5 + worldPos.x / 9 - worldPos.z / 17;
 	float rippleMask_1 = rippleSample_1.b;

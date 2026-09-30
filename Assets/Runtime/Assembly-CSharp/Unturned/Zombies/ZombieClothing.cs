@@ -451,7 +451,7 @@ namespace SDG.Unturned
 
 			if (clothingShader == null)
 			{
-				clothingShader = Shader.Find("Standard/Clothes");
+				clothingShader = global::SDG.Unturned.UniversalShaderCatalog.Find("Standard/Clothes");
 			}
 
 			if (clothes != null)

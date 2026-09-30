@@ -1,62 +1,89 @@
 Shader "Standard/Ice"
 {
-	Properties 
+	Properties
 	{
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Metallic ("Metallic", 2D) = "black" {}
 	}
 
-	SubShader 
-	{
-		Tags 
-		{ 
-			"RenderType" = "Opaque" 
-		}
+	SubShader
+{
+Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+Cull Back
+Pass { Name "Forward" Tags { "LightMode"="UniversalForwardOnly" }
 
-		LOD 200
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ IS_SNOWING
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+#pragma multi_compile_fragment _ _SHADOWS_SOFT
+#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+#pragma multi_compile _ LIGHTMAP_ON
+#pragma multi_compile _ DIRLIGHTMAP_COMBINED
+#pragma multi_compile_fog
+#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+#include "Assets/Game/Sources/Shaders/Standard/StandardIce.hlsl"
+ENDHLSL
+}
+Pass { Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ IS_SNOWING
+#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+#define UNTURNED_SHADOW_PASS 1
+float3 _LightDirection;
+float3 _LightPosition;
+#include "Assets/Game/Sources/Shaders/Standard/StandardIce.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthOnly" Tags { "LightMode"="DepthOnly" }
+ColorMask 0
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ IS_SNOWING
+#define UNTURNED_DEPTH_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardIce.hlsl"
+ENDHLSL
+}
+Pass { Name "DepthNormals" Tags { "LightMode"="DepthNormalsOnly" }
 
-		Stencil
-		{
-			Ref 1
-			WriteMask 1
-			Pass Replace
-		}
-		
-		CGPROGRAM
-
-		#pragma surface surf Standard
-		#pragma target 3.0
-		#include "Assets/Game/Sources/Shaders/CGIncludes/Snow.cginc"
-		#include "Assets/Game/Sources/Shaders/CGIncludes/ProjectionMapping.cginc"
-		#pragma multi_compile ___ IS_SNOWING
-
-		sampler2D _MainTex;
-		sampler2D _Metallic;
-
-		struct Input 
-		{
-			float2 uv_MainTex;
-			float3 worldPos;
-			float3 worldNormal;
-			float3 viewDir;
-		};
-
-		void surf (Input IN, inout SurfaceOutputStandard OUT) 
-		{
-			float3 albedo = tex2D (_MainTex, IN.uv_MainTex).rgb;
-			OUT.Albedo = albedo;
-			float4 metallic = tex2D(_Metallic, IN.uv_MainTex);
-			OUT.Metallic = metallic.r;
-			OUT.Smoothness = metallic.a;
-
-#ifdef IS_SNOWING
-			float3 blend = triplanarBlend(IN.worldPos, IN.worldNormal);
-			snow(IN.worldPos, blend, IN.viewDir, 1, OUT.Albedo);
-#endif
-		}
-
-		ENDCG
-	}
-
-	FallBack "Diffuse"
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ IS_SNOWING
+#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+#pragma multi_compile _ _WRITE_SMOOTHNESS
+#define UNTURNED_NORMALS_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardIce.hlsl"
+ENDHLSL
+}
+Pass { Name "Meta" Tags { "LightMode"="Meta" }
+Cull Off
+HLSLPROGRAM
+#pragma target 4.5
+#pragma vertex UnturnedVert
+#pragma fragment UnturnedFrag
+#pragma multi_compile_instancing
+#pragma multi_compile ___ IS_SNOWING
+#define UNTURNED_META_PASS 1
+#include "Assets/Game/Sources/Shaders/Standard/StandardIce.hlsl"
+ENDHLSL
+}
+}
+Fallback Off
 }

@@ -2,9 +2,9 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 // #define LOG_KILL_COUNTERS
-#endif // UNITY_EDITOR || DEVELOPMENT_BUILD
+#endif // UNITY_EDITOR || UNITY_ENABLE_CHECKS
 using SDG.NetPak;
 using SDG.NetTransport;
 using SDG.Provider;
@@ -692,7 +692,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// Can be used by plugins to verify player is on a particular server.
-		/// 
+		///
 		/// OnSteamAuthTicketForWebApiReceived will be invoked when the response is received.
 		/// Note that the client doesn't send anything if the request to Steam fails, so plugins may wish to kick
 		/// players if a certain amount of time passes. (e.g., if a cheat is canceling the request)

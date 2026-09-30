@@ -64,7 +64,7 @@ namespace SDG.Unturned
 		private const byte SAVEDATA_VERSION_BLUEPRINT_IGNORE_BY_GUID = 2;
 		private const byte SAVEDATA_VERSION_ADDED_BLUEPRINT_PREFERENCES = 3;
 		private const byte SAVEDATA_VERSION_NEWEST = SAVEDATA_VERSION_ADDED_BLUEPRINT_PREFERENCES;
-		
+
 		private static InventorySearchQualityAscendingComparator qualityAscendingComparator = new InventorySearchQualityAscendingComparator();
 		private static InventorySearchQualityDescendingComparator qualityDescendingComparator = new InventorySearchQualityDescendingComparator();
 		private static InventorySearchAmountAscendingComparator amountAscendingComparator = new InventorySearchAmountAscendingComparator();
@@ -447,7 +447,7 @@ namespace SDG.Unturned
 				CachingAssetRef[] requiredTags = blueprint.GetApplicableRequiredNearbyCraftingTags();
 				if (requiredTags != null)
 				{
-					// Caller should UpdateAvailableCraftingTags first! This method may be called in a loop. 
+					// Caller should UpdateAvailableCraftingTags first! This method may be called in a loop.
 					for (int tagIndex = 0; tagIndex < requiredTags.Length; ++tagIndex)
 					{
 						ref CachingAssetRef tagRef = ref requiredTags[tagIndex];
@@ -474,12 +474,12 @@ namespace SDG.Unturned
 		/// </summary>
 		internal void UpdateBlueprintDynamicStatus(in UpdateBlueprintStatusParameters p)
 		{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 			Debug.Assert(p.status.inputItems.IsEmpty(), "Forgot to call ResetDynamicStatus?");
 #endif
 
 			updateBlueprintDynamicStatusSampler.Begin();
-			
+
 			Blueprint blueprint = p.status.blueprint;
 
 			if (!blueprint.areConditionsMet(player))

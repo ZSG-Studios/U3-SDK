@@ -2,7 +2,7 @@
 // This file is part of the U3 SDK: https://github.com/smartlydressedgames/u3-sdk/    //
 // Please refer to the included LICENSE.txt for copyright notice and license details. //
 ////////////////////////////////////////////////////////////////////////////////////////
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 //#define PROFILE_MATERIAL_LOOKUP
 #endif
 using SDG.Framework.Landscapes;
@@ -19,7 +19,7 @@ namespace SDG.Unturned
 		/// which specify the PhysicMaterial to assign to the colliders. Specifying an asset path is available, but
 		/// for the common case we will use the built-in vanilla resources.
 		/// </summary>
-		public static PhysicMaterial LoadResourceForLegacyMaterial(EPhysicsMaterial material)
+		public static PhysicsMaterial LoadResourceForLegacyMaterial(EPhysicsMaterial material)
 		{
 			switch (material)
 			{
@@ -28,67 +28,67 @@ namespace SDG.Unturned
 					return null;
 
 				case EPhysicsMaterial.CLOTH_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Cloth_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Cloth_Dynamic");
 
 				case EPhysicsMaterial.CLOTH_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Cloth_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Cloth_Static");
 
 				case EPhysicsMaterial.TILE_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Tile_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Tile_Dynamic");
 
 				case EPhysicsMaterial.TILE_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Tile_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Tile_Static");
 
 				case EPhysicsMaterial.CONCRETE_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Concrete_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Concrete_Dynamic");
 
 				case EPhysicsMaterial.CONCRETE_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Concrete_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Concrete_Static");
 
 				case EPhysicsMaterial.FLESH_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Flesh_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Flesh_Dynamic");
 
 				case EPhysicsMaterial.GRAVEL_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Gravel_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Gravel_Dynamic");
 
 				case EPhysicsMaterial.GRAVEL_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Gravel_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Gravel_Static");
 
 				case EPhysicsMaterial.METAL_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Metal_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Metal_Dynamic");
 
 				case EPhysicsMaterial.METAL_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Metal_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Metal_Static");
 
 				case EPhysicsMaterial.METAL_SLIP:
-					return Resources.Load<PhysicMaterial>("Physics/Metal_Slip");
+					return Resources.Load<PhysicsMaterial>("Physics/Metal_Slip");
 
 				case EPhysicsMaterial.WOOD_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Wood_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Wood_Dynamic");
 
 				case EPhysicsMaterial.WOOD_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Wood_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Wood_Static");
 
 				case EPhysicsMaterial.FOLIAGE_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Foliage_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Foliage_Static");
 
 				case EPhysicsMaterial.FOLIAGE_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Foliage_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Foliage_Dynamic");
 
 				case EPhysicsMaterial.SNOW_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Snow_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Snow_Static");
 
 				case EPhysicsMaterial.ICE_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Ice_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Ice_Static");
 
 				case EPhysicsMaterial.WATER_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Water");
+					return Resources.Load<PhysicsMaterial>("Physics/Water");
 
 				case EPhysicsMaterial.ALIEN_DYNAMIC:
-					return Resources.Load<PhysicMaterial>("Physics/Alien_Dynamic");
+					return Resources.Load<PhysicsMaterial>("Physics/Alien_Dynamic");
 
 				case EPhysicsMaterial.SAND_STATIC:
-					return Resources.Load<PhysicMaterial>("Physics/Sand_Static");
+					return Resources.Load<PhysicsMaterial>("Physics/Sand_Static");
 			}
 		}
 
@@ -361,7 +361,7 @@ namespace SDG.Unturned
 
 		/// <summary>
 		/// If collider and its physics material are not null, get the physics material's name. Null otherwise.
-		/// 
+		///
 		/// Nelson 2025-04-22: this method may seem silly on first glance. However, I tracked down some every-frame
 		/// memory allocation to getting the PhysicMaterial.name property. This method caches the instance ID to
 		/// name lookup in a dictionary to avoid that. Note: we don't worry about clearing the dictionary because
@@ -374,10 +374,10 @@ namespace SDG.Unturned
 #endif
 			string result = null;
 
-			PhysicMaterial material = collider?.sharedMaterial;
+			PhysicsMaterial material = collider?.sharedMaterial;
 			if (material != null)
 			{
-				int id = material.GetInstanceID();
+				EntityId id = material.GetEntityId();
 				if (!physicsMaterialToName.TryGetValue(id, out result))
 				{
 					result = material.name;
@@ -389,7 +389,7 @@ namespace SDG.Unturned
 #endif
 			return result;
 		}
-		private static Dictionary<int, string> physicsMaterialToName = new Dictionary<int, string>();
+		private static Dictionary<EntityId, string> physicsMaterialToName = new Dictionary<EntityId, string>();
 
 		internal const int NAME_LENGTH_BITS = 6;
 	}

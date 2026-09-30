@@ -105,7 +105,7 @@ namespace SDG.Unturned
 				}
 				else
 				{
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
 					UnturnedLog.error("Item hotkeyed to {0} has no element and not in the queue", button);
 #endif
 				}
