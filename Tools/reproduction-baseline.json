@@ -1,0 +1,86 @@
+{
+  "editor": "6000.7.0b2",
+  "steamBuildId": "25613056",
+  "mapBundleInputs": [
+    {
+      "relativePath": "Maps/Alpha Valley/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/Alpha Valley/Environment/Roads.unity3d",
+      "sha256": "e658ca0ed14ff74ad042c29fddde0daa67a20363ed4883b44206e7114b1a20a4"
+    },
+    {
+      "relativePath": "Maps/Destruction/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/Destruction/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Germany/Environment/Ambience.unity3d",
+      "sha256": "d903cfe7735c91e430e0ee622b90b9a0ce92b7e65c247f16188db9bb3a047382"
+    },
+    {
+      "relativePath": "Maps/Germany/Environment/Roads.unity3d",
+      "sha256": "adc79e7d3bcd757bce51a9662c9fbc3305cdd256614a560e1949bec599cc3f36"
+    },
+    {
+      "relativePath": "Maps/Monolith/Environment/Ambience.unity3d",
+      "sha256": "193bd03c4051c00c5aefb2643fb8b48e49d5427b4bd6a979208ac828c04ba311"
+    },
+    {
+      "relativePath": "Maps/Monolith/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/PEI/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/PEI/Environment/Roads.unity3d",
+      "sha256": "afbc444409e2fe5cd58c09978fe288363cda74c9e67b0e2ee4ed7d613be73a1b"
+    },
+    {
+      "relativePath": "Maps/Paintball_Arena_0/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/Paintball_Arena_0/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Russia/Environment/Ambience.unity3d",
+      "sha256": "17bf73e6b425051617e7801160efff82f674c917ace42f5dcb19c4a42e9b7063"
+    },
+    {
+      "relativePath": "Maps/Russia/Environment/Roads.unity3d",
+      "sha256": "2da64b2bb1cbfe500fdd8b7ea7e27a4aa43ee2703cc7b066da351d50c0473ac5"
+    },
+    {
+      "relativePath": "Maps/Tutorial/Environment/Ambience.unity3d",
+      "sha256": "193bd03c4051c00c5aefb2643fb8b48e49d5427b4bd6a979208ac828c04ba311"
+    },
+    {
+      "relativePath": "Maps/Tutorial/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Washington/Environment/Ambience.unity3d",
+      "sha256": "551775c479db7826c228964a128a25121587c7bfb649b13a88951245507beff8"
+    },
+    {
+      "relativePath": "Maps/Washington/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Yukon/Environment/Ambience.unity3d",
+      "sha256": "1fc12349a4e2f31033bdf80cdbf306d4e26ceade010963a9eba599da43025129"
+    },
+    {
+      "relativePath": "Maps/Yukon/Environment/Roads.unity3d",
+      "sha256": "7b54df178414422d8e7944e567fe5be8b5a4d1f3139cebb94159862ce6f2fddf"
+    }
+  ]
+}

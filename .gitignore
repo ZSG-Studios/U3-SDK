@@ -212,3 +212,6 @@ __pycache__/
 /.codex/
 /Assets/Generated/
 /Assets/Generated.meta
+
+# Local Windows shortcuts to this machine's Editor logs.
+/*.lnk

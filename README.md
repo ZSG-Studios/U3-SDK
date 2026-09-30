@@ -1,4 +1,4 @@
-# U3 SDK � Unity 6.7 port
+# U3 SDK — Unity 6.7 port
 
 This fork of [SmartlyDressedGames/U3-SDK](https://github.com/SmartlyDressedGames/U3-SDK) contains the Unity **6000.7.0b2** upgrade, **URP 17.7**, Windows **DirectX 12/Vulkan**, Unity **AI Navigation**, repaired graphics/display controls, and external diagnostics with automated verification tools. This targets a beta editor; see [port notes and validation limits](UNITY_PORT.md).
 
@@ -16,6 +16,20 @@ Source code for [Unturned](https://smartlydressedgames.com/unturned/), a free op
 6. Open the project with the Unity editor
 7. Open the `Assets/GameStartup.unity` scene
 8. Click play!
+
+The editor prepares the required map audio/road conversions automatically from your installed Steam content. The first preparation takes longer; subsequent runs reuse a verified cache. Alternate Steam libraries are discovered automatically. If discovery fails, set `UNTURNED_ASSET_DIRECTORY` to the installed Unturned directory before launching Unity.
+
+To build the same development client used for validation, choose **Tools → Unturned → Build reproducible Windows development client**. This uses the committed build profile, prepares missing content, and copies the generated cache and `steam_appid.txt` into the output. Unity CLI is optional for opening and building; it is required by the automated runtime checks.
+
+With Unity CLI installed, run from the cloned project directory:
+
+```powershell
+unity run . --timeout 3600 --log-file Logs/reproduce-editor.log --no-tail -- -force-d3d12 -automated -executeMethod PortReproducibility.BuildWindowsDevelopment
+python Tools/smoke_client.py --graphics-api dx12 --map Germany --verify-graphics
+python Tools/smoke_client.py --graphics-api vulkan --map Germany --verify-graphics
+```
+
+These Windows checks require Python, Steam running, and a GPU/driver supporting the selected graphics API. Editor, package, Steam content, graphics settings, and hardware versions affect results; matching source alone does not guarantee identical images or performance on every machine.
 
 ## Resources
 

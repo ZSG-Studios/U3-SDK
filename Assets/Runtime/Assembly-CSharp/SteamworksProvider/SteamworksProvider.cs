@@ -111,6 +111,15 @@ namespace SDG.SteamworksProvider
 #if UNITY_EDITOR || UNITY_ENABLE_CHECKS || !WITH_NOREDIST
 				string appInstallDir;
 				uint appInstallDirLength = SteamApps.GetAppInstallDir((AppId_t) appInfo.id, out appInstallDir, /*bufferSize*/ 1024);
+				string assetDirectoryOverride = System.Environment.GetEnvironmentVariable("UNTURNED_ASSET_DIRECTORY");
+				if (!string.IsNullOrWhiteSpace(assetDirectoryOverride))
+				{
+					if (!System.IO.Directory.Exists(System.IO.Path.Combine(assetDirectoryOverride, "Maps")) ||
+						!System.IO.Directory.Exists(System.IO.Path.Combine(assetDirectoryOverride, "Bundles")))
+						throw new Exception("UNTURNED_ASSET_DIRECTORY must contain the installed Unturned Maps and Bundles directories.");
+					appInstallDir = System.IO.Path.GetFullPath(assetDirectoryOverride);
+					appInstallDirLength = (uint)appInstallDir.Length;
+				}
 				if (appInstallDirLength > 0)
 				{
 					SDG.Unturned.Provider.steamAppInstallDirectory = new System.IO.DirectoryInfo(appInstallDir);

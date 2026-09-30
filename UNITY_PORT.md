@@ -144,7 +144,9 @@ path reopens when its migrated blocker is disabled.
 `Tools/Unturned/Upgrade installed map ambience and road bundles` rebuilds legacy map bundles
 into a Unity-version and source-content-addressed local cache. It preserves complete texture
 mips and imports self-contained decoded audio before rebuilding. The original Steam files remain
-the source. `UNTURNED_ASSET_DIRECTORY` overrides the default Steam install path. Twenty bundle
+the source. `UNTURNED_ASSET_DIRECTORY` overrides the default Steam install path. Preparation runs automatically after Editor import, before Play, and before player builds.
+Alternate Steam libraries are detected through Steam's library registry; the override is also used
+by the runtime asset loader. Twenty bundle
 references across ten installed maps reduced to twelve unique rebuilt bundles. Verification
 compared 92 assets: all texture mip pixels matched exactly and audio sample differences stayed
 below 0.00005 (`Logs/modern-map-bundle-verification.json`). Player builds copy the verified cache.
@@ -262,11 +264,17 @@ Raw logs, screenshots, Steam-derived bundles, build output, and per-process cred
 | Scope | Result | Qualification |
 | --- | --- | --- |
 | Latest Windows development build (`bbee7281787c`) | Succeeded; 0 errors, 0 warnings | Includes the graphics/display fixes and quit cleanup. |
-| Latest Germany smoke runs, DX12 and Vulkan | Both passed; 0 runtime errors/warnings and 0 native warnings including shutdown | Graphics presets, shadows, AA, SSR, AO off/on images, post effects, FPS, VSync, UI scale, rational refresh serialization, and a real 1024×768 window resize. |
-| Earlier complete installed-map matrix | 20/20 passed; 10 maps × 2 APIs | Build `7748695e82d4`; predates the latest graphics/display fixes. |
+| Latest Germany smoke runs, DX12 and Vulkan | Both passed; 0 runtime errors/warnings and 0 native warnings including shutdown | Graphics presets, shadows, AA, SSR, AO off/on images, post effects, FPS, VSync, UI scale, rational refresh serialization, and a real 1024Ã—768 window resize. |
+| Earlier complete installed-map matrix | 20/20 passed; 10 maps Ã— 2 APIs | Build `7748695e82d4`; predates the latest graphics/display fixes. |
 | Earlier broad EditMode suite | 3,271 passed, 0 failed, 92 skipped | Predates the latest graphics/display fixes; skipped tests are not passes. |
 | Focused resource-leak fixture | First cold run failed; unchanged warm retry passed 1/1 | The cold SSR depth-history failure remains recorded locally; the retry does not establish a new leak fix. |
 
 Exclusive fullscreen, borderless transitions, and physical monitor refresh changes were not automatically exercised. Proprietary SDK-omitted effects remain unavailable, and the AI Navigation compatibility layer does not implement every A* Pro feature. These results do not establish full gameplay or release qualification.
 
 Before publishing, five test-only subassets left in the embedded URP default volume profile by the upstream editor tests were removed together with their component references. Project runtime profiles were unaffected.
+
+## Reproducing from GitHub
+
+The committed `PortReproducibility.BuildWindowsDevelopment` entry point builds the native Windows profile without requiring a running Pipeline server or saved Editor preferences. Preparation creates missing Steam-derived bundles, preserves compressed texture mips through editor serialization, and validates cached bundle checksums, conversion revision, and Unity version before reuse. Build callbacks copy the cache and Steam app-ID file. No generated content is required from the publishing machine.
+
+`Tools/reproduction-baseline.json` records the editor, Steam build ID, and SHA-256 hashes of the source map bundles. `Logs/project-preparation.json` records whether your inputs match it. A Steam update changes the inputs and must be qualified again; matching this receipt is not a promise of identical performance or images on different GPUs/drivers. Unity CLI, Python, and a Steam/Unity license remain external prerequisites for the automated checks.

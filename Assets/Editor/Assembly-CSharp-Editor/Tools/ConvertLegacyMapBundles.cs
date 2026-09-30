@@ -10,11 +10,23 @@ using UnityEngine;
 
 public static class ConvertLegacyMapBundles
 {
+    public static bool InstalledCacheReady()
+    {
+        string steam = PortPreparation.FindSteamGame();
+        foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")))
+            foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
+            {
+                string source = Path.Combine(map, "Environment", name);
+                if (!File.Exists(source)) continue;
+                string target = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion, ModernBundleCache.Fingerprint(source) + ".unity3d");
+                if (!ModernBundleCache.IsVerified(target)) return false;
+            }
+        return true;
+    }
     [MenuItem("Tools/Unturned/Upgrade installed map ambience and road bundles")]
     public static void ConvertInstalledMaps()
     {
-        string steam = Environment.GetEnvironmentVariable("UNTURNED_ASSET_DIRECTORY");
-        if (string.IsNullOrEmpty(steam)) steam = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Unturned");
+        string steam = PortPreparation.FindSteamGame();
         var results = new List<object>();
         foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")))
             foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
@@ -24,6 +36,7 @@ public static class ConvertLegacyMapBundles
             }
         Directory.CreateDirectory("Logs");
         File.WriteAllText("Logs/legacy-map-bundle-conversion.json", Newtonsoft.Json.JsonConvert.SerializeObject(results, Newtonsoft.Json.Formatting.Indented));
+        PortReproducibility.RecordPreparation(steam);
     }
 
     public static object Convert(string source)
@@ -33,7 +46,7 @@ public static class ConvertLegacyMapBundles
         string output = Path.GetFullPath(Path.Combine("Builds", "ConvertedBundles", Application.unityVersion));
         Directory.CreateDirectory(output);
         string target = Path.Combine(output, hash + ".unity3d");
-        if (File.Exists(target) && File.Exists(target + ".verified")) return new { source, target, reused = true };
+        if (ModernBundleCache.IsVerified(target)) return new { source, target, reused = true };
         string folder = "Assets/Generated/ModernMapBundles/" + hash;
         Directory.CreateDirectory(folder);
         AssetDatabase.Refresh();
@@ -50,9 +63,20 @@ public static class ConvertLegacyMapBundles
                     path = folder + "/" + texture.name + ".asset";
                     // Clone the complete native texture, including compressed mip data,
                     // wrap/filter settings, and color-space metadata. No PNG round trip.
-                    var clone = UnityEngine.Object.Instantiate(texture);
+                    // Editor serialization preserves native compressed mip data even
+                    // when the source bundle's texture is non-readable. Instantiate
+                    // rejects those textures in a fresh batch-mode import.
+                    var clone = new Texture2D(2, 2);
+                    EditorUtility.CopySerialized(texture, clone);
                     clone.name = texture.name;
-                    AssetDatabase.CreateAsset(clone, path);
+                    var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                    if (existing != null)
+                    {
+                        EditorUtility.CopySerialized(clone, existing);
+                        UnityEngine.Object.DestroyImmediate(clone);
+                        EditorUtility.SetDirty(existing);
+                    }
+                    else AssetDatabase.CreateAsset(clone, path);
                 }
                 else if (asset is AudioClip clip)
                 {
@@ -86,9 +110,9 @@ public static class ConvertLegacyMapBundles
             AssetDatabase.SaveAssets();
             var build = new AssetBundleBuild { assetBundleName = hash + ".unity3d", assetNames = paths.ToArray(),
                 addressableNames = paths.Select(p => Path.GetFileName(p).ToLowerInvariant()).ToArray() };
-            var manifest = BuildPipeline.BuildAssetBundles(output, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+            var manifest = BuildPipeline.BuildAssetBundles(output, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows64);
             if (manifest == null || !File.Exists(target)) throw new InvalidOperationException("Failed to rebuild " + source);
-            File.WriteAllText(target + ".verified", Application.unityVersion);
+            File.WriteAllText(target + ".verified", ModernBundleCache.VerificationText(target));
             return new { source, target, assets = paths.Count, reused = false };
         }
         finally { if (bundle != null) bundle.Unload(true); }
@@ -110,20 +134,25 @@ public static class ConvertLegacyMapBundles
 
 }
 
-public sealed class ModernMapBundleBuildCopy : IPostprocessBuildWithReport
+public sealed class ModernMapBundleBuildCopy : IPostprocessBuildWithContext
 {
     public int callbackOrder => 100;
-    public void OnPostprocessBuild(BuildReport report)
+    public void OnPostprocessBuild(BuildCallbackContext context)
     {
+        var report = context.Report;
+        // This modern callback also receives AssetBundle builds.
+        if (!context.IsPlayerBuild) return;
         string source = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion);
-        if (!Directory.Exists(source)) return;
+        if (!Directory.Exists(source)) throw new BuildFailedException("Required converted map cache was not prepared.");
         string target = Path.Combine(Path.GetDirectoryName(report.summary.outputPath), "ConvertedBundles", Application.unityVersion);
         Directory.CreateDirectory(target);
         foreach (string file in Directory.GetFiles(source, "*.unity3d"))
         {
-            if (!File.Exists(file + ".verified")) continue;
+            if (!ModernBundleCache.IsVerified(file)) continue;
             File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
             File.Copy(file + ".verified", Path.Combine(target, Path.GetFileName(file) + ".verified"), true);
         }
+        // Direct development launches must initialize Steam rather than restart the installed game.
+        File.Copy("steam_appid.txt", Path.Combine(Path.GetDirectoryName(report.summary.outputPath), "steam_appid.txt"), true);
     }
 }
