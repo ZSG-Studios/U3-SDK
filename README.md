@@ -26,11 +26,21 @@ To build the same development client used for validation, choose **Tools → Unt
 With Unity CLI installed, run from the cloned project directory:
 
 ```powershell
-unity run . --timeout 3600 --log-file Logs/reproduce-editor.log --no-tail -- -force-d3d12 -automated -executeMethod PortReproducibility.BuildWindowsDevelopment
+unity run . --timeout 7200 --log-file Logs/reproduce-editor.log --no-tail -- -force-d3d12 -automated -executeMethod PortReproducibility.BuildWindowsDevelopment
 python Tools/smoke_client.py --graphics-api dx12 --map Germany --verify-graphics
 python Tools/smoke_client.py --graphics-api vulkan --map Germany --verify-graphics
 python Tools/qualify_port.py
 ```
+
+For a DirectX 12-only Windows client, use **Tools → Unturned → Build reproducible Windows DirectX 12 development client**, or:
+
+```powershell
+unity run . --timeout 7200 --log-file Logs/dx12-build-editor.log --no-tail -- -force-d3d12 -automated -executeMethod PortReproducibility.BuildWindowsDevelopmentDirectX12
+```
+
+This writes the same `Builds/Windows64/Unturned.exe` output and records the selected graphics APIs in `Logs/reproducible-build.json`. It restores the project's DX12/Vulkan settings afterward; use the standard build command above to produce a client supporting both APIs again.
+
+Cold import and shader compilation for both graphics APIs can take over an hour. The build command allows two hours; runtime checks retain their separate watchdogs.
 
 These Windows checks require Python, Steam running, and a GPU/driver supporting the selected graphics API. Editor, package, Steam content, graphics settings, and hardware versions affect results; matching source alone does not guarantee identical images or performance on every machine.
 

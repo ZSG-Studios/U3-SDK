@@ -11,6 +11,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>Native Unity batch entry point: no private caches, CLI server, or local build preferences required.</summary>
 public static class PortReproducibility
@@ -64,6 +65,26 @@ public static class PortReproducibility
         ConvertLegacyMapBundles.ConvertInstalledMaps();
     }
 
+    [MenuItem("Tools/Unturned/Build reproducible Windows DirectX 12 development client")]
+    public static void BuildWindowsDevelopmentDirectX12()
+    {
+        const BuildTarget target = BuildTarget.StandaloneWindows64;
+        bool originalAutomaticApis = PlayerSettings.GetUseDefaultGraphicsAPIs(target);
+        var originalApis = PlayerSettings.GetGraphicsAPIs(target);
+        try
+        {
+            PlayerSettings.SetUseDefaultGraphicsAPIs(target, false);
+            PlayerSettings.SetGraphicsAPIs(target, new[] { GraphicsDeviceType.Direct3D12 });
+            BuildWindowsDevelopment();
+        }
+        finally
+        {
+            PlayerSettings.SetGraphicsAPIs(target, originalApis);
+            PlayerSettings.SetUseDefaultGraphicsAPIs(target, originalAutomaticApis);
+            AssetDatabase.SaveAssets();
+        }
+    }
+
     [MenuItem("Tools/Unturned/Build reproducible Windows development client")]
     public static void BuildWindowsDevelopment()
     {
@@ -95,6 +116,7 @@ public static class PortReproducibility
             totalWarnings = summary.totalWarnings,
             totalSeconds = summary.totalTime.TotalSeconds,
             editor = Application.unityVersion,
+            graphicsApis = PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneWindows64).Select(api => api.ToString()).ToArray(),
             profile = profilePath,
             outputPath = summary.outputPath,
         };
