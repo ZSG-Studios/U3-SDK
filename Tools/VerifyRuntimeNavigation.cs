@@ -24,6 +24,8 @@ public sealed class NativeNavigationQualification : MonoBehaviour
     private NavMeshData data;
     private NavMeshDataInstance instance;
     private Mesh mesh;
+    private float simulatedMovementSeconds, startedMovingAt, minimumTimeStep = float.MaxValue, maximumTimeStep;
+    private int movementFrames;
     private IEnumerator Start()
     {
         var origin = new Vector3(10000, 0, 10000);
@@ -64,9 +66,15 @@ public sealed class NativeNavigationQualification : MonoBehaviour
         var movement = pawn.AddComponent<SDG.Unturned.UnityZombieNavigation>(); movement.TargetTransform = target.transform; movement.Speed = 6;
         float maximumLateralDeviation = 0;
         bool enteredBlockedFootprint = false;
+        startedMovingAt = Time.realtimeSinceStartup;
         for (int frame = 0; frame < 500; frame++)
         {
-            movement.Move(Time.deltaTime);
+            float step = Time.deltaTime;
+            simulatedMovementSeconds += step;
+            minimumTimeStep = Mathf.Min(minimumTimeStep, step);
+            maximumTimeStep = Mathf.Max(maximumTimeStep, step);
+            movementFrames++;
+            movement.Move(step);
             var relative = pawn.transform.position - origin;
             maximumLateralDeviation = Mathf.Max(maximumLateralDeviation, Mathf.Abs(relative.z));
             if (Mathf.Abs(relative.x) < 2 && Mathf.Abs(relative.z) < 4) enteredBlockedFootprint = true;
@@ -82,7 +90,9 @@ public sealed class NativeNavigationQualification : MonoBehaviour
     }
     private void Finish(bool passed, string detail, int openCorners, int closedCorners)
     {
-        File.WriteAllText(reportPath, Newtonsoft.Json.JsonConvert.SerializeObject(new { passed, detail, openCorners, closedCorners }, Newtonsoft.Json.Formatting.Indented));
+        File.WriteAllText(reportPath, Newtonsoft.Json.JsonConvert.SerializeObject(new { passed, detail, openCorners, closedCorners,
+            movementFrames, simulatedMovementSeconds, movementElapsedSeconds = startedMovingAt == 0 ? 0 : Time.realtimeSinceStartup - startedMovingAt,
+            minimumTimeStep, maximumTimeStep }, Newtonsoft.Json.Formatting.Indented));
         Destroy(gameObject);
     }
     private void OnDestroy() { if (instance.valid) instance.Remove(); if (data != null) Destroy(data); if (mesh != null) Destroy(mesh); }
