@@ -63,6 +63,7 @@ public static class PortReproducibility
     {
         if (Application.unityVersion != EditorVersion)
             throw new BuildFailedException("Use the pinned Unity " + EditorVersion + " editor for this port; running " + Application.unityVersion);
+        TMProSetup.EnsureReady();
         ConvertLegacyMapBundles.ConvertInstalledMaps();
     }
 
@@ -71,6 +72,7 @@ public static class PortReproducibility
     {
         if (Application.unityVersion != EditorVersion)
             throw new BuildFailedException("Use Unity " + EditorVersion + " to reproduce this port.");
+        TMProSetup.EnsureReady();
         const string profilePath = "Assets/Settings/Build Profiles/Unturned Windows DX12 Vulkan.asset";
         var profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(profilePath);
         if (profile == null) throw new BuildFailedException("Missing committed build profile: " + profilePath);

@@ -11,8 +11,8 @@ The native Windows Build Profile selects DXC for DirectX 12; Vulkan uses Unity's
 
 - Updated packages to the editor's bundled versions: Burst 2.0.0, Collections 6.7.0, Editor Coroutines 6.6.0, uGUI 2.7.0, and Test Framework 1.9.0.
 - Updated Visual Studio integration to 2.0.28 and Memory Profiler to the latest stable 1.1.12.
-- Removed the deprecated TextMesh Pro shim. Essential resources resolve from the package owning `TMP_Text`, and use the current package-import API.
-- Modernized fragment outputs to `SV_Target`. The resource importer also upgrades the old shader debug pragma and fragment semantics in the installed TextMesh Pro resource archive.
+- Removed the deprecated TextMesh Pro shim. Required TextMesh Pro settings, fonts, atlases, materials, shaders, and their GUID metadata are version-controlled project assets. Play/build preparation validates them instead of relying on an asynchronous first-open package import.
+- Modernized fragment outputs to `SV_Target` and upgraded the old shader debug pragma in the committed TextMesh Pro resources.
 - Applied Unity's API updater for rigidbody velocity/damping, physics material names, and light fade properties.
 - Used full `EntityId` keys in prefab pools and material/attachment caches, and in component ordering.
 - Updated editor assembly enumeration to `CurrentAssemblies.GetLoadedAssemblies()` and scripting defines to `NamedBuildTarget`.

@@ -295,6 +295,9 @@ def main():
             "before 2019.1 are deprecated", "below the supported minimum",
             "Instantiating a non-readable", "BoxCollider does not support negative scale",
             "The referenced script on this Behaviour", "Serialization layout mismatch",
+            "NullReferenceException:", "MissingReferenceException:", "MissingMethodException:",
+            "TypeLoadException:", "InvalidOperationException:", "ArgumentException:",
+            "IndexOutOfRangeException:", "DllNotFoundException:", "FileNotFoundException:",
         )
         report["nativeProblemsIncludingShutdown"] = list(dict.fromkeys(
             line for line in native_log.splitlines() if any(marker in line for marker in native_failure_markers)))

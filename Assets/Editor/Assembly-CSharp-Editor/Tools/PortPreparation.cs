@@ -66,7 +66,11 @@ public static partial class PortPreparation
             return;
         }
         if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-        try { ConvertLegacyMapBundles.ConvertInstalledMaps(); }
+        try
+        {
+            TMProSetup.EnsureReady();
+            ConvertLegacyMapBundles.ConvertInstalledMaps();
+        }
         catch (DirectoryNotFoundException error) { Debug.Log("SDK preparation: " + error.Message); }
         catch (Exception error) { Debug.LogException(error); }
     }
@@ -78,6 +82,7 @@ public static partial class PortPreparation
         if (!EditorApplication.isPlayingOrWillChangePlaymode) return;
         try
         {
+            TMProSetup.EnsureReady();
             if (ConvertLegacyMapBundles.InstalledCacheReady()) return;
             // Cancel the transition before importing/building missing content. Once
             // ready, resume the original Play request without another user action.
@@ -107,7 +112,11 @@ public sealed class PortBuildPreparation : BuildPlayerProcessor
     {
         if (context.BuildPlayerOptions.target != BuildTarget.StandaloneWindows64)
             throw new BuildFailedException("This Unity port is qualified for Windows 64-bit with DX12/Vulkan. Select the Unturned Windows DX12 Vulkan profile.");
-        try { ConvertLegacyMapBundles.ConvertInstalledMaps(); }
+        try
+        {
+            TMProSetup.EnsureReady();
+            ConvertLegacyMapBundles.ConvertInstalledMaps();
+        }
         catch (Exception error) { throw new BuildFailedException("SDK preparation failed: " + error.Message); }
     }
 }

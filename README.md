@@ -19,6 +19,8 @@ Source code for [Unturned](https://smartlydressedgames.com/unturned/), a free op
 
 The editor prepares the required map audio/road conversions automatically from your installed Steam content. The first preparation takes longer; subsequent runs reuse a verified cache. Alternate Steam libraries are discovered automatically. If discovery fails, set `UNTURNED_ASSET_DIRECTORY` to the installed Unturned directory before launching Unity.
 
+Required TextMesh Pro UI resources and their metadata are included in Git. No manual font/resource import is needed. Preparation validates those assets before Play/build; generated Steam conversions remain local.
+
 To build the same development client used for validation, choose **Tools → Unturned → Build reproducible Windows development client**. This uses the committed build profile, prepares missing content, and copies the generated cache and `steam_appid.txt` into the output. Unity CLI is optional for opening and building; it is required by the automated runtime checks.
 
 With Unity CLI installed, run from the cloned project directory:
