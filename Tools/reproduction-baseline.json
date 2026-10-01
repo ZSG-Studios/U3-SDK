@@ -11,12 +11,20 @@
       "sha256": "e658ca0ed14ff74ad042c29fddde0daa67a20363ed4883b44206e7114b1a20a4"
     },
     {
+      "relativePath": "Maps/Alpha Valley/Terrain/Materials.unity3d",
+      "sha256": "8301b17b2f52cfc12ae2ff5abfdfc4b8fcb3b3706e581998f35e93b0c4fa36b3"
+    },
+    {
       "relativePath": "Maps/Destruction/Environment/Ambience.unity3d",
       "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
     },
     {
       "relativePath": "Maps/Destruction/Environment/Roads.unity3d",
       "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Destruction/Terrain/Materials.unity3d",
+      "sha256": "3e896ba9b16b254928876873ba0412ffeb7598b224ccf992860b44915eb3ff27"
     },
     {
       "relativePath": "Maps/Germany/Environment/Ambience.unity3d",
@@ -27,6 +35,10 @@
       "sha256": "adc79e7d3bcd757bce51a9662c9fbc3305cdd256614a560e1949bec599cc3f36"
     },
     {
+      "relativePath": "Maps/Germany/Terrain/Materials.unity3d",
+      "sha256": "3e896ba9b16b254928876873ba0412ffeb7598b224ccf992860b44915eb3ff27"
+    },
+    {
       "relativePath": "Maps/Monolith/Environment/Ambience.unity3d",
       "sha256": "193bd03c4051c00c5aefb2643fb8b48e49d5427b4bd6a979208ac828c04ba311"
     },
@@ -35,12 +47,8 @@
       "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
     },
     {
-      "relativePath": "Maps/PEI/Environment/Ambience.unity3d",
-      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
-    },
-    {
-      "relativePath": "Maps/PEI/Environment/Roads.unity3d",
-      "sha256": "afbc444409e2fe5cd58c09978fe288363cda74c9e67b0e2ee4ed7d613be73a1b"
+      "relativePath": "Maps/Monolith/Terrain/Materials.unity3d",
+      "sha256": "0ca01014d376ed1c1b3714151a0ec9dff85bc690f85c0732ba74766e904832af"
     },
     {
       "relativePath": "Maps/Paintball_Arena_0/Environment/Ambience.unity3d",
@@ -51,12 +59,32 @@
       "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
     },
     {
+      "relativePath": "Maps/Paintball_Arena_0/Terrain/Materials.unity3d",
+      "sha256": "3e896ba9b16b254928876873ba0412ffeb7598b224ccf992860b44915eb3ff27"
+    },
+    {
+      "relativePath": "Maps/PEI/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/PEI/Environment/Roads.unity3d",
+      "sha256": "afbc444409e2fe5cd58c09978fe288363cda74c9e67b0e2ee4ed7d613be73a1b"
+    },
+    {
+      "relativePath": "Maps/PEI/Terrain/Materials.unity3d",
+      "sha256": "a7734f517eeb921130b15c0525e4125634e286011c52cca71674ba097e3f1c4f"
+    },
+    {
       "relativePath": "Maps/Russia/Environment/Ambience.unity3d",
       "sha256": "17bf73e6b425051617e7801160efff82f674c917ace42f5dcb19c4a42e9b7063"
     },
     {
       "relativePath": "Maps/Russia/Environment/Roads.unity3d",
       "sha256": "2da64b2bb1cbfe500fdd8b7ea7e27a4aa43ee2703cc7b066da351d50c0473ac5"
+    },
+    {
+      "relativePath": "Maps/Russia/Terrain/Materials.unity3d",
+      "sha256": "e1759b8873e2eeef518df43a2fb3ea2c0b0cfc16f79685667f36f821ce5253b3"
     },
     {
       "relativePath": "Maps/Tutorial/Environment/Ambience.unity3d",
@@ -67,6 +95,10 @@
       "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
     },
     {
+      "relativePath": "Maps/Tutorial/Terrain/Materials.unity3d",
+      "sha256": "0f42b8fc453416b39a4419800526fc61dcf81967da4d5236f7388de94c5acff3"
+    },
+    {
       "relativePath": "Maps/Washington/Environment/Ambience.unity3d",
       "sha256": "551775c479db7826c228964a128a25121587c7bfb649b13a88951245507beff8"
     },
@@ -75,12 +107,20 @@
       "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
     },
     {
+      "relativePath": "Maps/Washington/Terrain/Materials.unity3d",
+      "sha256": "33d5e1313c7e52bacb2441c1620f6c1288f5df10dcebc8c35186d954d02c18c4"
+    },
+    {
       "relativePath": "Maps/Yukon/Environment/Ambience.unity3d",
       "sha256": "1fc12349a4e2f31033bdf80cdbf306d4e26ceade010963a9eba599da43025129"
     },
     {
       "relativePath": "Maps/Yukon/Environment/Roads.unity3d",
       "sha256": "7b54df178414422d8e7944e567fe5be8b5a4d1f3139cebb94159862ce6f2fddf"
+    },
+    {
+      "relativePath": "Maps/Yukon/Terrain/Materials.unity3d",
+      "sha256": "723db50c5537828ffbb04b2745ba2a63384573cbf2c8d89ebe3e2a62ffb79ee3"
     }
   ]
 }

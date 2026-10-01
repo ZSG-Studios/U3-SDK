@@ -17,7 +17,7 @@ Source code for [Unturned](https://smartlydressedgames.com/unturned/), a free op
 7. Open the `Assets/GameStartup.unity` scene
 8. Click play!
 
-The editor prepares the required map audio/road conversions automatically from your installed Steam content. The first preparation takes longer; subsequent runs reuse a verified cache. Alternate Steam libraries are discovered automatically. If discovery fails, set `UNTURNED_ASSET_DIRECTORY` to the installed Unturned directory before launching Unity.
+The editor prepares the required map audio/road conversions and legacy terrain texture-name metadata automatically from your installed Steam content. The first preparation takes longer; subsequent runs reuse a verified cache. Alternate Steam libraries are discovered automatically. If discovery fails, set `UNTURNED_ASSET_DIRECTORY` to the installed Unturned directory before launching Unity.
 
 Required TextMesh Pro UI resources and their metadata are included in Git. No manual font/resource import is needed. Preparation validates those assets before Play/build; generated Steam conversions remain local.
 

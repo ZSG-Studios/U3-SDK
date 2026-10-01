@@ -576,12 +576,17 @@ namespace SDG.Unturned
 
 				try
 				{
-					Bundle materialBundle = Bundles.getBundle(materialsAssetBundlePath, false);
-					Texture2D[] materialTextures = materialBundle.loadAll<Texture2D>();
-					int layerIndex = 0;
-					foreach (Texture2D materialTexture in materialTextures)
+					string[] materialNames = ModernBundleCache.ReadTerrainTextureNames(materialsAssetBundlePath);
+					if (materialNames == null)
 					{
-						string materialName = materialTexture.name;
+						// Compatibility for community maps not yet prepared by the SDK.
+						Bundle materialBundle = Bundles.getBundle(materialsAssetBundlePath, false);
+						try { materialNames = System.Array.ConvertAll(materialBundle.loadAll<Texture2D>(), texture => texture.name); }
+						finally { materialBundle.unload(); }
+					}
+					int layerIndex = 0;
+					foreach (string materialName in materialNames)
+					{
 						if (materialName.IndexOf("_Mask") != -1)
 						{
 							continue;
@@ -643,7 +648,6 @@ namespace SDG.Unturned
 							break;
 						}
 					}
-					materialBundle.unload();
 				}
 				catch (System.Exception exception)
 				{

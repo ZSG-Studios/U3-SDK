@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
+using System.Linq;
 
 public static class VerifyModernMapBundles
 {
@@ -14,11 +15,27 @@ public static class VerifyModernMapBundles
         var inputs = JArray.Parse(File.ReadAllText("Logs/legacy-map-bundle-conversion.json"));
         var results = new List<object>();
         var seen = new HashSet<string>();
+        int terrainManifests = 0, terrainNames = 0;
         foreach (var record in inputs)
         {
             string source = (string)record["source"], target = (string)record["target"];
             if (!seen.Add(target)) continue;
             var original = AssetBundle.LoadFromFile(source);
+            if (original == null) throw new InvalidDataException("Original bundle load failed");
+            if (ModernBundleCache.IsTerrainNamesSource(source))
+            {
+                try
+                {
+                    var names = original.LoadAllAssets<Texture2D>().Select(texture => texture.name).ToArray();
+                    var prepared = Newtonsoft.Json.JsonConvert.DeserializeObject<string[]>(File.ReadAllText(target));
+                    if (!ModernBundleCache.IsVerified(target) || !names.SequenceEqual(prepared))
+                        throw new InvalidDataException("Terrain texture order changed: " + source);
+                    results.Add(new { bundle = Path.GetFileName(target), kind = "terrainNames", names });
+                    terrainManifests++; terrainNames += names.Length;
+                }
+                finally { original.Unload(true); }
+                continue;
+            }
             var rebuilt = AssetBundle.LoadFromFile(target);
             if (original == null || rebuilt == null) throw new InvalidDataException("Bundle load failed");
             try
@@ -68,6 +85,6 @@ public static class VerifyModernMapBundles
             finally { if (original != null) original.Unload(true); if (rebuilt != null) rebuilt.Unload(true); }
         }
         File.WriteAllText("Logs/modern-map-bundle-verification.json", Newtonsoft.Json.JsonConvert.SerializeObject(results, Newtonsoft.Json.Formatting.Indented));
-        return new { passed = true, bundles = seen.Count, assets = results.Count };
+        return new { passed = true, bundles = seen.Count - terrainManifests, assets = results.Count - terrainManifests, terrainManifests, terrainNames };
     }
 }

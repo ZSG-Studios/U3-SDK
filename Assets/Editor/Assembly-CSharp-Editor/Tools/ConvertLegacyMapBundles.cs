@@ -13,9 +13,9 @@ public static class ConvertLegacyMapBundles
     public static IEnumerable<string> InstalledSources(string steam)
     {
         foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")).OrderBy(p => p, StringComparer.Ordinal))
-            foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
+            foreach (string name in new[] { "Environment/Ambience.unity3d", "Environment/Roads.unity3d", "Terrain/Materials.unity3d" })
             {
-                string source = Path.Combine(map, "Environment", name);
+                string source = Path.Combine(map, name);
                 if (File.Exists(source)) yield return source;
             }
     }
@@ -25,7 +25,7 @@ public static class ConvertLegacyMapBundles
         string steam = PortPreparation.FindSteamGame();
         foreach (string source in InstalledSources(steam))
         {
-            string target = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion, ModernBundleCache.Fingerprint(source) + ".unity3d");
+            string target = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion, ModernBundleCache.PreparedFileName(source));
             if (!ModernBundleCache.IsVerified(target)) return false;
         }
         return true;
@@ -35,10 +35,32 @@ public static class ConvertLegacyMapBundles
     {
         string steam = PortPreparation.FindSteamGame();
         var results = new List<object>();
-        foreach (string source in InstalledSources(steam)) results.Add(Convert(source));
+        foreach (string source in InstalledSources(steam))
+            results.Add(ModernBundleCache.IsTerrainNamesSource(source) ? ConvertTerrainNames(source) : Convert(source));
         Directory.CreateDirectory("Logs");
         File.WriteAllText("Logs/legacy-map-bundle-conversion.json", Newtonsoft.Json.JsonConvert.SerializeObject(results, Newtonsoft.Json.Formatting.Indented));
         PortReproducibility.RecordPreparation(steam);
+    }
+
+    public static object ConvertTerrainNames(string source)
+    {
+        if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play mode before preparing terrain metadata");
+        string target = Path.Combine(ModernBundleCache.CacheDirectory, ModernBundleCache.PreparedFileName(source));
+        if (ModernBundleCache.IsVerified(target)) return new { source, target, reused = true };
+        Directory.CreateDirectory(Path.GetDirectoryName(target));
+        var bundle = AssetBundle.LoadFromFile(source);
+        if (bundle == null) throw new InvalidDataException("Cannot read terrain material names: " + source);
+        try
+        {
+            // Keep the original texture order: legacy splatmap layer indices depend
+            // on it. Runtime only needs these names, never the obsolete textures.
+            var names = bundle.LoadAllAssets<Texture2D>().Select(texture => texture.name).ToArray();
+            if (names.Length == 0 || names.Any(string.IsNullOrEmpty)) throw new InvalidDataException("Empty terrain texture metadata: " + source);
+            File.WriteAllText(target, Newtonsoft.Json.JsonConvert.SerializeObject(names));
+            File.WriteAllText(target + ".verified", ModernBundleCache.VerificationText(target));
+            return new { source, target, reused = false };
+        }
+        finally { bundle.Unload(true); }
     }
 
     public static object Convert(string source)
@@ -149,7 +171,7 @@ public sealed class ModernMapBundleBuildCopy : IPostprocessBuildWithContext
         string target = Path.Combine(Path.GetDirectoryName(report.summary.outputPath), "ConvertedBundles", Application.unityVersion);
         Directory.CreateDirectory(target);
         var files = ConvertLegacyMapBundles.InstalledSources(PortPreparation.FindSteamGame())
-            .Select(path => Path.Combine(source, ModernBundleCache.Fingerprint(path) + ".unity3d")).Distinct();
+            .Select(path => Path.Combine(source, ModernBundleCache.PreparedFileName(path))).Distinct();
         foreach (string file in files)
         {
             if (!ModernBundleCache.IsVerified(file)) throw new BuildFailedException("Invalid prepared map bundle: " + Path.GetFileName(file));

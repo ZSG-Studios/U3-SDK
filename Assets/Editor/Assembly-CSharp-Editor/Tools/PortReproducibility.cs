@@ -32,16 +32,12 @@ public static class PortReproducibility
     public static void RecordPreparation(string steam)
     {
         var inputs = new List<object>();
-        foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")).OrderBy(p => p, StringComparer.Ordinal))
-            foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
+        foreach (string source in ConvertLegacyMapBundles.InstalledSources(steam))
+            inputs.Add(new
             {
-                string source = Path.Combine(map, "Environment", name);
-                if (File.Exists(source)) inputs.Add(new
-                {
-                    relativePath = "Maps/" + Path.GetFileName(map) + "/Environment/" + name,
-                    sha256 = ModernBundleCache.Fingerprint(source),
-                });
-            }
+                relativePath = Path.GetRelativePath(steam, source).Replace('\\', '/'),
+                sha256 = ModernBundleCache.Fingerprint(source),
+            });
         string manifest = Path.Combine(new DirectoryInfo(steam).Parent.Parent.FullName, "appmanifest_304930.acf");
         string buildId = File.Exists(manifest) ? Regex.Match(File.ReadAllText(manifest), "\"buildid\"\\s*\"([^\"]+)\"").Groups[1].Value : null;
         bool? matchesBaseline = null;
