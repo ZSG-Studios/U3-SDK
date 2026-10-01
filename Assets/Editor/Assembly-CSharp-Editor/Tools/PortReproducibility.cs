@@ -21,6 +21,7 @@ public static class PortReproducibility
     {
         AssetDatabase.ForceReserializeAssets(new[]
         {
+            "Assets/TextMesh Pro/Fonts/LiberationSans.ttf",
             "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractive.shadergraph",
             "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractiveMasked.shadergraph",
             "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractiveTransparent.shadergraph",
