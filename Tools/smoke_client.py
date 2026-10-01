@@ -247,6 +247,16 @@ def main():
                         report["navigationFixture"] = json.loads(navigation_path.read_text(encoding="utf-8"))
                         if not report["navigationFixture"].get("passed"):
                             raise RuntimeError("Native navigation fixture failed: " + str(report["navigationFixture"]))
+                        navigation = fixture("VerifyRuntimeNavigation.cs", "VerifyLowFrameRateNavigation")
+                        deadline = time.monotonic() + 25
+                        navigation_path = Path(navigation["reportPath"])
+                        while not navigation_path.is_file() and time.monotonic() < deadline:
+                            time.sleep(1)
+                        if not navigation_path.is_file():
+                            raise TimeoutError("Low-frame-rate navigation fixture exceeded its watchdog")
+                        report["lowFrameRateNavigationFixture"] = json.loads(navigation_path.read_text(encoding="utf-8"))
+                        if not report["lowFrameRateNavigationFixture"].get("passed"):
+                            raise RuntimeError("Low-frame-rate navigation fixture failed: " + str(report["lowFrameRateNavigationFixture"]))
                     time.sleep(3)
                     report["console"] = command("console_status")
                     if report["console"]["counts"]["error"]:

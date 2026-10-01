@@ -151,7 +151,7 @@ namespace SDG.Unturned
         private void Awake() { controller = GetComponent<CharacterController>(); path = new NavMeshPath(); }
         public void Move(float deltaTime)
         {
-            if (controller == null || !controller.enabled || !CanMove || TargetTransform == null) return;
+            if (controller == null || !controller.enabled || !CanMove || TargetTransform == null || deltaTime <= 0) return;
             if (CanSearch && Time.time >= nextSearch)
             {
                 nextSearch = Time.time + .25f;
@@ -162,15 +162,18 @@ namespace SDG.Unturned
                 { cornerCount = path.GetCornersNonAlloc(corners); cornerIndex = cornerCount > 1 ? 1 : 0; }
             }
             while (cornerIndex < cornerCount - 1 && (corners[cornerIndex] - transform.position).GetHorizontal().sqrMagnitude < .25f) cornerIndex++;
-            var direction = cornerIndex < cornerCount ? (corners[cornerIndex] - transform.position).GetHorizontal().normalized : Vector3.zero;
+            var offset = cornerIndex < cornerCount ? (corners[cornerIndex] - transform.position).GetHorizontal() : Vector3.zero;
+            var direction = offset.normalized;
             if (CanTurn && direction.sqrMagnitude > .001f)
             {
                 TargetDirection = direction;
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), 720 * deltaTime);
             }
-            var velocity = direction * Speed;
-            velocity.y = Physics.gravity.y * 2;
-            controller.Move(velocity * deltaTime);
+            // A hitch must not step beyond a corner: that can leave subsequent
+            // frames oscillating outside the corner's arrival tolerance.
+            var displacement = Vector3.MoveTowards(Vector3.zero, offset, Speed * deltaTime);
+            displacement.y = Physics.gravity.y * 2 * deltaTime;
+            controller.Move(displacement);
         }
     }
 }
