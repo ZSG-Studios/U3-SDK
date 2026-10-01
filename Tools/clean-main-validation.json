@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/ZSG-Studios/U3-SDK",
+  "validatedAtUtc": "2026-10-01T03:41:59.523182+00:00",
+  "status": "passed",
+  "scope": "Germany on DX12 and Vulkan, followed by a DirectX 12-only Windows build",
+  "fullMapMatrixRerun": false,
+  "fullMatrixCancelledAtUserRequest": true,
+  "cloneInitialSourceCommit": "5daad0f1bff6a5adc96a545230ffef1a224d39bf",
+  "dx12BuildSourceCommit": "3910f2c193ee12b834402a48423960a8310fecfc",
+  "editor": "6000.7.0b2",
+  "steamBuildId": "25613056",
+  "hardware": {
+    "platform": "Windows64",
+    "gpu": "AMD Radeon RX 9070 XT"
+  },
+  "freshClone": {
+    "branch": "main",
+    "downloadedFromGitHub": true,
+    "absentAtStart": {
+      "Library": true,
+      "Temp": true,
+      "UserSettings": true,
+      "Assets/Generated": true,
+      "Builds/ConvertedBundles": true,
+      "Builds/Windows64/Unturned_Data": true
+    },
+    "copiedGeneratedContent": false,
+    "gitAlternatesAbsent": true,
+    "tmpSettingsTracked": true
+  },
+  "sourceMatchesRecordedBaseline": true,
+  "mapBundleInputs": 30,
+  "coldDualApiBuild": {
+    "buildId": "reproduce_ebc36143bb6b4a75a08887392537ff00",
+    "result": "Succeeded",
+    "totalErrors": 0,
+    "totalWarnings": 0,
+    "totalSeconds": 5100.9576639,
+    "editor": "6000.7.0b2"
+  },
+  "coldBuildExitEvidence": {
+    "nativeEditorExitCode": 0,
+    "cliWrapperExitCode": null,
+    "note": "The background PowerShell wrapper did not save its exit status. The native Editor log confirms successful shutdown and return code 0; the native build receipt passed."
+  },
+  "contentVerification": {
+    "passed": true,
+    "bundles": 12,
+    "textureAndAudioAssets": 92,
+    "terrainManifests": 8,
+    "terrainNamesInOriginalOrder": 80
+  },
+  "mapTests": [
+    {
+      "map": "Germany",
+      "api": "Direct3D12",
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "nativeWarningCallsIncludingShutdown": 0,
+      "nativeFailuresIncludingShutdown": 0,
+      "graphicsSettingsPassed": true,
+      "aoChangedPixels": [
+        219,
+        234
+      ],
+      "display": {
+        "width": 1024,
+        "height": 768,
+        "mode": "Windowed"
+      },
+      "displayAspectRatio": 1.33333337,
+      "scopeWidth": 768,
+      "waterPassed": true,
+      "navigationPassed": true,
+      "lowFrameRateNavigationPassed": true,
+      "watchdogFired": false,
+      "elapsedSeconds": 77.09
+    },
+    {
+      "map": "Germany",
+      "api": "Vulkan",
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "nativeWarningCallsIncludingShutdown": 0,
+      "nativeFailuresIncludingShutdown": 0,
+      "graphicsSettingsPassed": true,
+      "aoChangedPixels": [
+        206,
+        210
+      ],
+      "display": {
+        "width": 1024,
+        "height": 768,
+        "mode": "Windowed"
+      },
+      "displayAspectRatio": 1.33333337,
+      "scopeWidth": 768,
+      "waterPassed": true,
+      "navigationPassed": true,
+      "lowFrameRateNavigationPassed": true,
+      "watchdogFired": false,
+      "elapsedSeconds": 104.89
+    }
+  ],
+  "dx12OnlyBuild": {
+    "buildId": "reproduce_67b3bdef865449b7aec710b871d62404",
+    "result": "Succeeded",
+    "totalErrors": 0,
+    "totalWarnings": 0,
+    "totalSeconds": 198.9822103,
+    "editor": "6000.7.0b2",
+    "graphicsApis": [
+      "Direct3D12"
+    ]
+  },
+  "dx12OnlyBuildCliExitCode": 0,
+  "projectGraphicsApiSettingsRestored": true,
+  "initialAttempts": {
+    "coldRuntime": {
+      "result": "failed",
+      "watchdogFired": true,
+      "elapsedSeconds": 242.45,
+      "germanyLoaded": true,
+      "graphicsSettingsPassed": true,
+      "note": "First cold runtime startup used about 156 seconds. The unchanged 240-second whole-run watchdog ended the test after graphics/display checks; the subsequent complete DX12 retest passed."
+    },
+    "vulkanIconDownload": {
+      "result": "failed",
+      "warnings": 1,
+      "reason": "Optional Steam-hosted menu icon returned a texture data-processing error. The same test was rerun without suppressing warnings or changing network behavior and passed."
+    }
+  },
+  "limitations": [
+    "This rerun covers Germany only; the earlier 20-case receipt is a separate historical qualification.",
+    "Results require the pinned editor, recorded Steam inputs, and compatible hardware. They do not guarantee identical startup time, images, or performance on other machines.",
+    "External menu image services can fail independently of map rendering."
+  ],
+  "rawEvidence": "Full native logs, failed attempts, screenshots, and JSON reports remain in the clean clone Logs directory; generated content and raw logs are not published."
+}

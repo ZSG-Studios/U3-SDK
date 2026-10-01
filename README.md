@@ -46,6 +46,8 @@ These Windows checks require Python, Steam running, and a GPU/driver supporting 
 
 ## Resources
 
+- [Latest clean-clone Germany checks and DX12-only build receipt](Tools/clean-main-validation.json)
+
 - [Unity 6 port, tooling, and validation](UNITY_PORT.md)
 
 - [Frequently Asked Questions](https://docs.smartlydressedgames.com/en/stable/u3-sdk/faq.html)
