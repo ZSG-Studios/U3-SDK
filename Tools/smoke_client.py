@@ -287,10 +287,22 @@ def main():
         # Shutdown callbacks can log after the managed console's final query.
         native_log = (LOGS / ("standalone-client" + suffix + ".log")).read_text(encoding="utf-8", errors="replace")
         report["nativeWarningCallsIncludingShutdown"] = sum("UnityEngine.Debug:LogWarning" in line for line in native_log.splitlines())
-        shutdown_failed = report["result"] == "passed" and report["nativeWarningCallsIncludingShutdown"] > 0
+        # Engine serialization/importer messages can bypass both managed counters
+        # and Debug.LogWarning. Reject them in the player as well as GPU errors.
+        native_failure_markers = (
+            "ERROR: Shader ", "Shader error in ", "UnityEngine.Debug:LogError", "UnityEngine.Debug:LogException",
+            "Releasing render texture that is set to be RenderTexture.active",
+            "before 2019.1 are deprecated", "below the supported minimum",
+            "Instantiating a non-readable", "BoxCollider does not support negative scale",
+            "The referenced script on this Behaviour", "Serialization layout mismatch",
+        )
+        report["nativeProblemsIncludingShutdown"] = list(dict.fromkeys(
+            line for line in native_log.splitlines() if any(marker in line for marker in native_failure_markers)))
+        shutdown_failed = report["result"] == "passed" and (
+            report["nativeWarningCallsIncludingShutdown"] > 0 or report["nativeProblemsIncludingShutdown"])
         if shutdown_failed:
             report["result"] = "failed"
-            report["failure"] = "Native log contains warning calls, including shutdown; inspect its full log"
+            report["failure"] = "Native log contains warnings or engine failures, including shutdown; inspect its full log"
         (LOGS / ("standalone-smoke" + suffix + ".json")).write_text(json.dumps(report, indent=2), encoding="utf-8")
         if shutdown_failed:
             raise RuntimeError(report["failure"])

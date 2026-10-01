@@ -10,17 +10,24 @@ using UnityEngine;
 
 public static class ConvertLegacyMapBundles
 {
-    public static bool InstalledCacheReady()
+    public static IEnumerable<string> InstalledSources(string steam)
     {
-        string steam = PortPreparation.FindSteamGame();
-        foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")))
+        foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")).OrderBy(p => p, StringComparer.Ordinal))
             foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
             {
                 string source = Path.Combine(map, "Environment", name);
-                if (!File.Exists(source)) continue;
-                string target = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion, ModernBundleCache.Fingerprint(source) + ".unity3d");
-                if (!ModernBundleCache.IsVerified(target)) return false;
+                if (File.Exists(source)) yield return source;
             }
+    }
+
+    public static bool InstalledCacheReady()
+    {
+        string steam = PortPreparation.FindSteamGame();
+        foreach (string source in InstalledSources(steam))
+        {
+            string target = Path.Combine("Builds", "ConvertedBundles", Application.unityVersion, ModernBundleCache.Fingerprint(source) + ".unity3d");
+            if (!ModernBundleCache.IsVerified(target)) return false;
+        }
         return true;
     }
     [MenuItem("Tools/Unturned/Upgrade installed map ambience and road bundles")]
@@ -28,12 +35,7 @@ public static class ConvertLegacyMapBundles
     {
         string steam = PortPreparation.FindSteamGame();
         var results = new List<object>();
-        foreach (string map in Directory.GetDirectories(Path.Combine(steam, "Maps")))
-            foreach (string name in new[] { "Ambience.unity3d", "Roads.unity3d" })
-            {
-                string source = Path.Combine(map, "Environment", name);
-                if (File.Exists(source)) results.Add(Convert(source));
-            }
+        foreach (string source in InstalledSources(steam)) results.Add(Convert(source));
         Directory.CreateDirectory("Logs");
         File.WriteAllText("Logs/legacy-map-bundle-conversion.json", Newtonsoft.Json.JsonConvert.SerializeObject(results, Newtonsoft.Json.Formatting.Indented));
         PortReproducibility.RecordPreparation(steam);
@@ -146,9 +148,11 @@ public sealed class ModernMapBundleBuildCopy : IPostprocessBuildWithContext
         if (!Directory.Exists(source)) throw new BuildFailedException("Required converted map cache was not prepared.");
         string target = Path.Combine(Path.GetDirectoryName(report.summary.outputPath), "ConvertedBundles", Application.unityVersion);
         Directory.CreateDirectory(target);
-        foreach (string file in Directory.GetFiles(source, "*.unity3d"))
+        var files = ConvertLegacyMapBundles.InstalledSources(PortPreparation.FindSteamGame())
+            .Select(path => Path.Combine(source, ModernBundleCache.Fingerprint(path) + ".unity3d")).Distinct();
+        foreach (string file in files)
         {
-            if (!ModernBundleCache.IsVerified(file)) continue;
+            if (!ModernBundleCache.IsVerified(file)) throw new BuildFailedException("Invalid prepared map bundle: " + Path.GetFileName(file));
             File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
             File.Copy(file + ".verified", Path.Combine(target, Path.GetFileName(file) + ".verified"), true);
         }

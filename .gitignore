@@ -215,3 +215,7 @@ __pycache__/
 
 # Local Windows shortcuts to this machine's Editor logs.
 /*.lnk
+
+# Pipeline bakes these transient Resources assets from ProjectSettings for each build.
+/Assets/Settings/Pipeline/Resources/RuntimePipelineConfig.asset*
+/Assets/Settings/Pipeline/Resources/RuntimePipelineBuildInfo.asset*

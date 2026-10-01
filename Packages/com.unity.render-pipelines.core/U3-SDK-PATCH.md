@@ -27,3 +27,5 @@ fixes the compiler rather than disabling shader optimization project-wide.
 The player graphics-settings stripper excludes test assemblies referencing NUnit during player
 builds. Test fixtures contain deliberately invalid stripper constructors; they are not
 production strippers. Normal editor/test discovery and its constructor validation are retained.
+
+Cold-import fixes: the visible-light culling fixture uses the current unsorted `FindObjectsByType` overload. The deprecated editor compatibility declarations are in `DebugState.cs`, with their original script GUID, so the filename matches the ScriptableObject base type and the native MonoScript importer resolves it without a partial-class notice. RenderGraphViewer stylesheet importer metadata was reserialized through Unity to its current version. Public compatibility types are retained.

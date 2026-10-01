@@ -66,7 +66,7 @@ namespace UnityEngine.Rendering.Tests
             // Existing lights commonly affect every layer, so using a dedicated GameObject layer alone
             // does not stop them from appearing in the culling results or consuming the light budget.
             m_ExistingLightMasks = new List<(Light, int)>();
-            foreach (var light in Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var light in Object.FindObjectsByType<Light>(FindObjectsInactive.Include))
             {
                 if ((light.cullingMask & k_TestLayerMask) == 0)
                     continue;

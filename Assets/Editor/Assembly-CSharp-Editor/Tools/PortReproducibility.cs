@@ -17,6 +17,17 @@ public static class PortReproducibility
 {
     public const string EditorVersion = "6000.7.0b2";
 
+    public static void UpgradeEmbeddedImportMetadata()
+    {
+        AssetDatabase.ForceReserializeAssets(new[]
+        {
+            "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractive.shadergraph",
+            "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractiveMasked.shadergraph",
+            "Packages/com.unity.render-pipelines.universal/Shaders/AutodeskInteractive/AutodeskInteractiveTransparent.shadergraph",
+            "Packages/com.unity.render-pipelines.core/Editor/StyleSheets/RenderGraphViewer.uss",
+        }, ForceReserializeAssetsOptions.ReserializeMetadata);
+    }
+
     public static void RecordPreparation(string steam)
     {
         var inputs = new List<object>();
@@ -30,7 +41,7 @@ public static class PortReproducibility
                     sha256 = ModernBundleCache.Fingerprint(source),
                 });
             }
-        string manifest = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(steam)), "appmanifest_304930.acf");
+        string manifest = Path.Combine(new DirectoryInfo(steam).Parent.Parent.FullName, "appmanifest_304930.acf");
         string buildId = File.Exists(manifest) ? Regex.Match(File.ReadAllText(manifest), "\"buildid\"\\s*\"([^\"]+)\"").Groups[1].Value : null;
         bool? matchesBaseline = null;
         if (File.Exists("Tools/reproduction-baseline.json"))

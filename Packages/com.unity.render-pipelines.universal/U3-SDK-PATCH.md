@@ -25,3 +25,5 @@ both project settings.
 UniversalAdditionalCameraData disposes nonserialized history in Editor OnDisable before
 domain reload recreates its owner. Persistent Scene View cameras otherwise leak SSR history
 textures across entering/leaving Play mode. The focused resource-leak test now passes.
+
+The three bundled Autodesk Interactive shadergraph importer metadata files were reserialized through Unity. Their script/shader GUIDs and main shader file IDs are retained; ScriptedImporter metadata now uses version 2 and the current internal ID table rather than the old version-1 defaults.
