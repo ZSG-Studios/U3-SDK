@@ -51,18 +51,6 @@
       "sha256": "0ca01014d376ed1c1b3714151a0ec9dff85bc690f85c0732ba74766e904832af"
     },
     {
-      "relativePath": "Maps/Paintball_Arena_0/Environment/Ambience.unity3d",
-      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
-    },
-    {
-      "relativePath": "Maps/Paintball_Arena_0/Environment/Roads.unity3d",
-      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
-    },
-    {
-      "relativePath": "Maps/Paintball_Arena_0/Terrain/Materials.unity3d",
-      "sha256": "3e896ba9b16b254928876873ba0412ffeb7598b224ccf992860b44915eb3ff27"
-    },
-    {
       "relativePath": "Maps/PEI/Environment/Ambience.unity3d",
       "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
     },
@@ -73,6 +61,18 @@
     {
       "relativePath": "Maps/PEI/Terrain/Materials.unity3d",
       "sha256": "a7734f517eeb921130b15c0525e4125634e286011c52cca71674ba097e3f1c4f"
+    },
+    {
+      "relativePath": "Maps/Paintball_Arena_0/Environment/Ambience.unity3d",
+      "sha256": "ec72b9d0a0b4d2c80691dedecfcad5fc75415d66479a5e79bf117dba78e32617"
+    },
+    {
+      "relativePath": "Maps/Paintball_Arena_0/Environment/Roads.unity3d",
+      "sha256": "4026ea80ff3dc5570b859ed91e20e86e7528324a88a2da3492703eee1151305d"
+    },
+    {
+      "relativePath": "Maps/Paintball_Arena_0/Terrain/Materials.unity3d",
+      "sha256": "3e896ba9b16b254928876873ba0412ffeb7598b224ccf992860b44915eb3ff27"
     },
     {
       "relativePath": "Maps/Russia/Environment/Ambience.unity3d",
