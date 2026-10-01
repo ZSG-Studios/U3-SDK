@@ -86,6 +86,10 @@ public static class PortReproducibility
             options = BuildOptions.Development | BuildOptions.CompressWithLz4,
         });
         var summary = report.summary;
+        // SRP populates its runtime-only settings list while serializing a player.
+        // Restore the native Editor representation after the build, so a build
+        // does not leave a machine's generated runtime cache in tracked source.
+        AssetDatabase.ForceReserializeAssets(new[] { "Assets/UniversalRenderPipelineGlobalSettings.asset" });
         var result = new
         {
             buildId = "reproduce_" + Guid.NewGuid().ToString("N"),
