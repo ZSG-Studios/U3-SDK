@@ -9,18 +9,29 @@ public static class VerifyRuntimeNavigation
 {
     public static object Main()
     {
+        return Create(false);
+    }
+    public static object Create(bool lowFrameRate)
+    {
         var host = new GameObject("Native navigation qualification fixture");
         var fixture = host.AddComponent<NativeNavigationQualification>();
-        fixture.reportPath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Logs", "native-navigation-fixture.json");
+        fixture.lowFrameRate = lowFrameRate;
+        fixture.reportPath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Logs", lowFrameRate ? "native-navigation-low-fps-fixture.json" : "native-navigation-fixture.json");
         Directory.CreateDirectory(Path.GetDirectoryName(fixture.reportPath));
         if (File.Exists(fixture.reportPath)) File.Delete(fixture.reportPath);
         return new { reportPath = fixture.reportPath, status = "running" };
     }
 }
 
+public static class VerifyLowFrameRateNavigation
+{
+    public static object Main() => VerifyRuntimeNavigation.Create(true);
+}
+
 public sealed class NativeNavigationQualification : MonoBehaviour
 {
     public string reportPath;
+    public bool lowFrameRate;
     private NavMeshData data;
     private NavMeshDataInstance instance;
     private Mesh mesh;
@@ -69,12 +80,15 @@ public sealed class NativeNavigationQualification : MonoBehaviour
         startedMovingAt = Time.realtimeSinceStartup;
         for (int frame = 0; frame < 500; frame++)
         {
-            float step = Time.deltaTime;
+            // Isolate waypoint traversal from replanning on a fixed, carved path.
+            // A 3 FPS step can cross a corner between observations.
+            float step = lowFrameRate ? 1f / 3f : Time.deltaTime;
             simulatedMovementSeconds += step;
             minimumTimeStep = Mathf.Min(minimumTimeStep, step);
             maximumTimeStep = Mathf.Max(maximumTimeStep, step);
             movementFrames++;
             movement.Move(step);
+            if (lowFrameRate) movement.CanSearch = false;
             var relative = pawn.transform.position - origin;
             maximumLateralDeviation = Mathf.Max(maximumLateralDeviation, Mathf.Abs(relative.z));
             if (Mathf.Abs(relative.x) < 2 && Mathf.Abs(relative.z) < 4) enteredBlockedFootprint = true;
@@ -91,7 +105,7 @@ public sealed class NativeNavigationQualification : MonoBehaviour
     private void Finish(bool passed, string detail, int openCorners, int closedCorners)
     {
         File.WriteAllText(reportPath, Newtonsoft.Json.JsonConvert.SerializeObject(new { passed, detail, openCorners, closedCorners,
-            movementFrames, simulatedMovementSeconds, movementElapsedSeconds = startedMovingAt == 0 ? 0 : Time.realtimeSinceStartup - startedMovingAt,
+            lowFrameRate, movementFrames, simulatedMovementSeconds, movementElapsedSeconds = startedMovingAt == 0 ? 0 : Time.realtimeSinceStartup - startedMovingAt,
             minimumTimeStep, maximumTimeStep }, Newtonsoft.Json.Formatting.Indented));
         Destroy(gameObject);
     }
