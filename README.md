@@ -29,6 +29,7 @@ With Unity CLI installed, run from the cloned project directory:
 unity run . --timeout 3600 --log-file Logs/reproduce-editor.log --no-tail -- -force-d3d12 -automated -executeMethod PortReproducibility.BuildWindowsDevelopment
 python Tools/smoke_client.py --graphics-api dx12 --map Germany --verify-graphics
 python Tools/smoke_client.py --graphics-api vulkan --map Germany --verify-graphics
+python Tools/qualify_port.py
 ```
 
 These Windows checks require Python, Steam running, and a GPU/driver supporting the selected graphics API. Editor, package, Steam content, graphics settings, and hardware versions affect results; matching source alone does not guarantee identical images or performance on every machine.

@@ -17,12 +17,16 @@ def main():
     parser.add_argument("--apis", nargs="+", choices=("dx12", "vulkan"), default=["dx12", "vulkan"])
     args = parser.parse_args()
     LOGS.mkdir(exist_ok=True)
-    status_path = PROJECT / "Temp" / "pipeline_build_status.json"
-    build = json.loads(status_path.read_text(encoding="utf-8-sig"))
+    # Unity deletes Temp during a normal batch-mode exit. Prefer the newest
+    # available receipt, including the durable receipt from the native builder.
+    receipts = [p for p in (LOGS / "reproducible-build.json", PROJECT / "Temp" / "pipeline_build_status.json") if p.is_file()]
+    status_path = max(receipts, key=lambda p: p.stat().st_mtime) if receipts else None
+    build = json.loads(status_path.read_text(encoding="utf-8-sig")) if status_path else {"status": "missing"}
     build_gate = (build.get("status") == "completed" and build.get("result") == "Succeeded"
                   and build.get("totalErrors") == 0 and build.get("totalWarnings") == 0)
     report = {"startedUtc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
               "build": {key: build.get(key) for key in ("buildId", "status", "result", "totalErrors", "totalWarnings")},
+              "buildReceipt": str(status_path.relative_to(PROJECT)) if status_path else None,
               "buildPassed": build_gate, "expectedCases": len(args.maps) * len(args.apis), "complete": False, "cases": [], "passed": False}
     output = LOGS / "port-qualification.json"
     output.write_text(json.dumps(report, indent=2), encoding="utf-8")
