@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/ZSG-Studios/U3-SDK",
+  "validatedAtUtc": "2026-10-01T01:39:27.314072+00:00",
+  "status": "passed",
+  "runtimeSourceCommit": "afce8fe04f422fdddfb7ca63b0dfabd224d30e6f",
+  "preparedSourceCommit": "914a08824628671d95ca46b5e3e9ad00a18d16d1",
+  "editor": "6000.7.0b2",
+  "steamBuildId": "25613056",
+  "hardware": {
+    "platform": "Windows64",
+    "gpu": "AMD Radeon RX 9070 XT",
+    "graphicsApis": [
+      "Direct3D12",
+      "Vulkan"
+    ]
+  },
+  "freshClone": {
+    "downloadedFromGitHub": true,
+    "startedWithoutLibraryTempOrUserSettings": true,
+    "copiedGeneratedContent": false,
+    "fixesReceivedThroughGit": true,
+    "uiResourcesTracked": true,
+    "sourceInputsMatchBaseline": true
+  },
+  "preparation": {
+    "sourceInputs": 30,
+    "convertedBundles": 12,
+    "verifiedTextureAndAudioAssets": 92,
+    "exactTextureMipPixels": true,
+    "maximumAudioSampleError": 3.05175781e-05,
+    "audioTolerance": 5e-05,
+    "terrainNameManifests": 8,
+    "terrainTextureNamesVerifiedInOriginalOrder": 80
+  },
+  "builds": {
+    "freshClone": {
+      "buildId": "reproduce_be51098fc3044601bab9e261e4ba0d7c",
+      "result": "Succeeded",
+      "totalErrors": 0,
+      "totalWarnings": 0,
+      "editor": "6000.7.0b2"
+    },
+    "workingCheckout": {
+      "buildId": "reproduce_d4dac751ca7a4eb49a86d5615f8b722f",
+      "result": "Succeeded",
+      "totalErrors": 0,
+      "totalWarnings": 0,
+      "editor": "6000.7.0b2"
+    }
+  },
+  "mapMatrix": {
+    "passed": true,
+    "expectedCases": 20,
+    "passedCases": 20,
+    "cases": [
+      {
+        "map": "Tutorial",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "PEI",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Russia",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Germany",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Washington",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Yukon",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Alpha Valley",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Destruction",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Monolith",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Paintball_Arena_0",
+        "api": "dx12",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Tutorial",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "PEI",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Russia",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Germany",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Washington",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Yukon",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Alpha Valley",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Destruction",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Monolith",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      },
+      {
+        "map": "Paintball_Arena_0",
+        "api": "vulkan",
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "nativeWarningsIncludingShutdown": 0,
+        "nativeFailuresIncludingShutdown": 0
+      }
+    ]
+  },
+  "automaticPlayPreparation": {
+    "invalidatedCacheWasRejected": true,
+    "automaticRebuildAndPlay": true,
+    "scene": "GameStartup",
+    "tmpReady": true,
+    "passed": true,
+    "testedSourceCommit": "939a6a6eafe0c2f9a241a49af44d308a58ae0481",
+    "invalidatedContent": "converted map bundle verification marker",
+    "note": "This lifecycle test preceded the additional terrain-name preparation; current build preparation and cache checks cover all 30 inputs."
+  },
+  "navigationRegression": {
+    "before": {
+      "passed": false,
+      "detail": "Movement remaining distance 5.010835; obstacle reopened True; detour lateral distance 4.736328; entered blocker False",
+      "openCorners": 2,
+      "closedCorners": 4,
+      "lowFrameRate": true,
+      "movementFrames": 500,
+      "simulatedMovementSeconds": 166.666458,
+      "movementElapsedSeconds": 8.384838,
+      "minimumTimeStep": 0.333333343,
+      "maximumTimeStep": 0.333333343
+    },
+    "after": {
+      "passed": true,
+      "detail": "Movement remaining distance 0.08000004; obstacle reopened True; detour lateral distance 4.5; entered blocker False",
+      "openCorners": 2,
+      "closedCorners": 4,
+      "lowFrameRate": true,
+      "movementFrames": 9,
+      "simulatedMovementSeconds": 2.99999976,
+      "movementElapsedSeconds": 0.18294,
+      "minimumTimeStep": 0.333333343,
+      "maximumTimeStep": 0.333333343
+    }
+  },
+  "initialFailuresFixed": [
+    "missing TextMesh Pro project resources",
+    "outdated import metadata",
+    "non-readable map texture cloning",
+    "native navigation waypoint overshoot",
+    "deprecated terrain archive loads",
+    "temporary build receipt dependency"
+  ],
+  "limits": [
+    "Windows and the listed GPU were tested; this is not all-hardware or bit-identical binary qualification.",
+    "Unity 6000.7.0b2 and the recorded Steam inputs are required to reproduce this baseline.",
+    "Original pre-2019 archive migration notices occur during first preparation, not in the qualified player.",
+    "Community/workshop maps, exclusive fullscreen, borderless transitions, and physical monitor refresh changes are outside this qualification.",
+    "SDK-omitted proprietary effects and complete A* Pro feature parity are not supplied by this port."
+  ],
+  "graphicsChecks": {
+    "dx12": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "nativeWarningsIncludingShutdown": 0,
+      "nativeFailuresIncludingShutdown": 0,
+      "waterWithAtmosphereAndCameraOverlay": true,
+      "graphicsControlCallbacks": true,
+      "ambientOcclusionChangedPixels": [
+        210,
+        210
+      ],
+      "nativeDisplayResize": {
+        "width": 1024,
+        "height": 768,
+        "mode": "Windowed"
+      },
+      "resizedScopeWidth": 768,
+      "navigation": true,
+      "lowFrameRateNavigation": true
+    },
+    "vulkan": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "nativeWarningsIncludingShutdown": 0,
+      "nativeFailuresIncludingShutdown": 0,
+      "waterWithAtmosphereAndCameraOverlay": true,
+      "graphicsControlCallbacks": true,
+      "ambientOcclusionChangedPixels": [
+        234,
+        188
+      ],
+      "nativeDisplayResize": {
+        "width": 1024,
+        "height": 768,
+        "mode": "Windowed"
+      },
+      "resizedScopeWidth": 768,
+      "navigation": true,
+      "lowFrameRateNavigation": true
+    }
+  }
+}

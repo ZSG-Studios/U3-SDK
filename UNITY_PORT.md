@@ -257,14 +257,14 @@ Sun-shaft and outline-quality implementations are omitted from the public SDK. T
 controls are disabled with availability tooltips; interaction highlighting retains the SDK
 tint fallback. Their effects have not been implemented by this settings repair.
 
-## Published validation snapshot (2026-09-30)
+## Earlier validation snapshot (2026-09-30)
 
 Raw logs, screenshots, Steam-derived bundles, build output, and per-process credentials stay local and are ignored by Git. The source includes the verification tools to repeat these checks on your installation.
 
 | Scope | Result | Qualification |
 | --- | --- | --- |
-| Latest Windows development build (`bbee7281787c`) | Succeeded; 0 errors, 0 warnings | Includes the graphics/display fixes and quit cleanup. |
-| Latest Germany smoke runs, DX12 and Vulkan | Both passed; 0 runtime errors/warnings and 0 native warnings including shutdown | Graphics presets, shadows, AA, SSR, AO off/on images, post effects, FPS, VSync, UI scale, rational refresh serialization, and a real 1024×768 window resize. |
+| Graphics/display repair build (`bbee7281787c`) | Succeeded; 0 errors, 0 warnings | Predates the fresh-clone repairs below. |
+| Germany smoke runs for that repair, DX12 and Vulkan | Both passed; 0 runtime errors/warnings and 0 native warnings including shutdown | Graphics presets, shadows, AA, SSR, AO off/on images, post effects, FPS, VSync, UI scale, rational refresh serialization, and a real 1024×768 window resize. |
 | Earlier complete installed-map matrix | 20/20 passed; 10 maps × 2 APIs | Build `7748695e82d4`; predates the latest graphics/display fixes. |
 | Earlier broad EditMode suite | 3,271 passed, 0 failed, 92 skipped | Predates the latest graphics/display fixes; skipped tests are not passes. |
 | Focused resource-leak fixture | First cold run failed; unchanged warm retry passed 1/1 | The cold SSR depth-history failure remains recorded locally; the retry does not establish a new leak fix. |
@@ -275,8 +275,35 @@ Before publishing, five test-only subassets left in the embedded URP default vol
 
 ## Reproducing from GitHub
 
-The committed `PortReproducibility.BuildWindowsDevelopment` entry point builds the native Windows profile without requiring a running Pipeline server or saved Editor preferences. Preparation creates missing Steam-derived bundles, preserves compressed texture mips through editor serialization, and validates cached bundle checksums, conversion revision, and Unity version before reuse. Build callbacks copy the cache and Steam app-ID file. No generated content is required from the publishing machine.
+The committed `PortReproducibility.BuildWindowsDevelopment` entry point builds the native Windows profile without requiring a running Pipeline server or saved Editor preferences. Preparation creates missing Steam-derived bundles, preserves compressed texture mips through editor serialization, and validates cached checksums, conversion revision, and Unity version before reuse. Legacy terrain archives are read during preparation to preserve their texture-name order in verified JSON metadata; the player uses this metadata for legacy splatmap mapping. Build callbacks copy the prepared content and Steam app-ID file. No generated content is required from the publishing machine.
+
+TextMesh Pro settings, fonts, atlases, materials, shaders, and their GUID metadata are tracked project dependencies. Play/build preparation validates them and fails early if they are missing. The first-open package importer previously reported success without producing these assets in batch mode; it has been removed.
+
+Opening the project prepares installed maps automatically. Play requests rebuild a missing or invalid cache before entering Play; native player builds prepare and copy it automatically. `Logs/reproducible-build.json` is the durable build receipt used by qualification after Unity removes `Temp` on exit. SRP's runtime-only settings list is returned to its native Editor representation after a build.
 
 `Tools/reproduction-baseline.json` records the editor, Steam build ID, and SHA-256 hashes of the source map bundles. `Logs/project-preparation.json` records whether your inputs match it. A Steam update changes the inputs and must be qualified again; matching this receipt is not a promise of identical performance or images on different GPUs/drivers. Unity CLI, Python, and a Steam/Unity license remain external prerequisites for the automated checks.
 
 The first conversion must read the original Steam archives. Unity emits native migration notices for their pre-2019 serialized formats during that conversion. These are preserved in the preparation log. Converted bundles use the current format; the runtime qualification rejects those notices in the player. The harness also checks native error/exception calls and importer/serialization diagnostics after shutdown, beyond the managed console counts.
+
+The native zombie movement adapter uses Unity's [Vector3.MoveTowards](https://docs.unity3d.com/6000.7/Documentation/ScriptReference/Vector3.MoveTowards.html) to stop at the next waypoint during large movement steps. The regression fixture freezes replanning on a carved path and supplies 1/3-second steps: the old adapter remained stuck after 500 steps; the repaired adapter reaches the destination in nine without entering the obstacle footprint. Germany runtime checks exercise both normal movement and this low-frame-rate case on each graphics API.
+
+Community/workshop maps are outside the ten-map qualification set. Legacy terrain lookup retains the upstream compatibility path for maps without prepared metadata; those maps need separate conversion and qualification.
+
+
+## Fresh GitHub clone qualification
+
+See [the machine-readable validation receipt](Tools/clean-clone-validation.json) for source revisions, input versions, cases, and limits. Required UI resources are tracked; no Library, UserSettings, generated Steam content, or build output was copied from the working checkout. Failures found during qualification were repaired in Git and pulled into the clones.
+
+| Scope | Result |
+| --- | --- |
+| Cold import and automatic preparation | Recreated 12 current-format bundles and 8 ordered terrain-name manifests from 30 Steam inputs; input hashes match the committed baseline. |
+| Content preservation | 92 texture/audio assets verified; texture mip pixels match exactly, audio sample error is at most 0.0000305176 (tolerance 0.00005), and all 80 terrain texture names preserve their original order. |
+| Fresh-checkout development build (`reproduce_be51098fc3044601bab9e261e4ba0d7c`) | Succeeded; 0 errors and 0 warnings. |
+| Working-checkout development build (`reproduce_d4dac751ca7a4eb49a86d5615f8b722f`) | Succeeded; 0 errors and 0 warnings. |
+| Installed-map matrix on the repaired build | 20/20 passed: ten maps on DX12 and Vulkan, with 0 runtime errors/warnings and no native failure markers through shutdown. |
+| Final-build Germany graphics/display checks | Passed on both APIs: rendering controls, visible AO changes, native 1024x768 resize, resized scope, water with atmosphere/overlay, and normal/low-frame-rate navigation. |
+| Automatic Play preparation | Invalidating a converted-bundle marker caused automatic regeneration and Play entry. This lifecycle check preceded the additional terrain-name preparation; current build/cache checks cover all 30 inputs. |
+
+The initial clone exposed missing TextMesh Pro assets, old importer metadata, non-readable texture cloning, waypoint overshoot, legacy terrain archive reads, and dependence on an ephemeral Temp build receipt. These were fixed rather than counted as passing runs. Terrain preparation and the repaired full matrix do not load deprecated terrain archives in the player. Original Steam inputs remain untouched; first-time preparation still records their native migration notices.
+
+This was tested on Windows with an AMD Radeon RX 9070 XT, Unity 6000.7.0b2, and Steam build 25613056. The clone initially contained no project caches and received subsequent fixes through Git. This establishes the documented source/preparation/build/runtime workflow on this machine; it does not establish bit-identical binaries, identical performance/images across hardware, or the broader gameplay/omitted-feature scopes listed above.
